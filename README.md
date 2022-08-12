@@ -1,4 +1,4 @@
 # corgi
-package manager for the Husky programming language
+Package Manager for the Husky programming language
 
-Why called Corgi? Because it sounds like Cargo, it behaves like Cargo, it walks like Cargo, it is immitating Cargo.
+Why called Corgi? Because it sounds like Cargo, it walks like Cargo, it eats like Cargo, it is Cargo for Husky.
