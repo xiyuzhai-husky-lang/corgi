@@ -71,7 +71,7 @@ use crate::core::shell::Verbosity;
 use crate::core::{features, CliUnstable, Shell, SourceId, Workspace, WorkspaceRootConfig};
 use crate::ops;
 use crate::util::errors::CargoResult;
-use crate::util::toml as cargo_toml;
+use crate::util::toml as corgi_toml;
 use crate::util::validate_package_name;
 use crate::util::{FileLock, Filesystem, IntoUrl, IntoUrlWithBase, Rustc};
 use anyhow::{anyhow, bail, format_err, Context as _};
@@ -1077,7 +1077,7 @@ impl Config {
         }
         let contents = fs::read_to_string(path)
             .with_context(|| format!("failed to read configuration file `{}`", path.display()))?;
-        let toml = cargo_toml::parse(&contents, path, self).with_context(|| {
+        let toml = corgi_toml::parse(&contents, path, self).with_context(|| {
             format!("could not parse TOML configuration in `{}`", path.display())
         })?;
         let value =
@@ -2011,7 +2011,7 @@ pub fn save_credentials(
         )
     })?;
 
-    let mut toml = cargo_toml::parse(&contents, file.path(), cfg)?;
+    let mut toml = corgi_toml::parse(&contents, file.path(), cfg)?;
 
     // Move the old token location to the new one.
     if let Some(token) = toml.as_table_mut().unwrap().remove("token") {

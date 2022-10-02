@@ -7,7 +7,7 @@ fn verify_project_success_output() -> String {
 }
 
 #[cargo_test]
-fn cargo_verify_project_path_to_cargo_toml_relative() {
+fn cargo_verify_project_path_to_corgi_toml_relative() {
     let p = project()
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/foo.rs", &main_file(r#""i am foo""#, &[]))
@@ -20,7 +20,7 @@ fn cargo_verify_project_path_to_cargo_toml_relative() {
 }
 
 #[cargo_test]
-fn cargo_verify_project_path_to_cargo_toml_absolute() {
+fn cargo_verify_project_path_to_corgi_toml_absolute() {
     let p = project()
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/foo.rs", &main_file(r#""i am foo""#, &[]))

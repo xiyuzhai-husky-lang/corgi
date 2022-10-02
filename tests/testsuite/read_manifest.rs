@@ -69,7 +69,7 @@ pub fn basic_bin_manifest_with_readme(name: &str, readme_filename: &str) -> Stri
 }
 
 #[cargo_test]
-fn cargo_read_manifest_path_to_cargo_toml_relative() {
+fn cargo_read_manifest_path_to_corgi_toml_relative() {
     let p = project()
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/foo.rs", &main_file(r#""i am foo""#, &[]))
@@ -82,7 +82,7 @@ fn cargo_read_manifest_path_to_cargo_toml_relative() {
 }
 
 #[cargo_test]
-fn cargo_read_manifest_path_to_cargo_toml_absolute() {
+fn cargo_read_manifest_path_to_corgi_toml_absolute() {
     let p = project()
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/foo.rs", &main_file(r#""i am foo""#, &[]))
@@ -96,7 +96,7 @@ fn cargo_read_manifest_path_to_cargo_toml_absolute() {
 }
 
 #[cargo_test]
-fn cargo_read_manifest_path_to_cargo_toml_parent_relative() {
+fn cargo_read_manifest_path_to_corgi_toml_parent_relative() {
     let p = project()
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/foo.rs", &main_file(r#""i am foo""#, &[]))
@@ -113,7 +113,7 @@ fn cargo_read_manifest_path_to_cargo_toml_parent_relative() {
 }
 
 #[cargo_test]
-fn cargo_read_manifest_path_to_cargo_toml_parent_absolute() {
+fn cargo_read_manifest_path_to_corgi_toml_parent_absolute() {
     let p = project()
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/foo.rs", &main_file(r#""i am foo""#, &[]))

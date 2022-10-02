@@ -2,7 +2,7 @@ use std::io::prelude::*;
 
 use crate::core::{resolver, Resolve, ResolveVersion, Workspace};
 use crate::util::errors::CargoResult;
-use crate::util::toml as cargo_toml;
+use crate::util::toml as corgi_toml;
 use crate::util::Filesystem;
 
 use anyhow::Context as _;
@@ -21,7 +21,7 @@ pub fn load_pkg_lockfile(ws: &Workspace<'_>) -> CargoResult<Option<Resolve>> {
         .with_context(|| format!("failed to read file: {}", f.path().display()))?;
 
     let resolve = (|| -> CargoResult<Option<Resolve>> {
-        let resolve: toml::Value = cargo_toml::parse(&s, f.path(), ws.config())?;
+        let resolve: toml::Value = corgi_toml::parse(&s, f.path(), ws.config())?;
         let v: resolver::EncodableResolve = resolve.try_into()?;
         Ok(Some(v.into_resolve(&s, ws)?))
     })()

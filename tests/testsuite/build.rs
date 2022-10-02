@@ -573,7 +573,7 @@ fn cargo_compile_without_manifest() {
 
 #[cargo_test]
 #[cfg(target_os = "linux")]
-fn cargo_compile_with_lowercase_cargo_toml() {
+fn cargo_compile_with_lowercase_corgi_toml() {
     let p = project()
         .no_manifest()
         .file("cargo.toml", &basic_manifest("foo", "0.1.0"))
@@ -2625,7 +2625,7 @@ fn deletion_causes_failure() {
 }
 
 #[cargo_test]
-fn bad_cargo_toml_in_target_dir() {
+fn bad_corgi_toml_in_target_dir() {
     let p = project()
         .file("src/main.rs", "fn main() {}")
         .file("target/Cargo.toml", "bad-toml")

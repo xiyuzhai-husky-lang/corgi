@@ -479,7 +479,7 @@ fn install_target_dir() {
 
 #[cargo_test]
 #[cfg(target_os = "linux")]
-fn install_path_with_lowercase_cargo_toml() {
+fn install_path_with_lowercase_corgi_toml() {
     let toml = paths::root().join("cargo.toml");
     fs::write(toml, "").unwrap();
 
@@ -917,7 +917,7 @@ fn git_repo() {
 
 #[cargo_test]
 #[cfg(target_os = "linux")]
-fn git_repo_with_lowercase_cargo_toml() {
+fn git_repo_with_lowercase_corgi_toml() {
     let p = git::repo(&paths::root().join("foo"))
         .file("cargo.toml", &basic_manifest("foo", "0.1.0"))
         .file("src/main.rs", "fn main() {}")

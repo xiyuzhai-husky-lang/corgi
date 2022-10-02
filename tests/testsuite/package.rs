@@ -679,7 +679,7 @@ src/main.rs
 
 #[cargo_test]
 fn ignore_nested() {
-    let cargo_toml = r#"
+    let corgi_toml = r#"
             [project]
             name = "foo"
             version = "0.0.1"
@@ -691,11 +691,11 @@ fn ignore_nested() {
             fn main() { println!("hello"); }
         "#;
     let p = project()
-        .file("Cargo.toml", cargo_toml)
+        .file("Cargo.toml", corgi_toml)
         .file("src/main.rs", main_rs)
         // If a project happens to contain a copy of itself, we should
         // ignore it.
-        .file("a_dir/foo/Cargo.toml", cargo_toml)
+        .file("a_dir/foo/Cargo.toml", corgi_toml)
         .file("a_dir/foo/src/main.rs", main_rs)
         .build();
 
@@ -1524,7 +1524,7 @@ fn package_no_default_features() {
 }
 
 #[cargo_test]
-fn include_cargo_toml_implicit() {
+fn include_corgi_toml_implicit() {
     let p = project()
         .file(
             "Cargo.toml",

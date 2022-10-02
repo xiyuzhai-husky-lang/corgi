@@ -1350,7 +1350,7 @@ fn workspace_with_transitive_dev_deps() {
 }
 
 #[cargo_test]
-fn error_if_parent_cargo_toml_is_invalid() {
+fn error_if_parent_corgi_toml_is_invalid() {
     let p = project()
         .file("Cargo.toml", "Totally not a TOML file")
         .file("bar/Cargo.toml", &basic_manifest("bar", "0.1.0"))

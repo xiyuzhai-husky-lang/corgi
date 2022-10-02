@@ -1826,7 +1826,7 @@ const MANIFEST_OUTPUT: &str = r#"
 }"#;
 
 #[cargo_test]
-fn cargo_metadata_no_deps_path_to_cargo_toml_relative() {
+fn cargo_metadata_no_deps_path_to_corgi_toml_relative() {
     let p = project()
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/foo.rs", &main_file(r#""i am foo""#, &[]))
@@ -1839,7 +1839,7 @@ fn cargo_metadata_no_deps_path_to_cargo_toml_relative() {
 }
 
 #[cargo_test]
-fn cargo_metadata_no_deps_path_to_cargo_toml_absolute() {
+fn cargo_metadata_no_deps_path_to_corgi_toml_absolute() {
     let p = project()
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/foo.rs", &main_file(r#""i am foo""#, &[]))
@@ -1853,7 +1853,7 @@ fn cargo_metadata_no_deps_path_to_cargo_toml_absolute() {
 }
 
 #[cargo_test]
-fn cargo_metadata_no_deps_path_to_cargo_toml_parent_relative() {
+fn cargo_metadata_no_deps_path_to_corgi_toml_parent_relative() {
     let p = project()
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/foo.rs", &main_file(r#""i am foo""#, &[]))
@@ -1870,7 +1870,7 @@ fn cargo_metadata_no_deps_path_to_cargo_toml_parent_relative() {
 }
 
 #[cargo_test]
-fn cargo_metadata_no_deps_path_to_cargo_toml_parent_absolute() {
+fn cargo_metadata_no_deps_path_to_corgi_toml_parent_absolute() {
     let p = project()
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/foo.rs", &main_file(r#""i am foo""#, &[]))
@@ -2098,7 +2098,7 @@ fn package_publish() {
 }
 
 #[cargo_test]
-fn cargo_metadata_path_to_cargo_toml_project() {
+fn cargo_metadata_path_to_corgi_toml_project() {
     let p = project()
         .file(
             "Cargo.toml",
