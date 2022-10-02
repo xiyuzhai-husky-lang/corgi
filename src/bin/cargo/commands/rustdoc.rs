@@ -1,4 +1,4 @@
-use cargo::ops::{self, DocOptions};
+use corgi::ops::{self, DocOptions};
 
 use crate::command_prelude::*;
 

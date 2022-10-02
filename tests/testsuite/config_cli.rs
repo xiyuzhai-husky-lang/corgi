@@ -1,8 +1,8 @@
 //! Tests for the --config CLI option.
 
 use super::config::{assert_error, assert_match, read_output, write_config, ConfigBuilder};
-use cargo::util::config::Definition;
 use cargo_test_support::paths;
+use corgi::util::config::Definition;
 use std::{collections::HashMap, fs};
 
 #[cargo_test]
@@ -118,7 +118,7 @@ fn string_list_array() {
         .build();
     assert_eq!(
         config
-            .get::<cargo::util::config::StringList>("build.rustflags")
+            .get::<corgi::util::config::StringList>("build.rustflags")
             .unwrap()
             .as_slice(),
         ["--file", "--cli"]
@@ -131,7 +131,7 @@ fn string_list_array() {
         .build();
     assert_eq!(
         config
-            .get::<cargo::util::config::StringList>("build.rustflags")
+            .get::<corgi::util::config::StringList>("build.rustflags")
             .unwrap()
             .as_slice(),
         ["--file", "--cli", "--env1", "--env2"]
@@ -145,7 +145,7 @@ fn string_list_array() {
         .build();
     assert_eq!(
         config
-            .get::<cargo::util::config::StringList>("build.rustflags")
+            .get::<corgi::util::config::StringList>("build.rustflags")
             .unwrap()
             .as_slice(),
         ["--file", "--cli", "--env"]

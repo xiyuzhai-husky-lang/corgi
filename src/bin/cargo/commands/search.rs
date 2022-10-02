@@ -2,7 +2,7 @@ use crate::command_prelude::*;
 
 use std::cmp::min;
 
-use cargo::ops;
+use corgi::ops;
 
 pub fn cli() -> Command {
     subcommand("search")

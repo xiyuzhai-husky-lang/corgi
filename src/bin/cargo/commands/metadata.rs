@@ -1,5 +1,5 @@
 use crate::command_prelude::*;
-use cargo::ops::{self, OutputMetadataOptions};
+use corgi::ops::{self, OutputMetadataOptions};
 
 pub fn cli() -> Command {
     subcommand("metadata")

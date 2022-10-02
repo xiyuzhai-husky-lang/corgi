@@ -1,6 +1,6 @@
 use crate::command_prelude::*;
-use cargo::ops;
-use cargo::util::interning::InternedString;
+use corgi::ops;
+use corgi::util::interning::InternedString;
 
 const PRINT_ARG_NAME: &str = "print";
 const CRATE_TYPE_ARG_NAME: &str = "crate-type";

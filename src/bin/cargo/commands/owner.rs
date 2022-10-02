@@ -1,6 +1,6 @@
 use crate::command_prelude::*;
 
-use cargo::ops::{self, OwnersOptions};
+use corgi::ops::{self, OwnersOptions};
 
 pub fn cli() -> Command {
     subcommand("owner")

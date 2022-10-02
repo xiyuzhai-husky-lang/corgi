@@ -10,11 +10,11 @@
 //! cargo test --test testsuite -- old_cargos --nocapture --ignored
 //! ```
 
-use cargo::CargoResult;
 use cargo_test_support::paths::CargoPathExt;
 use cargo_test_support::registry::{self, Dependency, Package};
 use cargo_test_support::{cargo_exe, execs, paths, process, project, rustc_host};
 use cargo_util::{ProcessBuilder, ProcessError};
+use corgi::CargoResult;
 use semver::Version;
 use std::fs;
 

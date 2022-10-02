@@ -1,4 +1,4 @@
-use cargo::Config;
+use corgi::Config;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -175,7 +175,7 @@ impl Fixtures {
 
     /// Creates a new Config.
     pub fn make_config(&self, ws_root: &Path) -> Config {
-        let shell = cargo::core::Shell::new();
+        let shell = corgi::core::Shell::new();
         let mut config = Config::new(shell, ws_root.to_path_buf(), self.cargo_home());
         // Configure is needed to set the target_dir which is needed to write
         // the .rustc_info.json file which is very expensive.

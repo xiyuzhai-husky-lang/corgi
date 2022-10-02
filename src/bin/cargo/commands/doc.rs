@@ -1,6 +1,6 @@
 use crate::command_prelude::*;
 
-use cargo::ops::{self, DocOptions};
+use corgi::ops::{self, DocOptions};
 
 pub fn cli() -> Command {
     subcommand("doc")

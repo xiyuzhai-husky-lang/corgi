@@ -1,12 +1,12 @@
 //! Tests for the `cargo fix` command.
 
-use cargo::core::Edition;
 use cargo_test_support::compare::assert_match_exact;
 use cargo_test_support::git;
 use cargo_test_support::paths::{self, CargoPathExt};
 use cargo_test_support::registry::{Dependency, Package};
 use cargo_test_support::tools;
 use cargo_test_support::{basic_manifest, is_nightly, project};
+use corgi::core::Edition;
 
 #[cargo_test]
 fn do_not_fix_broken_builds() {

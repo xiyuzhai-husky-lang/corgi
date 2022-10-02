@@ -1,7 +1,7 @@
 //! Tests for edition setting.
 
-use cargo::core::Edition;
 use cargo_test_support::{basic_lib_manifest, project};
+use corgi::core::Edition;
 
 #[cargo_test]
 fn edition_works_for_build_script() {

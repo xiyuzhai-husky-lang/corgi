@@ -1,6 +1,6 @@
-use cargo::core::compiler::Lto;
 use cargo_test_support::registry::Package;
 use cargo_test_support::{basic_manifest, project, Project};
+use corgi::core::compiler::Lto;
 use std::process::Output;
 
 #[cargo_test]

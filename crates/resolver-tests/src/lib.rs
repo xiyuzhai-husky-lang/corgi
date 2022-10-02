@@ -10,12 +10,12 @@ use std::rc::Rc;
 use std::task::Poll;
 use std::time::Instant;
 
-use cargo::core::dependency::DepKind;
-use cargo::core::resolver::{self, ResolveOpts, VersionPreferences};
-use cargo::core::source::{GitReference, QueryKind, SourceId};
-use cargo::core::Resolve;
-use cargo::core::{Dependency, PackageId, Registry, Summary};
-use cargo::util::{CargoResult, Config, Graph, IntoUrl};
+use corgi::core::dependency::DepKind;
+use corgi::core::resolver::{self, ResolveOpts, VersionPreferences};
+use corgi::core::source::{GitReference, QueryKind, SourceId};
+use corgi::core::Resolve;
+use corgi::core::{Dependency, PackageId, Registry, Summary};
+use corgi::util::{CargoResult, Config, Graph, IntoUrl};
 
 use proptest::collection::{btree_map, vec};
 use proptest::prelude::*;

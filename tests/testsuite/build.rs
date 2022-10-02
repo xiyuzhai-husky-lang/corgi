@@ -1,11 +1,5 @@
 //! Tests for the `cargo build` command.
 
-use cargo::{
-    core::compiler::CompileMode,
-    core::{Shell, Workspace},
-    ops::CompileOptions,
-    Config,
-};
 use cargo_test_support::compare;
 use cargo_test_support::paths::{root, CargoPathExt};
 use cargo_test_support::registry::Package;
@@ -15,6 +9,12 @@ use cargo_test_support::{
     paths, process, project, rustc_host, sleep_ms, symlink_supported, t, Execs, ProjectBuilder,
 };
 use cargo_util::paths::dylib_path_envvar;
+use corgi::{
+    core::compiler::CompileMode,
+    core::{Shell, Workspace},
+    ops::CompileOptions,
+    Config,
+};
 use std::env;
 use std::fs;
 use std::io::Read;
@@ -447,7 +447,7 @@ fn cargo_compile_api_exposes_artifact_paths() {
     let ws = Workspace::new(&p.root().join("Cargo.toml"), &config).unwrap();
     let compile_options = CompileOptions::new(ws.config(), CompileMode::Build).unwrap();
 
-    let result = cargo::ops::compile(&ws, &compile_options).unwrap();
+    let result = corgi::ops::compile(&ws, &compile_options).unwrap();
 
     assert_eq!(1, result.binaries.len());
     assert!(result.binaries[0].path.exists());

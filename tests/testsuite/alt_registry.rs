@@ -1,9 +1,9 @@
 //! Tests for alternative registries.
 
-use cargo::util::IntoUrl;
 use cargo_test_support::publish::validate_alt_upload;
 use cargo_test_support::registry::{self, Package, RegistryBuilder};
 use cargo_test_support::{basic_manifest, git, paths, project};
+use corgi::util::IntoUrl;
 use std::fs;
 
 #[cargo_test]

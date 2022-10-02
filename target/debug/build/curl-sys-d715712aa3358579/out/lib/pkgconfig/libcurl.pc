@@ -23,10 +23,10 @@
 # This should most probably benefit from getting a "Requires:" field added
 # dynamically by configure.
 #
-prefix=/home/xiyuzhai/repos/cargo/target/debug/build/curl-sys-d715712aa3358579/out
+prefix=/home/xiyuzhai/corgi/target/debug/build/curl-sys-d715712aa3358579/out
 exec_prefix=
-libdir=/home/xiyuzhai/repos/cargo/target/debug/build/curl-sys-d715712aa3358579/out/lib
-includedir=/home/xiyuzhai/repos/cargo/target/debug/build/curl-sys-d715712aa3358579/out/include
+libdir=/home/xiyuzhai/corgi/target/debug/build/curl-sys-d715712aa3358579/out/lib
+includedir=/home/xiyuzhai/corgi/target/debug/build/curl-sys-d715712aa3358579/out/include
 supported_protocols=""
 supported_features=""
 

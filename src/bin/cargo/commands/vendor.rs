@@ -1,5 +1,5 @@
 use crate::command_prelude::*;
-use cargo::ops;
+use corgi::ops;
 use std::path::PathBuf;
 
 pub fn cli() -> Command {

@@ -1,7 +1,7 @@
 use crate::command_prelude::*;
 
-use cargo::ops;
-use cargo::ops::FetchOptions;
+use corgi::ops;
+use corgi::ops::FetchOptions;
 
 pub fn cli() -> Command {
     subcommand("fetch")

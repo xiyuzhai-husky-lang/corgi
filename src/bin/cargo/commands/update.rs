@@ -1,7 +1,7 @@
 use crate::command_prelude::*;
 
-use cargo::ops::{self, UpdateOptions};
-use cargo::util::print_available_packages;
+use corgi::ops::{self, UpdateOptions};
+use corgi::util::print_available_packages;
 
 pub fn cli() -> Command {
     subcommand("update")

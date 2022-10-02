@@ -68,13 +68,13 @@ diagnosing problems.
 CARGO_LOG=debug cargo generate-lockfile
 
 # Don't forget that you can filter by module as well
-CARGO_LOG=cargo::core::resolver=trace cargo generate-lockfile
+CARGO_LOG=corgi::core::resolver=trace cargo generate-lockfile
 
 # This will print lots of info about the download process. `trace` prints even more.
-CARGO_HTTP_DEBUG=true CARGO_LOG=cargo::ops::registry=debug cargo fetch
+CARGO_HTTP_DEBUG=true CARGO_LOG=corgi::ops::registry=debug cargo fetch
 
 # This is an important command for diagnosing fingerprint issues.
-CARGO_LOG=cargo::core::compiler::fingerprint=trace cargo build
+CARGO_LOG=corgi::core::compiler::fingerprint=trace cargo build
 ```
 
 [`env_logger`]: https://docs.rs/env_logger

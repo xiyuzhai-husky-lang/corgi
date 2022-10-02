@@ -1,7 +1,7 @@
 use crate::command_prelude::*;
 
-use cargo::ops;
-use cargo::util::print_available_packages;
+use corgi::ops;
+use corgi::util::print_available_packages;
 
 pub fn cli() -> Command {
     subcommand("pkgid")
@@ -23,6 +23,6 @@ pub fn exec(config: &mut Config, args: &ArgMatches) -> CliResult {
         .or_else(|| args.get_one::<String>("package"))
         .map(String::as_str);
     let spec = ops::pkgid(&ws, spec)?;
-    cargo::drop_println!(config, "{}", spec);
+    corgi::drop_println!(config, "{}", spec);
     Ok(())
 }

@@ -1,5 +1,5 @@
 use crate::command_prelude::*;
-use cargo::ops::cargo_config;
+use corgi::ops::cargo_config;
 
 pub fn cli() -> Command {
     subcommand("config")

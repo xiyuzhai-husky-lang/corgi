@@ -963,7 +963,7 @@ optional = true
 [features]
 feat = ["opt-dep1"]
 "#,
-                cargo::core::package::MANIFEST_PREAMBLE
+                corgi::core::package::MANIFEST_PREAMBLE
             ),
         )],
     );
@@ -1068,7 +1068,7 @@ feat1 = []
 feat2 = ["dep:bar"]
 feat3 = ["feat2"]
 "#,
-                cargo::core::package::MANIFEST_PREAMBLE
+                corgi::core::package::MANIFEST_PREAMBLE
             ),
         )],
     );

@@ -40,7 +40,7 @@ fn deleting_database_files() {
     find_files(&paths::home().join(".cargo/git/db"), &mut files);
     assert!(!files.is_empty());
 
-    let log = "cargo::sources::git=trace";
+    let log = "corgi::sources::git=trace";
     for file in files {
         if !file.exists() {
             continue;
@@ -116,7 +116,7 @@ fn deleting_checkout_files() {
     find_files(&dir, &mut files);
     assert!(!files.is_empty());
 
-    let log = "cargo::sources::git=trace";
+    let log = "corgi::sources::git=trace";
     for file in files {
         if !file.exists() {
             continue;

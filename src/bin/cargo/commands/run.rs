@@ -1,8 +1,8 @@
 use crate::command_prelude::*;
 use crate::util::restricted_names::is_glob_pattern;
-use cargo::core::Verbosity;
-use cargo::ops::{self, CompileFilter, Packages};
 use cargo_util::ProcessError;
+use corgi::core::Verbosity;
+use corgi::ops::{self, CompileFilter, Packages};
 
 pub fn cli() -> Command {
     subcommand("run")

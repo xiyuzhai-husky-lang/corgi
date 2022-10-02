@@ -1,12 +1,12 @@
 //! Tests for config settings.
 
-use cargo::core::{PackageIdSpec, Shell};
-use cargo::util::config::{self, Config, SslVersionConfig, StringList};
-use cargo::util::interning::InternedString;
-use cargo::util::toml::{self, VecStringOrBool as VSOB};
-use cargo::CargoResult;
 use cargo_test_support::compare;
 use cargo_test_support::{panic_error, paths, project, symlink_supported, t};
+use corgi::core::{PackageIdSpec, Shell};
+use corgi::util::config::{self, Config, SslVersionConfig, StringList};
+use corgi::util::interning::InternedString;
+use corgi::util::toml::{self, VecStringOrBool as VSOB};
+use corgi::CargoResult;
 use serde::Deserialize;
 use std::borrow::Borrow;
 use std::collections::{BTreeMap, HashMap};
@@ -354,14 +354,14 @@ lto = false
     // TODO: don't use actual `tomlprofile`.
     let p: toml::TomlProfile = config.get("profile.dev").unwrap();
     let mut packages = BTreeMap::new();
-    let key = toml::ProfilePackageSpec::Spec(::cargo::core::PackageIdSpec::parse("bar").unwrap());
+    let key = toml::ProfilePackageSpec::Spec(::corgi::core::PackageIdSpec::parse("bar").unwrap());
     let o_profile = toml::TomlProfile {
         opt_level: Some(toml::TomlOptLevel("2".to_string())),
         codegen_units: Some(9),
         ..Default::default()
     };
     packages.insert(key, o_profile);
-    let key = toml::ProfilePackageSpec::Spec(::cargo::core::PackageIdSpec::parse("env").unwrap());
+    let key = toml::ProfilePackageSpec::Spec(::corgi::core::PackageIdSpec::parse("env").unwrap());
     let o_profile = toml::TomlProfile {
         codegen_units: Some(13),
         ..Default::default()

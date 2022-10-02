@@ -1,6 +1,6 @@
-cargo:rustc-env=CARGO_COMMIT_HASH=abf6b4e4474658fb4c90978a15c38e8e27f37b1e
-cargo:rustc-env=CARGO_COMMIT_SHORT_HASH=abf6b4e44
-cargo:rustc-env=CARGO_COMMIT_DATE=2022-09-26
+cargo:rustc-env=CARGO_COMMIT_HASH=ddfc31d433ea946ada1f58d6be38d48153532b40
+cargo:rustc-env=CARGO_COMMIT_SHORT_HASH=ddfc31d43
+cargo:rustc-env=CARGO_COMMIT_DATE=2022-10-02
 cargo:rerun-if-changed=src/etc/man/cargo-add.1
 cargo:rerun-if-changed=src/etc/man/cargo-bench.1
 cargo:rerun-if-changed=src/etc/man/cargo-build.1

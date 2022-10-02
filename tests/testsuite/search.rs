@@ -89,9 +89,9 @@ fn setup() -> RegistryBuilder {
 fn not_update() {
     let registry = setup().build();
 
-    use cargo::core::{Shell, Source, SourceId};
-    use cargo::sources::RegistrySource;
-    use cargo::util::Config;
+    use corgi::core::{Shell, Source, SourceId};
+    use corgi::sources::RegistrySource;
+    use corgi::util::Config;
 
     let sid = SourceId::for_registry(registry.index_url()).unwrap();
     let cfg = Config::new(

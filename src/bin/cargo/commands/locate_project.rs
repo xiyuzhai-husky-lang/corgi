@@ -1,6 +1,6 @@
 use crate::command_prelude::*;
 use anyhow::bail;
-use cargo::{drop_println, CargoResult};
+use corgi::{drop_println, CargoResult};
 use serde::Serialize;
 
 pub fn cli() -> Command {

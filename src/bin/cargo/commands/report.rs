@@ -1,6 +1,6 @@
 use crate::command_prelude::*;
-use cargo::core::compiler::future_incompat::{OnDiskReports, REPORT_PREAMBLE};
-use cargo::drop_println;
+use corgi::core::compiler::future_incompat::{OnDiskReports, REPORT_PREAMBLE};
+use corgi::drop_println;
 
 pub fn cli() -> Command {
     subcommand("report")

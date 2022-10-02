@@ -1,6 +1,6 @@
 use crate::command_prelude::*;
 
-use cargo::ops::{self, PackageOpts};
+use corgi::ops::{self, PackageOpts};
 
 pub fn cli() -> Command {
     subcommand("package")

@@ -216,7 +216,7 @@ however, you can debug a rebuild at least a little by setting the `CARGO_LOG`
 environment variable:
 
 ```sh
-$ CARGO_LOG=cargo::core::compiler::fingerprint=info cargo build
+$ CARGO_LOG=corgi::core::compiler::fingerprint=info cargo build
 ```
 
 This will cause Cargo to print out a lot of information about diagnostics and

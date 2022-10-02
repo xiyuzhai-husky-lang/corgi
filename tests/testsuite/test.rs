@@ -3372,7 +3372,7 @@ fn cargo_test_env() {
             eprintln!("{{}}", env::var("{}").unwrap());
         }}
         "#,
-        cargo::CARGO_ENV
+        corgi::CARGO_ENV
     );
 
     let p = project()

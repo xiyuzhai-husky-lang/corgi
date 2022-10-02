@@ -319,7 +319,7 @@ fn cargo_subcommand_env() {
             println!("{{}}", env::var("{}").unwrap());
         }}
         "#,
-        cargo::CARGO_ENV
+        corgi::CARGO_ENV
     );
 
     let p = project()

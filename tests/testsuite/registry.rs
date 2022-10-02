@@ -1,6 +1,5 @@
 //! Tests for normal registry dependencies.
 
-use cargo::core::SourceId;
 use cargo_test_support::cargo_process;
 use cargo_test_support::paths::{self, CargoPathExt};
 use cargo_test_support::registry::{
@@ -9,6 +8,7 @@ use cargo_test_support::registry::{
 use cargo_test_support::{basic_manifest, project, Execs, Project};
 use cargo_test_support::{git, install::cargo_home, t};
 use cargo_util::paths::remove_dir_all;
+use corgi::core::SourceId;
 use std::fs::{self, File};
 use std::path::Path;
 
@@ -2572,7 +2572,7 @@ fn package_lock_inside_package_is_overwritten() {
     p.cargo("build").run();
 
     let id = SourceId::for_registry(registry.index_url()).unwrap();
-    let hash = cargo::util::hex::short_hash(&id);
+    let hash = corgi::util::hex::short_hash(&id);
     let ok = cargo_home()
         .join("registry")
         .join("src")
@@ -2610,7 +2610,7 @@ fn package_lock_as_a_symlink_inside_package_is_overwritten() {
     p.cargo("build").run();
 
     let id = SourceId::for_registry(registry.index_url()).unwrap();
-    let hash = cargo::util::hex::short_hash(&id);
+    let hash = corgi::util::hex::short_hash(&id);
     let pkg_root = cargo_home()
         .join("registry")
         .join("src")

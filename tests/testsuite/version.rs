@@ -7,11 +7,11 @@ fn simple() {
     let p = project().build();
 
     p.cargo("version")
-        .with_stdout(&format!("cargo {}\n", cargo::version()))
+        .with_stdout(&format!("cargo {}\n", corgi::version()))
         .run();
 
     p.cargo("--version")
-        .with_stdout(&format!("cargo {}\n", cargo::version()))
+        .with_stdout(&format!("cargo {}\n", corgi::version()))
         .run();
 }
 
@@ -45,7 +45,7 @@ fn version_works_with_bad_target_dir() {
 fn verbose() {
     // This is mainly to check that it doesn't explode.
     cargo_process("-vV")
-        .with_stdout_contains(&format!("cargo {}", cargo::version()))
+        .with_stdout_contains(&format!("cargo {}", corgi::version()))
         .with_stdout_contains("host: [..]")
         .with_stdout_contains("libgit2: [..]")
         .with_stdout_contains("libcurl: [..]")

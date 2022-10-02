@@ -1,7 +1,7 @@
 //! Tests for workspace member discovery.
 
-use cargo::core::{Shell, Workspace};
-use cargo::util::config::Config;
+use corgi::core::{Shell, Workspace};
+use corgi::util::config::Config;
 
 use cargo_test_support::install::cargo_home;
 use cargo_test_support::project;

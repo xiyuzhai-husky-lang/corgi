@@ -1,8 +1,8 @@
 use anyhow::anyhow;
-use cargo::core::shell::Shell;
-use cargo::core::{features, CliUnstable};
-use cargo::{self, drop_print, drop_println, CliResult, Config};
 use clap::{AppSettings, Arg, ArgMatches};
+use corgi::core::shell::Shell;
+use corgi::core::{features, CliUnstable};
+use corgi::{self, drop_print, drop_println, CliResult, Config};
 use itertools::Itertools;
 use std::collections::HashMap;
 use std::ffi::OsStr;
@@ -12,7 +12,7 @@ use std::fmt::Write;
 use super::commands;
 use super::list_commands;
 use crate::command_prelude::*;
-use cargo::core::features::HIDDEN;
+use corgi::core::features::HIDDEN;
 
 lazy_static::lazy_static! {
     // Maps from commonly known external commands (not builtin to cargo) to their
@@ -155,7 +155,7 @@ Run with 'cargo -Z [FLAG] [SUBCOMMAND]'",
 }
 
 pub fn get_version_string(is_verbose: bool) -> String {
-    let version = cargo::version();
+    let version = corgi::version();
     let mut version_string = format!("cargo {}\n", version);
     if is_verbose {
         version_string.push_str(&format!("release: {}\n", version.version));
@@ -512,7 +512,7 @@ impl LazyConfig {
             Ok(cfg) => cfg,
             Err(e) => {
                 let mut shell = Shell::new();
-                cargo::exit_with_error(e.into(), &mut shell)
+                corgi::exit_with_error(e.into(), &mut shell)
             }
         })
     }

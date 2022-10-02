@@ -1984,7 +1984,7 @@ artifact = [
     "staticlib",
 ]
 target = "target""#,
-                cargo::core::package::MANIFEST_PREAMBLE
+                corgi::core::package::MANIFEST_PREAMBLE
             ),
         )],
     );
@@ -2036,7 +2036,7 @@ fn doc_lib_true() {
 
     p.cargo("doc -Z bindeps")
         .masquerade_as_nightly_cargo(&["bindeps"])
-        .env("CARGO_LOG", "cargo::ops::cargo_rustc::fingerprint")
+        .env("CARGO_LOG", "corgi::ops::cargo_rustc::fingerprint")
         .with_stdout("")
         .run();
 

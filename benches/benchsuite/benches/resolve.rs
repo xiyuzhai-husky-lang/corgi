@@ -1,10 +1,10 @@
 use benchsuite::fixtures;
-use cargo::core::compiler::{CompileKind, RustcTargetData};
-use cargo::core::resolver::features::{FeatureOpts, FeatureResolver};
-use cargo::core::resolver::{CliFeatures, ForceAllTargets, HasDevUnits, ResolveBehavior};
-use cargo::core::{PackageIdSpec, Workspace};
-use cargo::ops::WorkspaceResolve;
-use cargo::Config;
+use corgi::core::compiler::{CompileKind, RustcTargetData};
+use corgi::core::resolver::features::{FeatureOpts, FeatureResolver};
+use corgi::core::resolver::{CliFeatures, ForceAllTargets, HasDevUnits, ResolveBehavior};
+use corgi::core::{PackageIdSpec, Workspace};
+use corgi::ops::WorkspaceResolve;
+use corgi::Config;
 use criterion::{criterion_group, criterion_main, Criterion};
 use std::path::Path;
 
@@ -27,13 +27,13 @@ fn do_resolve<'cfg>(config: &'cfg Config, ws_root: &Path) -> ResolveInfo<'cfg> {
     let ws = Workspace::new(&ws_root.join("Cargo.toml"), config).unwrap();
     let target_data = RustcTargetData::new(&ws, &requested_kinds).unwrap();
     let cli_features = CliFeatures::from_command_line(&[], false, true).unwrap();
-    let pkgs = cargo::ops::Packages::Default;
+    let pkgs = corgi::ops::Packages::Default;
     let specs = pkgs.to_package_id_specs(&ws).unwrap();
     let has_dev_units = HasDevUnits::Yes;
     let force_all_targets = ForceAllTargets::No;
     // Do an initial run to download anything necessary so that it does
     // not confuse criterion's warmup.
-    let ws_resolve = cargo::ops::resolve_ws_with_opts(
+    let ws_resolve = corgi::ops::resolve_ws_with_opts(
         &ws,
         &target_data,
         &requested_kinds,
@@ -83,7 +83,7 @@ fn resolve_ws(c: &mut Criterion) {
                 ..
             } = lazy_info.get_or_insert_with(|| do_resolve(&config, &ws_root));
             b.iter(|| {
-                cargo::ops::resolve_ws_with_opts(
+                corgi::ops::resolve_ws_with_opts(
                     ws,
                     target_data,
                     requested_kinds,

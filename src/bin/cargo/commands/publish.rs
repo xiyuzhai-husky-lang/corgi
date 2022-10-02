@@ -1,6 +1,6 @@
 use crate::command_prelude::*;
 
-use cargo::ops::{self, PublishOpts};
+use corgi::ops::{self, PublishOpts};
 
 pub fn cli() -> Command {
     subcommand("publish")

@@ -1,5 +1,5 @@
 use crate::command_prelude::*;
-use cargo::ops::{self, TestOptions};
+use corgi::ops::{self, TestOptions};
 
 pub fn cli() -> Command {
     subcommand("bench")

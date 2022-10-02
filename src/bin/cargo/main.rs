@@ -1,10 +1,10 @@
 #![warn(rust_2018_idioms)] // while we're getting used to 2018
 #![allow(clippy::all)]
 
-use cargo::util::toml::StringOrVec;
-use cargo::util::CliError;
-use cargo::util::{self, closest_msg, command_prelude, CargoResult, CliResult, Config};
 use cargo_util::{ProcessBuilder, ProcessError};
+use corgi::util::toml::StringOrVec;
+use corgi::util::CliError;
+use corgi::util::{self, closest_msg, command_prelude, CargoResult, CliResult, Config};
 use std::collections::BTreeMap;
 use std::env;
 use std::ffi::OsStr;
@@ -24,15 +24,15 @@ fn main() {
 
     let mut config = cli::LazyConfig::new();
 
-    let result = if let Some(lock_addr) = cargo::ops::fix_get_proxy_lock_addr() {
-        cargo::ops::fix_exec_rustc(config.get(), &lock_addr).map_err(|e| CliError::from(e))
+    let result = if let Some(lock_addr) = corgi::ops::fix_get_proxy_lock_addr() {
+        corgi::ops::fix_exec_rustc(config.get(), &lock_addr).map_err(|e| CliError::from(e))
     } else {
-        let _token = cargo::util::job::setup();
+        let _token = corgi::util::job::setup();
         cli::main(&mut config)
     };
 
     match result {
-        Err(e) => cargo::exit_with_error(e, &mut config.get_mut().shell()),
+        Err(e) => corgi::exit_with_error(e, &mut config.get_mut().shell()),
         Ok(()) => {}
     }
 }
@@ -191,7 +191,7 @@ fn execute_external_subcommand(config: &Config, cmd: &str, args: &[&OsStr]) -> C
 
     let cargo_exe = config.cargo_exe()?;
     let mut cmd = ProcessBuilder::new(&command);
-    cmd.env(cargo::CARGO_ENV, cargo_exe).args(args);
+    cmd.env(corgi::CARGO_ENV, cargo_exe).args(args);
     if let Some(client) = config.jobserver_from_env() {
         cmd.inherit_jobserver(client);
     }
@@ -250,12 +250,12 @@ fn init_git_transports(config: &Config) {
     // such as proxies or custom certificate authorities. The custom
     // transport, however, is not as well battle-tested.
 
-    match cargo::ops::needs_custom_http_transport(config) {
+    match corgi::ops::needs_custom_http_transport(config) {
         Ok(true) => {}
         _ => return,
     }
 
-    let handle = match cargo::ops::http_handle(config) {
+    let handle = match corgi::ops::http_handle(config) {
         Ok(handle) => handle,
         Err(..) => return,
     };

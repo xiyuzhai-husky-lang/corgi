@@ -1,6 +1,6 @@
 use crate::command_prelude::*;
 
-use cargo::ops;
+use corgi::ops;
 
 pub fn cli() -> Command {
     subcommand("uninstall")

@@ -1,9 +1,9 @@
 //! Tests for workspace member errors.
 
-use cargo::core::resolver::ResolveError;
-use cargo::core::{compiler::CompileMode, Shell, Workspace};
-use cargo::ops::{self, CompileOptions};
-use cargo::util::{config::Config, errors::ManifestError};
+use corgi::core::resolver::ResolveError;
+use corgi::core::{compiler::CompileMode, Shell, Workspace};
+use corgi::ops::{self, CompileOptions};
+use corgi::util::{config::Config, errors::ManifestError};
 
 use cargo_test_support::install::cargo_home;
 use cargo_test_support::project;

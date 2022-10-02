@@ -2780,7 +2780,7 @@
   `http.multiplexing` config value to enable.
   [#6005](https://github.com/rust-lang/cargo/pull/6005)
 - Added `http.debug` configuration value to debug HTTP connections. Use
-  `CARGO_HTTP_DEBUG=true RUST_LOG=cargo::ops::registry cargo build` to display
+  `CARGO_HTTP_DEBUG=true RUST_LOG=corgi::ops::registry cargo build` to display
   the debug information. [#6166](https://github.com/rust-lang/cargo/pull/6166)
 - `CARGO_PKG_REPOSITORY` environment variable is set with the repository value
   from `Cargo.toml` when building .

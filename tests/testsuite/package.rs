@@ -1185,7 +1185,7 @@ registry-index = "{}"
 [dependencies.ghi]
 version = "1.0"
 "#,
-        cargo::core::package::MANIFEST_PREAMBLE,
+        corgi::core::package::MANIFEST_PREAMBLE,
         registry.index_url()
     );
 
@@ -1239,7 +1239,7 @@ name = "bar"
 version = "0.1.0"
 authors = []
 "#,
-        cargo::core::package::MANIFEST_PREAMBLE
+        corgi::core::package::MANIFEST_PREAMBLE
     );
     validate_crate_contents(
         f,
@@ -2424,7 +2424,7 @@ name = "bar"
 version = "0.1.0"
 resolver = "1"
 "#,
-        cargo::core::package::MANIFEST_PREAMBLE
+        corgi::core::package::MANIFEST_PREAMBLE
     );
     validate_crate_contents(
         f,
@@ -2442,7 +2442,7 @@ edition = "2015"
 name = "baz"
 version = "0.1.0"
 "#,
-        cargo::core::package::MANIFEST_PREAMBLE
+        corgi::core::package::MANIFEST_PREAMBLE
     );
     validate_crate_contents(
         f,

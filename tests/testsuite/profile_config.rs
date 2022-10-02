@@ -312,10 +312,10 @@ fn named_config_profile() {
     // foo -> middle -> bar -> dev
     // middle exists in Cargo.toml, the others in .cargo/config
     use super::config::ConfigBuilder;
-    use cargo::core::compiler::CompileKind;
-    use cargo::core::profiles::{Profiles, UnitFor};
-    use cargo::core::{PackageId, Workspace};
-    use cargo::util::interning::InternedString;
+    use corgi::core::compiler::CompileKind;
+    use corgi::core::profiles::{Profiles, UnitFor};
+    use corgi::core::{PackageId, Workspace};
+    use corgi::util::interning::InternedString;
     use std::fs;
     paths::root().join(".cargo").mkdir_p();
     fs::write(
@@ -365,7 +365,7 @@ fn named_config_profile() {
     let ws = Workspace::new(&paths::root().join("Cargo.toml"), &config).unwrap();
     let profiles = Profiles::new(&ws, profile_name).unwrap();
 
-    let crates_io = cargo::core::source::SourceId::crates_io(&config).unwrap();
+    let crates_io = corgi::core::source::SourceId::crates_io(&config).unwrap();
     let a_pkg = PackageId::new("a", "0.1.0", crates_io).unwrap();
     let dep_pkg = PackageId::new("dep", "0.1.0", crates_io).unwrap();
 

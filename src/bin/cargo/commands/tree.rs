@@ -1,11 +1,11 @@
 use crate::cli;
 use crate::command_prelude::*;
 use anyhow::{bail, format_err};
-use cargo::core::dependency::DepKind;
-use cargo::ops::tree::{self, EdgeKind};
-use cargo::ops::Packages;
-use cargo::util::print_available_packages;
-use cargo::util::CargoResult;
+use corgi::core::dependency::DepKind;
+use corgi::ops::tree::{self, EdgeKind};
+use corgi::ops::Packages;
+use corgi::util::print_available_packages;
+use corgi::util::CargoResult;
 use std::collections::HashSet;
 use std::str::FromStr;
 
@@ -103,7 +103,7 @@ pub fn exec(config: &mut Config, args: &ArgMatches) -> CliResult {
     if args.flag("version") {
         let verbose = args.verbose() > 0;
         let version = cli::get_version_string(verbose);
-        cargo::drop_print!(config, "{}", version);
+        corgi::drop_print!(config, "{}", version);
         return Ok(());
     }
     let prefix = if args.flag("no-indent") {

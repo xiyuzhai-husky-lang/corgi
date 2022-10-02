@@ -1,8 +1,8 @@
 use crate::command_prelude::*;
 
-use cargo::core::{GitReference, SourceId, Workspace};
-use cargo::ops;
-use cargo::util::IntoUrl;
+use corgi::core::{GitReference, SourceId, Workspace};
+use corgi::ops;
+use corgi::util::IntoUrl;
 
 use cargo_util::paths;
 

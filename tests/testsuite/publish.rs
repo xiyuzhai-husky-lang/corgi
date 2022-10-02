@@ -1182,7 +1182,7 @@ fn publish_git_with_version() {
                      [dependencies.dep1]\n\
                      version = \"1.0\"\n\
                     ",
-                    cargo::core::package::MANIFEST_PREAMBLE
+                    corgi::core::package::MANIFEST_PREAMBLE
                 ),
             ),
             (
@@ -1287,7 +1287,7 @@ repository = "foo"
 
 [dev-dependencies]
 "#,
-                cargo::core::package::MANIFEST_PREAMBLE
+                corgi::core::package::MANIFEST_PREAMBLE
             ),
         )],
     );

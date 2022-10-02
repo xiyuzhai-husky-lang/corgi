@@ -1,10 +1,10 @@
 //! Tests for the `cargo doc` command.
 
-use cargo::core::compiler::RustDocFingerprint;
 use cargo_test_support::paths::CargoPathExt;
 use cargo_test_support::registry::Package;
 use cargo_test_support::{basic_lib_manifest, basic_manifest, git, project};
 use cargo_test_support::{rustc_host, symlink_supported, tools};
+use corgi::core::compiler::RustDocFingerprint;
 use std::fs;
 use std::str;
 
@@ -116,7 +116,7 @@ fn doc_deps() {
     assert_eq!(p.glob("target/debug/deps/libbar-*.rmeta").count(), 1);
 
     p.cargo("doc")
-        .env("CARGO_LOG", "cargo::ops::cargo_rustc::fingerprint")
+        .env("CARGO_LOG", "corgi::ops::cargo_rustc::fingerprint")
         .with_stdout("")
         .run();
 
