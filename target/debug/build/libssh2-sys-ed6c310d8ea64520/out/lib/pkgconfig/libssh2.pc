@@ -1,0 +1,17 @@
+###########################################################################
+# libssh2 installation details
+###########################################################################
+
+prefix=/home/xiyuzhai/repos/cargo/target/debug/build/libssh2-sys-ed6c310d8ea64520/out
+exec_prefix=
+libdir=/home/xiyuzhai/repos/cargo/target/debug/build/libssh2-sys-ed6c310d8ea64520/out/lib
+includedir=/home/xiyuzhai/repos/cargo/target/debug/build/libssh2-sys-ed6c310d8ea64520/out/include
+
+Name: libssh2
+URL: https://www.libssh2.org/
+Description: Library for SSH-based communication
+Version: 1.9.0_DEV
+Requires.private: 
+Libs: -L${libdir} -lssh2 
+Libs.private: 
+Cflags: -I${includedir}

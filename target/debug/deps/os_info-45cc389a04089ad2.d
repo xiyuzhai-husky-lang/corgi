@@ -1,0 +1,13 @@
+/home/xiyuzhai/repos/cargo/target/debug/deps/os_info-45cc389a04089ad2.rmeta: /home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/lib.rs /home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/linux/mod.rs /home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/linux/file_release.rs /home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/linux/lsb_release.rs /home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/bitness.rs /home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/info.rs /home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/matcher.rs /home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/os_type.rs /home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/version.rs
+
+/home/xiyuzhai/repos/cargo/target/debug/deps/os_info-45cc389a04089ad2.d: /home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/lib.rs /home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/linux/mod.rs /home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/linux/file_release.rs /home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/linux/lsb_release.rs /home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/bitness.rs /home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/info.rs /home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/matcher.rs /home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/os_type.rs /home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/version.rs
+
+/home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/lib.rs:
+/home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/linux/mod.rs:
+/home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/linux/file_release.rs:
+/home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/linux/lsb_release.rs:
+/home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/bitness.rs:
+/home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/info.rs:
+/home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/matcher.rs:
+/home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/os_type.rs:
+/home/xiyuzhai/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.5.1/src/version.rs:
