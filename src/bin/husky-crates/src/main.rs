@@ -1,6 +1,6 @@
-//! # Husky 包管理服务器
+//! # Husky package manager server
 //!
-//! 后端路由：
+//! ## Endpoints：
 //!
 //! PUT /api/v1/crates/new
 //! DELETE /api/v1/crates/{crate_name}/{version}/yank
@@ -32,7 +32,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/", delete(test))
         .route("/", put(test));
 
-    let inner = Router::new()
+    let crates = Router::new()
         .route("/new", post(test))
         .route("/:crate_name/:version/yank", delete(test))
         .route("/:crate_name/:version/unyank", put(test))
@@ -40,7 +40,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/", get(test));
 
     let router = Router::new()
-        .nest("/api/v1/crates", inner)
+        .nest("/api/v1/crates", crates)
         .route("/me", post(test));
 
     log::info!("Server started on {}.", port);
