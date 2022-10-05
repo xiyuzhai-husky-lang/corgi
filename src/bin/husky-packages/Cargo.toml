@@ -1,0 +1,21 @@
+[package]
+name = "husky-packages"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { version = "1.21.2", features = ["full"]}
+axum = "0.5.16"
+anyhow = "1"
+log = "0.4.17"
+pretty_env_logger = { version = "0.4.0" }
+sea-orm = "0.9.3"
+git2 = "0.15.0"
+url = { version = "2.3.1", features = ["serde"]}
+serde = { version = "1.0.145", features = ["derive"] }
+config = "0.13.2"
+clap = { version = "4.0.9", features = ["derive"] }
+crates-io = { path = "../../../crates/crates-io" }
+tempdir = "0.3.7"
