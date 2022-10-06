@@ -44,7 +44,7 @@ use crate::ops::resolve::WorkspaceResolve;
 use crate::util::config::Config;
 use crate::util::interning::InternedString;
 use crate::util::restricted_names::is_glob_pattern;
-use crate::util::{closest_msg, profile, CargoResult, StableHasher};
+use crate::util::{closest_msg, profile, CorgiResult, StableHasher};
 
 use anyhow::{bail, Context as _};
 
@@ -85,7 +85,7 @@ pub struct CompileOptions {
 }
 
 impl CompileOptions {
-    pub fn new(config: &Config, mode: CompileMode) -> CargoResult<CompileOptions> {
+    pub fn new(config: &Config, mode: CompileMode) -> CorgiResult<CompileOptions> {
         let jobs = None;
         let keep_going = false;
         Ok(CompileOptions {
@@ -114,7 +114,7 @@ pub enum Packages {
 }
 
 impl Packages {
-    pub fn from_flags(all: bool, exclude: Vec<String>, package: Vec<String>) -> CargoResult<Self> {
+    pub fn from_flags(all: bool, exclude: Vec<String>, package: Vec<String>) -> CorgiResult<Self> {
         Ok(match (all, exclude.len(), package.len()) {
             (false, 0, 0) => Packages::Default,
             (false, 0, _) => Packages::Packages(package),
@@ -125,7 +125,7 @@ impl Packages {
     }
 
     /// Converts selected packages from a workspace to `PackageIdSpec`s.
-    pub fn to_package_id_specs(&self, ws: &Workspace<'_>) -> CargoResult<Vec<PackageIdSpec>> {
+    pub fn to_package_id_specs(&self, ws: &Workspace<'_>) -> CorgiResult<Vec<PackageIdSpec>> {
         let specs = match self {
             Packages::All => ws
                 .members()
@@ -155,7 +155,7 @@ impl Packages {
                 let mut specs = packages
                     .iter()
                     .map(|p| PackageIdSpec::parse(p))
-                    .collect::<CargoResult<Vec<_>>>()?;
+                    .collect::<CorgiResult<Vec<_>>>()?;
                 if !patterns.is_empty() {
                     let matched_pkgs = ws
                         .members()
@@ -187,7 +187,7 @@ impl Packages {
     }
 
     /// Gets a list of selected packages from a workspace.
-    pub fn get_packages<'ws>(&self, ws: &'ws Workspace<'_>) -> CargoResult<Vec<&'ws Package>> {
+    pub fn get_packages<'ws>(&self, ws: &'ws Workspace<'_>) -> CorgiResult<Vec<&'ws Package>> {
         let packages: Vec<_> = match self {
             Packages::Default => ws.default_members().collect(),
             Packages::All => ws.members().collect(),
@@ -263,7 +263,7 @@ pub enum CompileFilter {
     },
 }
 
-pub fn compile<'a>(ws: &Workspace<'a>, options: &CompileOptions) -> CargoResult<Compilation<'a>> {
+pub fn compile<'a>(ws: &Workspace<'a>, options: &CompileOptions) -> CorgiResult<Compilation<'a>> {
     let exec: Arc<dyn Executor> = Arc::new(DefaultExecutor);
     compile_with_exec(ws, options, &exec)
 }
@@ -274,7 +274,7 @@ pub fn compile_with_exec<'a>(
     ws: &Workspace<'a>,
     options: &CompileOptions,
     exec: &Arc<dyn Executor>,
-) -> CargoResult<Compilation<'a>> {
+) -> CorgiResult<Compilation<'a>> {
     ws.emit_warnings()?;
     compile_ws(ws, options, exec)
 }
@@ -283,7 +283,7 @@ pub fn compile_ws<'a>(
     ws: &Workspace<'a>,
     options: &CompileOptions,
     exec: &Arc<dyn Executor>,
-) -> CargoResult<Compilation<'a>> {
+) -> CorgiResult<Compilation<'a>> {
     let interner = UnitInterner::new();
     let bcx = create_bcx(ws, options, &interner)?;
     if options.build_config.unit_graph {
@@ -299,7 +299,7 @@ pub fn print<'a>(
     ws: &Workspace<'a>,
     options: &CompileOptions,
     print_opt_value: &str,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let CompileOptions {
         ref build_config,
         ref target_rustc_args,
@@ -330,7 +330,7 @@ pub fn create_bcx<'a, 'cfg>(
     ws: &'a Workspace<'cfg>,
     options: &'a CompileOptions,
     interner: &'a UnitInterner,
-) -> CargoResult<BuildContext<'a, 'cfg>> {
+) -> CorgiResult<BuildContext<'a, 'cfg>> {
     let CompileOptions {
         ref build_config,
         ref spec,
@@ -986,7 +986,7 @@ fn generate_targets(
     package_set: &PackageSet<'_>,
     profiles: &Profiles,
     interner: &UnitInterner,
-) -> CargoResult<Vec<Unit>> {
+) -> CorgiResult<Vec<Unit>> {
     let config = ws.config();
     // Helper for creating a list of `Unit` structures
     let new_unit = |units: &mut HashSet<Unit>,
@@ -1287,7 +1287,7 @@ fn unmatched_target_filters(
     units: &[Unit],
     filter: &CompileFilter,
     shell: &mut Shell,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     if let CompileFilter::Only {
         all_targets,
         lib: _,
@@ -1339,7 +1339,7 @@ fn validate_required_features(
     required_features: &[String],
     summary: &Summary,
     shell: &mut Shell,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let resolve = match resolve {
         None => return Ok(()),
         Some(resolve) => resolve,
@@ -1487,7 +1487,7 @@ fn list_rule_targets<'a>(
     target_desc: &'static str,
     is_expected_kind: fn(&Target) -> bool,
     mode: CompileMode,
-) -> CargoResult<Vec<Proposal<'a>>> {
+) -> CorgiResult<Vec<Proposal<'a>>> {
     let mut proposals = Vec::new();
     match rule {
         FilterRule::All => {
@@ -1515,7 +1515,7 @@ fn find_named_targets<'a>(
     target_desc: &'static str,
     is_expected_kind: fn(&Target) -> bool,
     mode: CompileMode,
-) -> CargoResult<Vec<Proposal<'a>>> {
+) -> CorgiResult<Vec<Proposal<'a>>> {
     let is_glob = is_glob_pattern(target_name);
     let proposals = if is_glob {
         let pattern = build_glob(target_name)?;
@@ -1682,7 +1682,7 @@ fn traverse_and_share(
 }
 
 /// Build `glob::Pattern` with informative context.
-fn build_glob(pat: &str) -> CargoResult<glob::Pattern> {
+fn build_glob(pat: &str) -> CorgiResult<glob::Pattern> {
     glob::Pattern::new(pat).with_context(|| format!("cannot build glob pattern from `{}`", pat))
 }
 
@@ -1694,7 +1694,7 @@ fn emit_package_not_found(
     ws: &Workspace<'_>,
     opt_names: BTreeSet<&str>,
     opt_out: bool,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     if !opt_names.is_empty() {
         anyhow::bail!(
             "{}package(s) `{}` not found in workspace `{}`",
@@ -1714,7 +1714,7 @@ fn emit_pattern_not_found(
     ws: &Workspace<'_>,
     opt_patterns: Vec<(glob::Pattern, bool)>,
     opt_out: bool,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let not_matched = opt_patterns
         .iter()
         .filter(|(_, matched)| !*matched)
@@ -1751,7 +1751,7 @@ fn match_patterns(pkg: &Package, patterns: &mut Vec<(glob::Pattern, bool)>) -> b
 /// `Packages::to_package_id_specs` and `Packages::get_packages`.
 fn opt_patterns_and_names(
     opt: &[String],
-) -> CargoResult<(Vec<(glob::Pattern, bool)>, BTreeSet<&str>)> {
+) -> CorgiResult<(Vec<(glob::Pattern, bool)>, BTreeSet<&str>)> {
     let mut opt_patterns = Vec::new();
     let mut opt_names = BTreeSet::new();
     for x in opt.iter() {
@@ -1892,7 +1892,7 @@ fn override_rustc_crate_types(
     units: &mut [Unit],
     args: &[String],
     interner: &UnitInterner,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     if units.len() != 1 {
         anyhow::bail!(
             "crate types to rustc can only be passed to one \

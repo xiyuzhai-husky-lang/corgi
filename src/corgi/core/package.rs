@@ -27,7 +27,7 @@ use crate::core::{Dependency, Manifest, PackageId, SourceId, Target};
 use crate::core::{SourceMap, Summary, Workspace};
 use crate::ops;
 use crate::util::config::PackageCacheLock;
-use crate::util::errors::{CargoResult, HttpNot200};
+use crate::util::errors::{CorgiResult, HttpNot200};
 use crate::util::interning::InternedString;
 use crate::util::network::Retry;
 use crate::util::{self, internal, Config, Progress, ProgressStyle};
@@ -195,7 +195,7 @@ impl Package {
         }
     }
 
-    pub fn to_registry_toml(&self, ws: &Workspace<'_>) -> CargoResult<String> {
+    pub fn to_registry_toml(&self, ws: &Workspace<'_>) -> CorgiResult<String> {
         let manifest = self
             .manifest()
             .original()
@@ -402,7 +402,7 @@ impl<'cfg> PackageSet<'cfg> {
         package_ids: &[PackageId],
         sources: SourceMap<'cfg>,
         config: &'cfg Config,
-    ) -> CargoResult<PackageSet<'cfg>> {
+    ) -> CorgiResult<PackageSet<'cfg>> {
         // We've enabled the `http2` feature of `curl` in Cargo, so treat
         // failures here as fatal as it would indicate a build-time problem.
         let mut multi = Multi::new();
@@ -435,7 +435,7 @@ impl<'cfg> PackageSet<'cfg> {
         self.packages.values().filter_map(|p| p.borrow())
     }
 
-    pub fn enable_download<'a>(&'a self) -> CargoResult<Downloads<'a, 'cfg>> {
+    pub fn enable_download<'a>(&'a self) -> CorgiResult<Downloads<'a, 'cfg>> {
         assert!(!self.downloading.replace(true));
         let timeout = ops::HttpTimeout::new(self.config)?;
         Ok(Downloads {
@@ -462,14 +462,14 @@ impl<'cfg> PackageSet<'cfg> {
         })
     }
 
-    pub fn get_one(&self, id: PackageId) -> CargoResult<&Package> {
+    pub fn get_one(&self, id: PackageId) -> CorgiResult<&Package> {
         if let Some(pkg) = self.packages.get(&id).and_then(|slot| slot.borrow()) {
             return Ok(pkg);
         }
         Ok(self.get_many(Some(id))?.remove(0))
     }
 
-    pub fn get_many(&self, ids: impl IntoIterator<Item = PackageId>) -> CargoResult<Vec<&Package>> {
+    pub fn get_many(&self, ids: impl IntoIterator<Item = PackageId>) -> CorgiResult<Vec<&Package>> {
         let mut pkgs = Vec::new();
         let mut downloads = self.enable_download()?;
         for id in ids {
@@ -491,7 +491,7 @@ impl<'cfg> PackageSet<'cfg> {
         requested_kinds: &[CompileKind],
         target_data: &RustcTargetData<'cfg>,
         force_all_targets: ForceAllTargets,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         fn collect_used_deps(
             used: &mut BTreeSet<PackageId>,
             resolve: &Resolve,
@@ -500,7 +500,7 @@ impl<'cfg> PackageSet<'cfg> {
             requested_kinds: &[CompileKind],
             target_data: &RustcTargetData<'_>,
             force_all_targets: ForceAllTargets,
-        ) -> CargoResult<()> {
+        ) -> CorgiResult<()> {
             if !used.insert(pkg_id) {
                 return Ok(());
             }
@@ -557,7 +557,7 @@ impl<'cfg> PackageSet<'cfg> {
         requested_kinds: &[CompileKind],
         target_data: &RustcTargetData<'_>,
         force_all_targets: ForceAllTargets,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         let no_lib_pkgs: BTreeMap<PackageId, Vec<(&Package, &HashSet<Dependency>)>> = root_ids
             .iter()
             .map(|&root_id| {
@@ -676,12 +676,12 @@ impl<'a, 'cfg> Downloads<'a, 'cfg> {
     /// Returns `None` if the package is queued up for download and will
     /// eventually be returned from `wait_for_download`. Returns `Some(pkg)` if
     /// the package is ready and doesn't need to be downloaded.
-    pub fn start(&mut self, id: PackageId) -> CargoResult<Option<&'a Package>> {
+    pub fn start(&mut self, id: PackageId) -> CorgiResult<Option<&'a Package>> {
         self.start_inner(id)
             .with_context(|| format!("failed to download `{}`", id))
     }
 
-    fn start_inner(&mut self, id: PackageId) -> CargoResult<Option<&'a Package>> {
+    fn start_inner(&mut self, id: PackageId) -> CorgiResult<Option<&'a Package>> {
         // First up see if we've already cached this package, in which case
         // there's nothing to do.
         let slot = self
@@ -819,7 +819,7 @@ impl<'a, 'cfg> Downloads<'a, 'cfg> {
     /// # Panics
     ///
     /// This function will panic if there are no remaining downloads.
-    pub fn wait(&mut self) -> CargoResult<&'a Package> {
+    pub fn wait(&mut self) -> CorgiResult<&'a Package> {
         let (dl, data) = loop {
             assert_eq!(self.pending.len(), self.pending_ids.len());
             let (token, result) = self.wait_for_curl()?;
@@ -936,7 +936,7 @@ impl<'a, 'cfg> Downloads<'a, 'cfg> {
         Ok(slot.borrow().unwrap())
     }
 
-    fn enqueue(&mut self, dl: Download<'cfg>, handle: Easy) -> CargoResult<()> {
+    fn enqueue(&mut self, dl: Download<'cfg>, handle: Easy) -> CorgiResult<()> {
         let mut handle = self.set.multi.add(handle)?;
         let now = Instant::now();
         handle.set_token(dl.token)?;
@@ -953,7 +953,7 @@ impl<'a, 'cfg> Downloads<'a, 'cfg> {
 
     /// Block, waiting for curl. Returns a token and a `Result` for that token
     /// (`Ok` means the download successfully finished).
-    fn wait_for_curl(&mut self) -> CargoResult<(usize, Result<(), curl::Error>)> {
+    fn wait_for_curl(&mut self) -> CorgiResult<(usize, Result<(), curl::Error>)> {
         // This is the main workhorse loop. We use libcurl's portable `wait`
         // method to actually perform blocking. This isn't necessarily too
         // efficient in terms of fd management, but we should only be juggling
@@ -1059,7 +1059,7 @@ impl<'a, 'cfg> Downloads<'a, 'cfg> {
         true
     }
 
-    fn tick(&self, why: WhyTick<'_>) -> CargoResult<()> {
+    fn tick(&self, why: WhyTick<'_>) -> CorgiResult<()> {
         let mut progress = self.progress.borrow_mut();
         let progress = progress.as_mut().unwrap();
 

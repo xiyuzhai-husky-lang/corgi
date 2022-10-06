@@ -57,7 +57,7 @@ use log::{debug, trace};
 use crate::core::PackageIdSpec;
 use crate::core::{Dependency, PackageId, Registry, Summary};
 use crate::util::config::Config;
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::network::PollExt;
 use crate::util::profile;
 
@@ -127,7 +127,7 @@ pub fn resolve(
     version_prefs: &VersionPreferences,
     config: Option<&Config>,
     check_public_visible_dependencies: bool,
-) -> CargoResult<Resolve> {
+) -> CorgiResult<Resolve> {
     let _p = profile::start("resolving");
     let minimal_versions = match config {
         Some(config) => config.cli_unstable().minimal_versions,
@@ -190,7 +190,7 @@ fn activate_deps_loop(
     registry: &mut RegistryQueryer<'_>,
     summaries: &[(Summary, ResolveOpts)],
     config: Option<&Config>,
-) -> CargoResult<Context> {
+) -> CorgiResult<Context> {
     let mut backtrack_stack = Vec::new();
     let mut remaining_deps = RemainingDeps::new();
 
@@ -1008,7 +1008,7 @@ fn find_candidate(
     None
 }
 
-fn check_cycles(resolve: &Resolve) -> CargoResult<()> {
+fn check_cycles(resolve: &Resolve) -> CorgiResult<()> {
     // Create a simple graph representation alternative of `resolve` which has
     // only the edges we care about. Note that `BTree*` is used to produce
     // deterministic error messages here. Also note that the main reason for
@@ -1049,7 +1049,7 @@ fn check_cycles(resolve: &Resolve) -> CargoResult<()> {
         visited: &mut HashSet<PackageId>,
         path: &mut Vec<PackageId>,
         checked: &mut HashSet<PackageId>,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         path.push(id);
         if !visited.insert(id) {
             let iter = path.iter().rev().skip(1).scan(id, |child, parent| {
@@ -1082,7 +1082,7 @@ fn check_cycles(resolve: &Resolve) -> CargoResult<()> {
 /// When writing package ID's to lock file, we apply lossy encoding. In
 /// particular, we don't store paths of path dependencies. That means that
 /// *different* packages may collide in the lock file, hence this check.
-fn check_duplicate_pkgs_in_lockfile(resolve: &Resolve) -> CargoResult<()> {
+fn check_duplicate_pkgs_in_lockfile(resolve: &Resolve) -> CorgiResult<()> {
     let mut unique_pkg_ids = HashMap::new();
     let state = encode::EncodeState::new(resolve);
     for pkg_id in resolve.iter() {

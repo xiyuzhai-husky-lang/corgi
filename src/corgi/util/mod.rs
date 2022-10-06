@@ -7,7 +7,7 @@ pub(crate) use self::counter::MetricsCounter;
 pub use self::dependency_queue::DependencyQueue;
 pub use self::diagnostic_server::RustfixDiagnosticServer;
 pub use self::errors::CliError;
-pub use self::errors::{internal, CargoResult, CliResult};
+pub use self::errors::{internal, CliResult, CorgiResult};
 pub use self::flock::{FileLock, Filesystem};
 pub use self::graph::Graph;
 pub use self::hasher::StableHasher;

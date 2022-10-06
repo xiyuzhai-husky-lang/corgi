@@ -50,7 +50,7 @@ pub fn exec(config: &mut Config, args: &ArgMatches) -> CliResult {
 fn resolve_crate<'k>(
     mut krate: Option<&'k str>,
     mut version: Option<&'k str>,
-) -> crate::CargoResult<(Option<&'k str>, Option<&'k str>)> {
+) -> crate::CorgiResult<(Option<&'k str>, Option<&'k str>)> {
     if let Some((k, v)) = krate.and_then(|k| k.split_once('@')) {
         if version.is_some() {
             anyhow::bail!("cannot specify both `@{v}` and `--version`");

@@ -10,8 +10,8 @@ use super::manifest::str_or_1_len_table;
 use crate::core::GitReference;
 use crate::core::SourceId;
 use crate::core::Summary;
-use crate::CargoResult;
 use crate::Config;
+use crate::CorgiResult;
 
 /// A dependency handled by Cargo.
 ///
@@ -164,7 +164,7 @@ impl Dependency {
     }
 
     /// Get the SourceID for this dependency.
-    pub fn source_id(&self, config: &Config) -> CargoResult<MaybeWorkspace<SourceId>> {
+    pub fn source_id(&self, config: &Config) -> CorgiResult<MaybeWorkspace<SourceId>> {
         match &self.source.as_ref() {
             Some(Source::Registry(_)) | None => {
                 if let Some(r) = self.registry() {
@@ -185,7 +185,7 @@ impl Dependency {
     pub fn query(
         &self,
         config: &Config,
-    ) -> CargoResult<MaybeWorkspace<crate::core::dependency::Dependency>> {
+    ) -> CorgiResult<MaybeWorkspace<crate::core::dependency::Dependency>> {
         let source_id = self.source_id(config)?;
         match source_id {
             MaybeWorkspace::Workspace(workspace) => Ok(MaybeWorkspace::Workspace(workspace)),
@@ -208,7 +208,7 @@ pub enum MaybeWorkspace<T> {
 
 impl Dependency {
     /// Create a dependency from a TOML table entry.
-    pub fn from_toml(crate_root: &Path, key: &str, item: &toml_edit::Item) -> CargoResult<Self> {
+    pub fn from_toml(crate_root: &Path, key: &str, item: &toml_edit::Item) -> CorgiResult<Self> {
         if let Some(version) = item.as_str() {
             let dep = Self::new(key).set_source(RegistrySource::new(version));
             Ok(dep)
@@ -308,7 +308,7 @@ impl Dependency {
                                 invalid_type(key, "features", v.type_name(), "string")
                             })
                         })
-                        .collect::<CargoResult<IndexSet<String>>>()?,
+                        .collect::<CorgiResult<IndexSet<String>>>()?,
                 )
             } else {
                 None
@@ -774,7 +774,7 @@ impl PathSource {
     }
 
     /// Get the SourceID for this dependency.
-    pub fn source_id(&self) -> CargoResult<SourceId> {
+    pub fn source_id(&self) -> CorgiResult<SourceId> {
         SourceId::for_path(&self.path)
     }
 }
@@ -838,7 +838,7 @@ impl GitSource {
     }
 
     /// Get the SourceID for this dependency.
-    pub fn source_id(&self) -> CargoResult<SourceId> {
+    pub fn source_id(&self) -> CorgiResult<SourceId> {
         let git_url = self.git.parse::<url::Url>()?;
         let git_ref = self.git_ref();
         SourceId::for_git(&git_url, git_ref)

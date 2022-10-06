@@ -58,7 +58,7 @@ use crate::core::{Edition, MaybePackage, PackageId, Workspace};
 use crate::ops::resolve::WorkspaceResolve;
 use crate::ops::{self, CompileOptions};
 use crate::util::diagnostic_server::{Message, RustfixDiagnosticServer};
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::Config;
 use crate::util::{existing_vcs_repo, LockServer, LockServerClient};
 use crate::{drop_eprint, drop_eprintln};
@@ -78,7 +78,7 @@ pub struct FixOptions {
     pub broken_code: bool,
 }
 
-pub fn fix(ws: &Workspace<'_>, opts: &mut FixOptions) -> CargoResult<()> {
+pub fn fix(ws: &Workspace<'_>, opts: &mut FixOptions) -> CorgiResult<()> {
     check_version_control(ws.config(), opts)?;
     if opts.edition {
         check_resolver_change(ws, opts)?;
@@ -133,7 +133,7 @@ pub fn fix(ws: &Workspace<'_>, opts: &mut FixOptions) -> CargoResult<()> {
     Ok(())
 }
 
-fn check_version_control(config: &Config, opts: &FixOptions) -> CargoResult<()> {
+fn check_version_control(config: &Config, opts: &FixOptions) -> CorgiResult<()> {
     if opts.allow_no_vcs {
         return Ok(());
     }
@@ -205,7 +205,7 @@ fn check_version_control(config: &Config, opts: &FixOptions) -> CargoResult<()> 
     );
 }
 
-fn check_resolver_change(ws: &Workspace<'_>, opts: &FixOptions) -> CargoResult<()> {
+fn check_resolver_change(ws: &Workspace<'_>, opts: &FixOptions) -> CorgiResult<()> {
     let root = ws.root_maybe();
     match root {
         MaybePackage::Package(root_pkg) => {
@@ -233,7 +233,7 @@ fn check_resolver_change(ws: &Workspace<'_>, opts: &FixOptions) -> CargoResult<(
     assert_eq!(ws.resolve_behavior(), ResolveBehavior::V1);
     let specs = opts.compile_opts.spec.to_package_id_specs(ws)?;
     let target_data = RustcTargetData::new(ws, &opts.compile_opts.build_config.requested_kinds)?;
-    let resolve_differences = |has_dev_units| -> CargoResult<(WorkspaceResolve<'_>, DiffMap)> {
+    let resolve_differences = |has_dev_units| -> CorgiResult<(WorkspaceResolve<'_>, DiffMap)> {
         let ws_resolve = ops::resolve_ws_with_opts(
             ws,
             &target_data,
@@ -311,7 +311,7 @@ fn check_resolver_change(ws: &Workspace<'_>, opts: &FixOptions) -> CargoResult<(
     Ok(())
 }
 
-fn report_maybe_diesel(config: &Config, resolve: &Resolve) -> CargoResult<()> {
+fn report_maybe_diesel(config: &Config, resolve: &Resolve) -> CorgiResult<()> {
     fn is_broken_diesel(pid: PackageId) -> bool {
         pid.name() == "diesel" && pid.version() < &Version::new(1, 4, 8)
     }
@@ -349,7 +349,7 @@ pub fn fix_get_proxy_lock_addr() -> Option<String> {
 /// and the process exits with the corresponding `rustc` exit code.
 ///
 /// See [`fix_get_proxy_lock_addr`]
-pub fn fix_exec_rustc(config: &Config, lock_addr: &str) -> CargoResult<()> {
+pub fn fix_exec_rustc(config: &Config, lock_addr: &str) -> CorgiResult<()> {
     let args = FixArgs::get()?;
     trace!("cargo-fix as rustc got file {:?}", args.file);
 
@@ -457,7 +457,7 @@ fn rustfix_crate(
     filename: &Path,
     args: &FixArgs,
     config: &Config,
-) -> CargoResult<FixedCrate> {
+) -> CorgiResult<FixedCrate> {
     if !args.can_run_rustfix(config)? {
         // This fix should not be run. Skipping...
         return Ok(FixedCrate::default());
@@ -562,7 +562,7 @@ fn rustfix_and_fix(
     rustc: &ProcessBuilder,
     filename: &Path,
     config: &Config,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     // If not empty, filter by these lints.
     // TODO: implement a way to specify this.
     let only = HashSet::new();
@@ -709,7 +709,7 @@ fn exit_with(status: ExitStatus) -> ! {
     process::exit(status.code().unwrap_or(3));
 }
 
-fn log_failed_fix(krate: Option<String>, stderr: &[u8], status: ExitStatus) -> CargoResult<()> {
+fn log_failed_fix(krate: Option<String>, stderr: &[u8], status: ExitStatus) -> CorgiResult<()> {
     let stderr = str::from_utf8(stderr).context("failed to parse rustc stderr as utf-8")?;
 
     let diagnostics = stderr
@@ -777,12 +777,12 @@ struct FixArgs {
 }
 
 impl FixArgs {
-    fn get() -> CargoResult<FixArgs> {
+    fn get() -> CorgiResult<FixArgs> {
         Self::from_args(env::args_os())
     }
 
     // This is a separate function so that we can use it in tests.
-    fn from_args(argv: impl IntoIterator<Item = OsString>) -> CargoResult<Self> {
+    fn from_args(argv: impl IntoIterator<Item = OsString>) -> CorgiResult<Self> {
         let mut argv = argv.into_iter();
         let mut rustc = argv
             .nth(1)
@@ -793,7 +793,7 @@ impl FixArgs {
         let mut other = Vec::new();
         let mut format_args = Vec::new();
 
-        let mut handle_arg = |arg: OsString| -> CargoResult<()> {
+        let mut handle_arg = |arg: OsString| -> CorgiResult<()> {
             let path = PathBuf::from(arg);
             if path.extension().and_then(|s| s.to_str()) == Some("rs") && path.exists() {
                 file = Some(path);
@@ -887,7 +887,7 @@ impl FixArgs {
 
     /// Validates the edition, and sends a message indicating what is being
     /// done. Returns a flag indicating whether this fix should be run.
-    fn can_run_rustfix(&self, config: &Config) -> CargoResult<bool> {
+    fn can_run_rustfix(&self, config: &Config) -> CorgiResult<bool> {
         let to_edition = match self.prepare_for_edition {
             Some(s) => s,
             None => {

@@ -1,3 +1,4 @@
+use crate::error::Error;
 use clap::Parser;
 use config::Environment;
 use serde::{Deserialize, Serialize};
@@ -22,15 +23,15 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn from_command_line() -> anyhow::Result<Config> {
+    pub fn from_command_line() -> crate::error::Result<Config> {
         let Opts {
             mut configs,
             config_root_path,
         } = Opts::parse();
 
         if configs.is_empty() {
-            anyhow::bail!(
-                "Please use the command line option '-c' to set the configuration file path"
+            Error::Custom(
+                "Please use the command line option '-c' to set the configuration file path".into(),
             );
         }
 

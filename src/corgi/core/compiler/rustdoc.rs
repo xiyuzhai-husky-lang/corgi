@@ -4,7 +4,7 @@ use crate::core::compiler::context::Context;
 use crate::core::compiler::unit::Unit;
 use crate::core::compiler::CompileKind;
 use crate::sources::CRATES_IO_REGISTRY;
-use crate::util::errors::{internal, CargoResult};
+use crate::util::errors::{internal, CorgiResult};
 use cargo_util::ProcessBuilder;
 use std::collections::HashMap;
 use std::fmt;
@@ -96,7 +96,7 @@ pub fn add_root_urls(
     cx: &Context<'_, '_>,
     unit: &Unit,
     rustdoc: &mut ProcessBuilder,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let config = cx.bcx.config;
     if !config.cli_unstable().rustdoc_map {
         log::debug!("`doc.extern-map` ignored, requires -Zrustdoc-map flag");

@@ -14,7 +14,7 @@ use crate::core::compiler::Freshness;
 use crate::core::{Dependency, FeatureValue, Package, PackageId, QueryKind, Source, SourceId};
 use crate::ops::{self, CompileFilter, CompileOptions};
 use crate::sources::PathSource;
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::Config;
 use crate::util::{FileLock, Filesystem};
 
@@ -93,11 +93,11 @@ pub struct CrateListingV1 {
 
 impl InstallTracker {
     /// Create an InstallTracker from information on disk.
-    pub fn load(config: &Config, root: &Filesystem) -> CargoResult<InstallTracker> {
+    pub fn load(config: &Config, root: &Filesystem) -> CorgiResult<InstallTracker> {
         let v1_lock = root.open_rw(Path::new(".crates.toml"), config, "crate metadata")?;
         let v2_lock = root.open_rw(Path::new(".crates2.json"), config, "crate metadata")?;
 
-        let v1 = (|| -> CargoResult<_> {
+        let v1 = (|| -> CorgiResult<_> {
             let mut contents = String::new();
             v1_lock.file().read_to_string(&mut contents)?;
             if contents.is_empty() {
@@ -113,7 +113,7 @@ impl InstallTracker {
             )
         })?;
 
-        let v2 = (|| -> CargoResult<_> {
+        let v2 = (|| -> CorgiResult<_> {
             let mut contents = String::new();
             v2_lock.file().read_to_string(&mut contents)?;
             let mut v2 = if contents.is_empty() {
@@ -163,7 +163,7 @@ impl InstallTracker {
         opts: &CompileOptions,
         target: &str,
         _rustc: &str,
-    ) -> CargoResult<(Freshness, BTreeMap<String, Option<PackageId>>)> {
+    ) -> CorgiResult<(Freshness, BTreeMap<String, Option<PackageId>>)> {
         let exes = exe_names(pkg, &opts.filter);
         // Check if any tracked exe's are already installed.
         let duplicates = self.find_duplicates(dst, &exes);
@@ -278,7 +278,7 @@ impl InstallTracker {
     }
 
     /// Save tracking information to disk.
-    pub fn save(&self) -> CargoResult<()> {
+    pub fn save(&self) -> CorgiResult<()> {
         self.v1.save(&self.v1_lock).with_context(|| {
             format!(
                 "failed to write crate metadata at `{}`",
@@ -353,7 +353,7 @@ impl CrateListingV1 {
         }
     }
 
-    fn save(&self, lock: &FileLock) -> CargoResult<()> {
+    fn save(&self, lock: &FileLock) -> CorgiResult<()> {
         let mut file = lock.file();
         file.seek(SeekFrom::Start(0))?;
         file.set_len(0)?;
@@ -462,7 +462,7 @@ impl CrateListingV2 {
         }
     }
 
-    fn save(&self, lock: &FileLock) -> CargoResult<()> {
+    fn save(&self, lock: &FileLock) -> CorgiResult<()> {
         let mut file = lock.file();
         file.seek(SeekFrom::Start(0))?;
         file.set_len(0)?;
@@ -501,7 +501,7 @@ impl InstallInfo {
 }
 
 /// Determines the root directory where installation is done.
-pub fn resolve_root(flag: Option<&str>, config: &Config) -> CargoResult<Filesystem> {
+pub fn resolve_root(flag: Option<&str>, config: &Config) -> CorgiResult<Filesystem> {
     let config_root = config.get_path("install.root")?;
     Ok(flag
         .map(PathBuf::from)
@@ -512,7 +512,7 @@ pub fn resolve_root(flag: Option<&str>, config: &Config) -> CargoResult<Filesyst
 }
 
 /// Determines the `PathSource` from a `SourceId`.
-pub fn path_source(source_id: SourceId, config: &Config) -> CargoResult<PathSource<'_>> {
+pub fn path_source(source_id: SourceId, config: &Config) -> CorgiResult<PathSource<'_>> {
     let path = source_id
         .url()
         .to_file_path()
@@ -526,7 +526,7 @@ pub fn select_dep_pkg<T>(
     dep: Dependency,
     config: &Config,
     needs_update: bool,
-) -> CargoResult<Package>
+) -> CorgiResult<Package>
 where
     T: Source,
 {
@@ -593,10 +593,10 @@ pub fn select_pkg<T, F>(
     dep: Option<Dependency>,
     mut list_all: F,
     config: &Config,
-) -> CargoResult<Package>
+) -> CorgiResult<Package>
 where
     T: Source,
-    F: FnMut(&mut T) -> CargoResult<Vec<Package>>,
+    F: FnMut(&mut T) -> CorgiResult<Vec<Package>>,
 {
     // This operation may involve updating some sources or making a few queries
     // which may involve frobbing caches, as a result make sure we synchronize
@@ -646,7 +646,7 @@ where
 /// Get one element from the iterator.
 /// Returns None if none left.
 /// Returns error if there is more than one item in the iterator.
-fn one<I, F>(mut i: I, f: F) -> CargoResult<Option<I::Item>>
+fn one<I, F>(mut i: I, f: F) -> CorgiResult<Option<I::Item>>
 where
     I: Iterator,
     F: FnOnce(Vec<I::Item>) -> String,

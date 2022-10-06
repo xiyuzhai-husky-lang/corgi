@@ -3,7 +3,7 @@ use crate::core::compiler::{
 };
 use crate::core::{Dependency, Package, Target, TargetKind, Workspace};
 use crate::util::config::{Config, StringList, TargetConfig};
-use crate::util::{CargoResult, Rustc};
+use crate::util::{CorgiResult, Rustc};
 use anyhow::Context as _;
 use cargo_platform::{Cfg, CfgExpr};
 use cargo_util::{paths, ProcessBuilder};
@@ -137,7 +137,7 @@ impl TargetInfo {
         requested_kinds: &[CompileKind],
         rustc: &Rustc,
         kind: CompileKind,
-    ) -> CargoResult<TargetInfo> {
+    ) -> CorgiResult<TargetInfo> {
         let rustflags = env_args(
             config,
             requested_kinds,
@@ -219,7 +219,7 @@ impl TargetInfo {
         let cfg = lines
             .map(|line| Ok(Cfg::from_str(line)?))
             .filter(TargetInfo::not_user_specific_cfg)
-            .collect::<CargoResult<Vec<_>>>()
+            .collect::<CorgiResult<Vec<_>>>()
             .with_context(|| {
                 format!(
                     "failed to parse the cfg from `rustc --print=cfg`, got:\n{}",
@@ -256,7 +256,7 @@ impl TargetInfo {
         })
     }
 
-    fn not_user_specific_cfg(cfg: &CargoResult<Cfg>) -> bool {
+    fn not_user_specific_cfg(cfg: &CorgiResult<Cfg>) -> bool {
         if let Ok(Cfg::Name(cfg_name)) = cfg {
             // This should also include "debug_assertions", but it causes
             // regressions. Maybe some day in the distant future it can be
@@ -281,7 +281,7 @@ impl TargetInfo {
         crate_type: &CrateType,
         flavor: FileFlavor,
         target_triple: &str,
-    ) -> CargoResult<Option<Vec<FileType>>> {
+    ) -> CorgiResult<Option<Vec<FileType>>> {
         let crate_type = if *crate_type == CrateType::Lib {
             CrateType::Rlib
         } else {
@@ -416,7 +416,7 @@ impl TargetInfo {
         Ok(Some(ret))
     }
 
-    fn discover_crate_type(&self, crate_type: &CrateType) -> CargoResult<Option<(String, String)>> {
+    fn discover_crate_type(&self, crate_type: &CrateType) -> CorgiResult<Option<(String, String)>> {
         let mut process = self.crate_type_process.clone();
 
         process.arg("--crate-type").arg(crate_type.as_str());
@@ -442,7 +442,7 @@ impl TargetInfo {
         mode: CompileMode,
         target_kind: &TargetKind,
         target_triple: &str,
-    ) -> CargoResult<(Vec<FileType>, Vec<CrateType>)> {
+    ) -> CorgiResult<(Vec<FileType>, Vec<CrateType>)> {
         match mode {
             CompileMode::Build => self.calc_rustc_outputs(target_kind, target_triple),
             CompileMode::Test | CompileMode::Bench => {
@@ -465,7 +465,7 @@ impl TargetInfo {
         &self,
         target_kind: &TargetKind,
         target_triple: &str,
-    ) -> CargoResult<(Vec<FileType>, Vec<CrateType>)> {
+    ) -> CorgiResult<(Vec<FileType>, Vec<CrateType>)> {
         let mut unsupported = Vec::new();
         let mut result = Vec::new();
         let crate_types = target_kind.rustc_crate_types();
@@ -508,7 +508,7 @@ fn parse_crate_type(
     output: &str,
     error: &str,
     lines: &mut str::Lines<'_>,
-) -> CargoResult<Option<(String, String)>> {
+) -> CorgiResult<Option<(String, String)>> {
     let not_supported = error.lines().any(|line| {
         (line.contains("unsupported crate type") || line.contains("unknown crate type"))
             && line.contains(&format!("crate type `{}`", crate_type))
@@ -605,7 +605,7 @@ fn env_args(
     target_cfg: Option<&[Cfg]>,
     kind: CompileKind,
     flags: Flags,
-) -> CargoResult<Vec<String>> {
+) -> CorgiResult<Vec<String>> {
     let target_applies_to_host = config.target_applies_to_host()?;
 
     // Host artifacts should not generally pick up rustflags from anywhere except [host].
@@ -673,7 +673,7 @@ fn rustflags_from_target(
     target_cfg: Option<&[Cfg]>,
     kind: CompileKind,
     flag: Flags,
-) -> CargoResult<Option<Vec<String>>> {
+) -> CorgiResult<Option<Vec<String>>> {
     let mut rustflags = Vec::new();
 
     // Then the target.*.rustflags value...
@@ -712,7 +712,7 @@ fn rustflags_from_host(
     config: &Config,
     flag: Flags,
     host_triple: &str,
-) -> CargoResult<Option<Vec<String>>> {
+) -> CorgiResult<Option<Vec<String>>> {
     let target_cfg = config.host_cfg_triple(host_triple)?;
     let list = match flag {
         Flags::Rust => &target_cfg.rustflags,
@@ -724,7 +724,7 @@ fn rustflags_from_host(
     Ok(list.as_ref().map(|l| l.val.as_slice().to_vec()))
 }
 
-fn rustflags_from_build(config: &Config, flag: Flags) -> CargoResult<Option<Vec<String>>> {
+fn rustflags_from_build(config: &Config, flag: Flags) -> CorgiResult<Option<Vec<String>>> {
     // Then the `build.rustflags` value.
     let build = config.build_config()?;
     let list = match flag {
@@ -759,7 +759,7 @@ impl<'cfg> RustcTargetData<'cfg> {
     pub fn new(
         ws: &Workspace<'cfg>,
         requested_kinds: &[CompileKind],
-    ) -> CargoResult<RustcTargetData<'cfg>> {
+    ) -> CorgiResult<RustcTargetData<'cfg>> {
         let config = ws.config();
         let rustc = config.load_global_rustc(Some(ws))?;
         let mut target_config = HashMap::new();
@@ -825,7 +825,7 @@ impl<'cfg> RustcTargetData<'cfg> {
     }
 
     /// Insert `kind` into our `target_info` and `target_config` members if it isn't present yet.
-    fn merge_compile_kind(&mut self, kind: CompileKind) -> CargoResult<()> {
+    fn merge_compile_kind(&mut self, kind: CompileKind) -> CorgiResult<()> {
         if let CompileKind::Target(target) = kind {
             if !self.target_config.contains_key(&target) {
                 self.target_config
@@ -908,7 +908,7 @@ impl RustDocFingerprint {
     /// the rustdoc fingerprint info in order to guarantee that we won't end up with mixed
     /// versions of the `js/html/css` files that `rustdoc` autogenerates which do not have
     /// any versioning.
-    pub fn check_rustdoc_fingerprint(cx: &Context<'_, '_>) -> CargoResult<()> {
+    pub fn check_rustdoc_fingerprint(cx: &Context<'_, '_>) -> CorgiResult<()> {
         if cx.bcx.config.cli_unstable().skip_rustdoc_fingerprint {
             return Ok(());
         }
@@ -917,7 +917,7 @@ impl RustDocFingerprint {
         };
 
         let fingerprint_path = cx.files().host_root().join(".rustdoc_fingerprint.json");
-        let write_fingerprint = || -> CargoResult<()> {
+        let write_fingerprint = || -> CorgiResult<()> {
             paths::write(
                 &fingerprint_path,
                 serde_json::to_string(&actual_rustdoc_target_data)?,
@@ -961,7 +961,7 @@ impl RustDocFingerprint {
         write_fingerprint()?;
         return Ok(());
 
-        fn clean_doc(path: &Path) -> CargoResult<()> {
+        fn clean_doc(path: &Path) -> CorgiResult<()> {
             let entries = path
                 .read_dir()
                 .with_context(|| format!("failed to read directory `{}`", path.display()))?;

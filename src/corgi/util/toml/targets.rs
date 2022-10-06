@@ -20,7 +20,7 @@ use super::{
 };
 use crate::core::compiler::CrateType;
 use crate::core::{Edition, Feature, Features, Target};
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::restricted_names;
 
 use anyhow::Context as _;
@@ -40,7 +40,7 @@ pub fn targets(
     metabuild: &Option<StringOrVec>,
     warnings: &mut Vec<String>,
     errors: &mut Vec<String>,
-) -> CargoResult<Vec<Target>> {
+) -> CorgiResult<Vec<Target>> {
     let mut targets = Vec::new();
 
     let has_lib;
@@ -148,7 +148,7 @@ fn clean_lib(
     package_name: &str,
     edition: Edition,
     warnings: &mut Vec<String>,
-) -> CargoResult<Option<Target>> {
+) -> CorgiResult<Option<Target>> {
     let inferred = inferred_lib(package_root);
     let lib = match toml_lib {
         Some(lib) => {
@@ -262,7 +262,7 @@ fn clean_bins(
     warnings: &mut Vec<String>,
     errors: &mut Vec<String>,
     has_lib: bool,
-) -> CargoResult<Vec<Target>> {
+) -> CorgiResult<Vec<Target>> {
     let inferred = inferred_bins(package_root, package_name);
 
     let bins = toml_targets_and_inferred(
@@ -382,7 +382,7 @@ fn clean_examples(
     autodiscover: Option<bool>,
     warnings: &mut Vec<String>,
     errors: &mut Vec<String>,
-) -> CargoResult<Vec<Target>> {
+) -> CorgiResult<Vec<Target>> {
     let inferred = infer_from_directory(&package_root.join(DEFAULT_EXAMPLE_DIR_NAME));
 
     let targets = clean_targets(
@@ -427,7 +427,7 @@ fn clean_tests(
     autodiscover: Option<bool>,
     warnings: &mut Vec<String>,
     errors: &mut Vec<String>,
-) -> CargoResult<Vec<Target>> {
+) -> CorgiResult<Vec<Target>> {
     let inferred = infer_from_directory(&package_root.join(DEFAULT_TEST_DIR_NAME));
 
     let targets = clean_targets(
@@ -460,7 +460,7 @@ fn clean_benches(
     autodiscover: Option<bool>,
     warnings: &mut Vec<String>,
     errors: &mut Vec<String>,
-) -> CargoResult<Vec<Target>> {
+) -> CorgiResult<Vec<Target>> {
     let mut legacy_warnings = vec![];
 
     let targets = {
@@ -519,7 +519,7 @@ fn clean_targets(
     warnings: &mut Vec<String>,
     errors: &mut Vec<String>,
     autodiscover_flag_name: &str,
-) -> CargoResult<Vec<(PathBuf, TomlTarget)>> {
+) -> CorgiResult<Vec<(PathBuf, TomlTarget)>> {
     clean_targets_with_legacy_path(
         target_kind_human,
         target_kind,
@@ -547,7 +547,7 @@ fn clean_targets_with_legacy_path(
     errors: &mut Vec<String>,
     legacy_path: &mut dyn FnMut(&TomlTarget) -> Option<PathBuf>,
     autodiscover_flag_name: &str,
-) -> CargoResult<Vec<(PathBuf, TomlTarget)>> {
+) -> CorgiResult<Vec<(PathBuf, TomlTarget)>> {
     let toml_targets = toml_targets_and_inferred(
         toml_targets,
         inferred,
@@ -759,7 +759,7 @@ fn validate_target_name(
     target_kind_human: &str,
     target_kind: &str,
     warnings: &mut Vec<String>,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     match target.name {
         Some(ref name) => {
             if name.trim().is_empty() {
@@ -784,7 +784,7 @@ fn validate_target_name(
 }
 
 /// Will check a list of toml targets, and make sure the target names are unique within a vector.
-fn validate_unique_names(targets: &[TomlTarget], target_kind: &str) -> CargoResult<()> {
+fn validate_unique_names(targets: &[TomlTarget], target_kind: &str) -> CorgiResult<()> {
     let mut seen = HashSet::new();
     for name in targets.iter().map(|e| e.name()) {
         if !seen.insert(name.clone()) {
@@ -799,7 +799,7 @@ fn validate_unique_names(targets: &[TomlTarget], target_kind: &str) -> CargoResu
     Ok(())
 }
 
-fn configure(toml: &TomlTarget, target: &mut Target) -> CargoResult<()> {
+fn configure(toml: &TomlTarget, target: &mut Target) -> CorgiResult<()> {
     let t2 = target.clone();
     target
         .set_tested(toml.test.unwrap_or_else(|| t2.tested()))

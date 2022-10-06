@@ -6,7 +6,7 @@ use std::task::Poll;
 use crate::core::source::MaybePackage;
 use crate::core::{Dependency, Package, PackageId, QueryKind, Source, SourceId, Summary};
 use crate::sources::PathSource;
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::Config;
 
 use anyhow::Context as _;
@@ -51,7 +51,7 @@ impl<'cfg> Source for DirectorySource<'cfg> {
         dep: &Dependency,
         kind: QueryKind,
         f: &mut dyn FnMut(Summary),
-    ) -> Poll<CargoResult<()>> {
+    ) -> Poll<CorgiResult<()>> {
         if !self.updated {
             return Poll::Pending;
         }
@@ -78,7 +78,7 @@ impl<'cfg> Source for DirectorySource<'cfg> {
         self.source_id
     }
 
-    fn block_until_ready(&mut self) -> CargoResult<()> {
+    fn block_until_ready(&mut self) -> CorgiResult<()> {
         if self.updated {
             return Ok(());
         }
@@ -156,7 +156,7 @@ impl<'cfg> Source for DirectorySource<'cfg> {
         Ok(())
     }
 
-    fn download(&mut self, id: PackageId) -> CargoResult<MaybePackage> {
+    fn download(&mut self, id: PackageId) -> CorgiResult<MaybePackage> {
         self.packages
             .get(&id)
             .map(|p| &p.0)
@@ -165,15 +165,15 @@ impl<'cfg> Source for DirectorySource<'cfg> {
             .ok_or_else(|| anyhow::format_err!("failed to find package with id: {}", id))
     }
 
-    fn finish_download(&mut self, _id: PackageId, _data: Vec<u8>) -> CargoResult<Package> {
+    fn finish_download(&mut self, _id: PackageId, _data: Vec<u8>) -> CorgiResult<Package> {
         panic!("no downloads to do")
     }
 
-    fn fingerprint(&self, pkg: &Package) -> CargoResult<String> {
+    fn fingerprint(&self, pkg: &Package) -> CorgiResult<String> {
         Ok(pkg.package_id().version().to_string())
     }
 
-    fn verify(&self, id: PackageId) -> CargoResult<()> {
+    fn verify(&self, id: PackageId) -> CorgiResult<()> {
         let (pkg, cksum) = match self.packages.get(&id) {
             Some(&(ref pkg, ref cksum)) => (pkg, cksum),
             None => anyhow::bail!("failed to find entry for `{}` in directory source", id),
@@ -212,7 +212,7 @@ impl<'cfg> Source for DirectorySource<'cfg> {
 
     fn add_to_yanked_whitelist(&mut self, _pkgs: &[PackageId]) {}
 
-    fn is_yanked(&mut self, _pkg: PackageId) -> Poll<CargoResult<bool>> {
+    fn is_yanked(&mut self, _pkg: PackageId) -> Poll<CorgiResult<bool>> {
         Poll::Ready(Ok(false))
     }
 

@@ -1,5 +1,5 @@
 use crate::core::Target;
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::interning::InternedString;
 use crate::util::{Config, StableHasher};
 use anyhow::Context as _;
@@ -51,14 +51,14 @@ impl CompileKind {
     pub fn from_requested_targets(
         config: &Config,
         targets: &[String],
-    ) -> CargoResult<Vec<CompileKind>> {
+    ) -> CorgiResult<Vec<CompileKind>> {
         let dedup = |targets: &[String]| {
             Ok(targets
                 .iter()
                 .map(|value| Ok(CompileKind::Target(CompileTarget::new(value)?)))
                 // First collect into a set to deduplicate any `--target` passed
                 // more than once...
-                .collect::<CargoResult<BTreeSet<_>>>()?
+                .collect::<CorgiResult<BTreeSet<_>>>()?
                 // ... then generate a flat list for everything else to use.
                 .into_iter()
                 .collect())
@@ -124,7 +124,7 @@ pub struct CompileTarget {
 }
 
 impl CompileTarget {
-    pub fn new(name: &str) -> CargoResult<CompileTarget> {
+    pub fn new(name: &str) -> CorgiResult<CompileTarget> {
         let name = name.trim();
         if name.is_empty() {
             anyhow::bail!("target was empty");

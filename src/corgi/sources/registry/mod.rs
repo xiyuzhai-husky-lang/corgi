@@ -183,7 +183,7 @@ use crate::util::interning::InternedString;
 use crate::util::into_url::IntoUrl;
 use crate::util::network::PollExt;
 use crate::util::{
-    restricted_names, CargoResult, Config, Filesystem, LimitErrorReader, OptVersionReq,
+    restricted_names, Config, CorgiResult, Filesystem, LimitErrorReader, OptVersionReq,
 };
 
 const PACKAGE_SOURCE_LOCK: &str = ".cargo-ok";
@@ -355,7 +355,7 @@ struct RegistryDependency<'a> {
 
 impl<'a> RegistryDependency<'a> {
     /// Converts an encoded dependency in the registry to a cargo dependency
-    pub fn into_dep(self, default: SourceId) -> CargoResult<Dependency> {
+    pub fn into_dep(self, default: SourceId) -> CorgiResult<Dependency> {
         let RegistryDependency {
             name,
             req,
@@ -440,7 +440,7 @@ pub trait RegistryData {
     ///
     /// This should be safe to call multiple times, the implementation is
     /// expected to not do any work if it is already prepared.
-    fn prepare(&self) -> CargoResult<()>;
+    fn prepare(&self) -> CorgiResult<()>;
 
     /// Returns the path to the index.
     ///
@@ -458,12 +458,12 @@ pub trait RegistryData {
         root: &Path,
         path: &Path,
         index_version: Option<&str>,
-    ) -> Poll<CargoResult<LoadResponse>>;
+    ) -> Poll<CorgiResult<LoadResponse>>;
 
     /// Loads the `config.json` file and returns it.
     ///
     /// Local registries don't have a config, and return `None`.
-    fn config(&mut self) -> Poll<CargoResult<Option<RegistryConfig>>>;
+    fn config(&mut self) -> Poll<CorgiResult<Option<RegistryConfig>>>;
 
     /// Invalidates locally cached data.
     fn invalidate_cache(&mut self);
@@ -486,7 +486,7 @@ pub trait RegistryData {
     /// `finish_download`. For already downloaded `.crate` files, it does not
     /// validate the checksum, assuming the filesystem does not suffer from
     /// corruption or manipulation.
-    fn download(&mut self, pkg: PackageId, checksum: &str) -> CargoResult<MaybeLock>;
+    fn download(&mut self, pkg: PackageId, checksum: &str) -> CorgiResult<MaybeLock>;
 
     /// Finish a download by saving a `.crate` file to disk.
     ///
@@ -497,7 +497,7 @@ pub trait RegistryData {
     ///
     /// Returns a [`File`] handle to the `.crate` file, positioned at the start.
     fn finish_download(&mut self, pkg: PackageId, checksum: &str, data: &[u8])
-        -> CargoResult<File>;
+        -> CorgiResult<File>;
 
     /// Returns whether or not the `.crate` file is already downloaded.
     fn is_crate_downloaded(&self, _pkg: PackageId) -> bool {
@@ -514,7 +514,7 @@ pub trait RegistryData {
     fn assert_index_locked<'a>(&self, path: &'a Filesystem) -> &'a Path;
 
     /// Block until all outstanding Poll::Pending requests are Poll::Ready.
-    fn block_until_ready(&mut self) -> CargoResult<()>;
+    fn block_until_ready(&mut self) -> CorgiResult<()>;
 }
 
 /// The status of [`RegistryData::download`] which indicates if a `.crate`
@@ -547,7 +547,7 @@ impl<'cfg> RegistrySource<'cfg> {
         source_id: SourceId,
         yanked_whitelist: &HashSet<PackageId>,
         config: &'cfg Config,
-    ) -> CargoResult<RegistrySource<'cfg>> {
+    ) -> CorgiResult<RegistrySource<'cfg>> {
         let name = short_name(source_id);
         let ops = if source_id.url().scheme().starts_with("sparse+") {
             Box::new(http_remote::HttpRegistry::new(source_id, config, &name)?) as Box<_>
@@ -595,7 +595,7 @@ impl<'cfg> RegistrySource<'cfg> {
     /// Decode the configuration stored within the registry.
     ///
     /// This requires that the index has been at least checked out.
-    pub fn config(&mut self) -> Poll<CargoResult<Option<RegistryConfig>>> {
+    pub fn config(&mut self) -> Poll<CorgiResult<Option<RegistryConfig>>> {
         self.ops.config()
     }
 
@@ -603,7 +603,7 @@ impl<'cfg> RegistrySource<'cfg> {
     /// compiled.
     ///
     /// No action is taken if the source looks like it's already unpacked.
-    fn unpack_package(&self, pkg: PackageId, tarball: &File) -> CargoResult<PathBuf> {
+    fn unpack_package(&self, pkg: PackageId, tarball: &File) -> CorgiResult<PathBuf> {
         // The `.cargo-ok` file is used to track if the source is already
         // unpacked.
         let package_dir = format!("{}-{}", pkg.name(), pkg.version());
@@ -678,7 +678,7 @@ impl<'cfg> RegistrySource<'cfg> {
         Ok(unpack_dir.to_path_buf())
     }
 
-    fn get_pkg(&mut self, package: PackageId, path: &File) -> CargoResult<Package> {
+    fn get_pkg(&mut self, package: PackageId, path: &File) -> CorgiResult<Package> {
         let path = self
             .unpack_package(package, path)
             .with_context(|| format!("failed to unpack package `{}`", package))?;
@@ -715,7 +715,7 @@ impl<'cfg> Source for RegistrySource<'cfg> {
         dep: &Dependency,
         kind: QueryKind,
         f: &mut dyn FnMut(Summary),
-    ) -> Poll<CargoResult<()>> {
+    ) -> Poll<CorgiResult<()>> {
         // If this is a precise dependency, then it came from a lock file and in
         // theory the registry is known to contain this version. If, however, we
         // come back with no summaries, then our registry may need to be
@@ -773,7 +773,7 @@ impl<'cfg> Source for RegistrySource<'cfg> {
         self.ops.invalidate_cache();
     }
 
-    fn download(&mut self, package: PackageId) -> CargoResult<MaybePackage> {
+    fn download(&mut self, package: PackageId) -> CorgiResult<MaybePackage> {
         let hash = loop {
             match self.index.hash(package, &mut *self.ops)? {
                 Poll::Pending => self.block_until_ready()?,
@@ -788,7 +788,7 @@ impl<'cfg> Source for RegistrySource<'cfg> {
         }
     }
 
-    fn finish_download(&mut self, package: PackageId, data: Vec<u8>) -> CargoResult<Package> {
+    fn finish_download(&mut self, package: PackageId, data: Vec<u8>) -> CorgiResult<Package> {
         let hash = loop {
             match self.index.hash(package, &mut *self.ops)? {
                 Poll::Pending => self.block_until_ready()?,
@@ -799,7 +799,7 @@ impl<'cfg> Source for RegistrySource<'cfg> {
         self.get_pkg(package, &file)
     }
 
-    fn fingerprint(&self, pkg: &Package) -> CargoResult<String> {
+    fn fingerprint(&self, pkg: &Package) -> CorgiResult<String> {
         Ok(pkg.package_id().version().to_string())
     }
 
@@ -811,11 +811,11 @@ impl<'cfg> Source for RegistrySource<'cfg> {
         self.yanked_whitelist.extend(pkgs);
     }
 
-    fn is_yanked(&mut self, pkg: PackageId) -> Poll<CargoResult<bool>> {
+    fn is_yanked(&mut self, pkg: PackageId) -> Poll<CorgiResult<bool>> {
         self.index.is_yanked(pkg, &mut *self.ops)
     }
 
-    fn block_until_ready(&mut self) -> CargoResult<()> {
+    fn block_until_ready(&mut self) -> CorgiResult<()> {
         // Before starting to work on the registry, make sure that
         // `<cargo_home>/registry` is marked as excluded from indexing and
         // backups. Older versions of Cargo didn't do this, so we do it here

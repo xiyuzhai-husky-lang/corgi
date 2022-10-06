@@ -10,7 +10,7 @@ use std::{cmp, env};
 
 use anyhow::{bail, format_err, Context as _};
 use cargo_util::paths;
-use crates_io::{self, NewCrate, NewCrateDependency, Registry};
+use crates_io::{self, NewCrateDependency, NewPackage, Registry};
 use curl::easy::{Easy, InfoType, SslOpt, SslVersion};
 use log::{log, Level};
 use percent_encoding::{percent_encode, NON_ALPHANUMERIC};
@@ -26,7 +26,7 @@ use crate::ops;
 use crate::ops::Packages;
 use crate::sources::{RegistrySource, SourceConfigMap, CRATES_IO_DOMAIN, CRATES_IO_REGISTRY};
 use crate::util::config::{self, Config, SslVersionConfig, SslVersionConfigRange};
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::important_paths::find_root_manifest_for_wd;
 use crate::util::IntoUrl;
 use crate::{drop_print, drop_println, version};
@@ -89,7 +89,7 @@ pub struct PublishOpts<'cfg> {
     pub cli_features: CliFeatures,
 }
 
-pub fn publish(ws: &Workspace<'_>, opts: &PublishOpts<'_>) -> CargoResult<()> {
+pub fn publish(ws: &Workspace<'_>, opts: &PublishOpts<'_>) -> CorgiResult<()> {
     let specs = opts.to_publish.to_package_id_specs(ws)?;
     if specs.len() > 1 {
         bail!("the `-p` argument must be specified to select a single package to publish")
@@ -191,7 +191,7 @@ fn verify_dependencies(
     pkg: &Package,
     registry: &Registry,
     registry_src: SourceId,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     for dep in pkg.dependencies().iter() {
         if super::check_dep_has_version(dep, true)? {
             continue;
@@ -229,7 +229,7 @@ fn transmit(
     registry: &mut Registry,
     registry_id: SourceId,
     dry_run: bool,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let deps = pkg
         .dependencies()
         .iter()
@@ -269,7 +269,7 @@ fn transmit(
                 explicit_name_in_toml: dep.explicit_name_in_toml().map(|s| s.to_string()),
             })
         })
-        .collect::<CargoResult<Vec<NewCrateDependency>>>()?;
+        .collect::<CorgiResult<Vec<NewCrateDependency>>>()?;
     let manifest = pkg.manifest();
     let ManifestMetadata {
         ref authors,
@@ -319,7 +319,7 @@ fn transmit(
 
     let warnings = registry
         .publish(
-            &NewCrate {
+            &NewPackage {
                 name: pkg.name().to_string(),
                 vers: pkg.version().to_string(),
                 deps,
@@ -381,7 +381,7 @@ fn transmit(
 pub fn registry_configuration(
     config: &Config,
     registry: Option<&str>,
-) -> CargoResult<RegistryConfig> {
+) -> CorgiResult<RegistryConfig> {
     let err_both = |token_key: &str, proc_key: &str| {
         Err(format_err!(
             "both `{token_key}` and `{proc_key}` \
@@ -458,7 +458,7 @@ fn registry(
     registry: Option<&str>,
     force_update: bool,
     validate_token: bool,
-) -> CargoResult<(Registry, RegistryConfig, SourceId)> {
+) -> CorgiResult<(Registry, RegistryConfig, SourceId)> {
     if index.is_some() && registry.is_some() {
         // Otherwise we would silently ignore one or the other.
         bail!("both `--index` and `--registry` should not be set at the same time");
@@ -542,13 +542,13 @@ fn registry(
 }
 
 /// Creates a new HTTP handle with appropriate global configuration for cargo.
-pub fn http_handle(config: &Config) -> CargoResult<Easy> {
+pub fn http_handle(config: &Config) -> CorgiResult<Easy> {
     let (mut handle, timeout) = http_handle_and_timeout(config)?;
     timeout.configure(&mut handle)?;
     Ok(handle)
 }
 
-pub fn http_handle_and_timeout(config: &Config) -> CargoResult<(Easy, HttpTimeout)> {
+pub fn http_handle_and_timeout(config: &Config) -> CorgiResult<(Easy, HttpTimeout)> {
     if config.frozen() {
         bail!(
             "attempting to make an HTTP request, but --frozen was \
@@ -571,14 +571,14 @@ pub fn http_handle_and_timeout(config: &Config) -> CargoResult<(Easy, HttpTimeou
     Ok((handle, timeout))
 }
 
-pub fn needs_custom_http_transport(config: &Config) -> CargoResult<bool> {
+pub fn needs_custom_http_transport(config: &Config) -> CorgiResult<bool> {
     Ok(http_proxy_exists(config)?
         || *config.http_config()? != Default::default()
         || env::var_os("HTTP_TIMEOUT").is_some())
 }
 
 /// Configure a libcurl http handle with the defaults options for Cargo
-pub fn configure_http_handle(config: &Config, handle: &mut Easy) -> CargoResult<HttpTimeout> {
+pub fn configure_http_handle(config: &Config, handle: &mut Easy) -> CorgiResult<HttpTimeout> {
     let http = config.http_config()?;
     if let Some(proxy) = http_proxy(config)? {
         handle.proxy(&proxy)?;
@@ -597,7 +597,7 @@ pub fn configure_http_handle(config: &Config, handle: &mut Easy) -> CargoResult<
         handle.useragent(&format!("cargo {}", version()))?;
     }
 
-    fn to_ssl_version(s: &str) -> CargoResult<SslVersion> {
+    fn to_ssl_version(s: &str) -> CorgiResult<SslVersion> {
         let version = match s {
             "default" => SslVersion::Default,
             "tlsv1" => SslVersion::Tlsv1,
@@ -677,7 +677,7 @@ pub struct HttpTimeout {
 }
 
 impl HttpTimeout {
-    pub fn new(config: &Config) -> CargoResult<HttpTimeout> {
+    pub fn new(config: &Config) -> CorgiResult<HttpTimeout> {
         let config = config.http_config()?;
         let low_speed_limit = config.low_speed_limit.unwrap_or(10);
         let seconds = config
@@ -690,7 +690,7 @@ impl HttpTimeout {
         })
     }
 
-    pub fn configure(&self, handle: &mut Easy) -> CargoResult<()> {
+    pub fn configure(&self, handle: &mut Easy) -> CorgiResult<()> {
         // The timeout option for libcurl by default times out the entire
         // transfer, but we probably don't want this. Instead we only set
         // timeouts for the connect phase as well as a "low speed" timeout so
@@ -707,7 +707,7 @@ impl HttpTimeout {
 ///
 /// Favor cargo's `http.proxy`, then git's `http.proxy`. Proxies specified
 /// via environment variables are picked up by libcurl.
-fn http_proxy(config: &Config) -> CargoResult<Option<String>> {
+fn http_proxy(config: &Config) -> CorgiResult<Option<String>> {
     let http = config.http_config()?;
     if let Some(s) = &http.proxy {
         return Ok(Some(s.clone()));
@@ -730,7 +730,7 @@ fn http_proxy(config: &Config) -> CargoResult<Option<String>> {
 /// * `HTTP_PROXY` env var
 /// * `https_proxy` env var
 /// * `HTTPS_PROXY` env var
-fn http_proxy_exists(config: &Config) -> CargoResult<bool> {
+fn http_proxy_exists(config: &Config) -> CorgiResult<bool> {
     if http_proxy(config)?.is_some() {
         Ok(true)
     } else {
@@ -744,7 +744,7 @@ pub fn registry_login(
     config: &Config,
     token: Option<String>,
     reg: Option<String>,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let (registry, reg_cfg, _) =
         registry(config, token.clone(), None, reg.as_deref(), false, false)?;
 
@@ -793,7 +793,7 @@ pub fn registry_login(
     Ok(())
 }
 
-pub fn registry_logout(config: &Config, reg: Option<String>) -> CargoResult<()> {
+pub fn registry_logout(config: &Config, reg: Option<String>) -> CorgiResult<()> {
     let (registry, reg_cfg, _) = registry(config, None, None, reg.as_deref(), false, false)?;
     let reg_name = reg.as_deref().unwrap_or(CRATES_IO_DOMAIN);
     if reg_cfg.is_none() {
@@ -829,7 +829,7 @@ pub struct OwnersOptions {
     pub registry: Option<String>,
 }
 
-pub fn modify_owners(config: &Config, opts: &OwnersOptions) -> CargoResult<()> {
+pub fn modify_owners(config: &Config, opts: &OwnersOptions) -> CorgiResult<()> {
     let name = match opts.krate {
         Some(ref name) => name.clone(),
         None => {
@@ -904,7 +904,7 @@ pub fn yank(
     index: Option<String>,
     undo: bool,
     reg: Option<String>,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let name = match krate {
         Some(name) => name,
         None => {
@@ -944,7 +944,7 @@ pub fn yank(
 ///
 /// The `index` and `reg` values are from the command-line or config settings.
 /// If both are None, returns the source for crates.io.
-fn get_source_id(config: &Config, index: Option<&str>, reg: Option<&str>) -> CargoResult<SourceId> {
+fn get_source_id(config: &Config, index: Option<&str>, reg: Option<&str>) -> CorgiResult<SourceId> {
     match (reg, index) {
         (Some(r), _) => SourceId::alt_registry(config, r),
         (_, Some(i)) => SourceId::for_registry(&i.into_url()?),
@@ -962,7 +962,7 @@ pub fn search(
     index: Option<String>,
     limit: u32,
     reg: Option<String>,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     fn truncate_with_ellipsis(s: &str, max_width: usize) -> String {
         // We should truncate at grapheme-boundary and compute character-widths,
         // yet the dependencies on unicode-segmentation and unicode-width are

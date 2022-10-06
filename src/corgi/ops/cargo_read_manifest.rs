@@ -4,7 +4,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 
 use crate::core::{EitherManifest, Package, PackageId, SourceId};
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::important_paths::find_project_manifest_exact;
 use crate::util::toml::read_manifest;
 use crate::util::Config;
@@ -15,7 +15,7 @@ pub fn read_package(
     path: &Path,
     source_id: SourceId,
     config: &Config,
-) -> CargoResult<(Package, Vec<PathBuf>)> {
+) -> CorgiResult<(Package, Vec<PathBuf>)> {
     trace!(
         "read_package; path={}; source-id={}",
         path.display(),
@@ -38,7 +38,7 @@ pub fn read_packages(
     path: &Path,
     source_id: SourceId,
     config: &Config,
-) -> CargoResult<Vec<Package>> {
+) -> CorgiResult<Vec<Package>> {
     let mut all_packages = HashMap::new();
     let mut visited = HashSet::<PathBuf>::new();
     let mut errors = Vec::<anyhow::Error>::new();
@@ -107,7 +107,7 @@ pub fn read_packages(
     }
 }
 
-fn walk(path: &Path, callback: &mut dyn FnMut(&Path) -> CargoResult<bool>) -> CargoResult<()> {
+fn walk(path: &Path, callback: &mut dyn FnMut(&Path) -> CorgiResult<bool>) -> CorgiResult<()> {
     if !callback(path)? {
         trace!("not processing {}", path.display());
         return Ok(());
@@ -144,7 +144,7 @@ fn read_nested_packages(
     config: &Config,
     visited: &mut HashSet<PathBuf>,
     errors: &mut Vec<anyhow::Error>,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     if !visited.insert(path.to_path_buf()) {
         return Ok(());
     }

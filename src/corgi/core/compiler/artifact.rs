@@ -2,7 +2,7 @@
 use crate::core::compiler::unit_graph::UnitDep;
 use crate::core::compiler::{Context, CrateType, FileFlavor, Unit};
 use crate::core::TargetKind;
-use crate::CargoResult;
+use crate::CorgiResult;
 use std::collections::HashMap;
 use std::ffi::OsString;
 
@@ -11,7 +11,7 @@ use std::ffi::OsString;
 pub fn get_env(
     cx: &Context<'_, '_>,
     dependencies: &[UnitDep],
-) -> CargoResult<HashMap<String, OsString>> {
+) -> CorgiResult<HashMap<String, OsString>> {
     let mut env = HashMap::new();
     for unit_dep in dependencies.iter().filter(|d| d.unit.artifact.is_true()) {
         for artifact_path in cx

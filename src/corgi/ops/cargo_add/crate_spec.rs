@@ -5,7 +5,7 @@ use anyhow::Context as _;
 use super::Dependency;
 use crate::util::toml_mut::dependency::RegistrySource;
 use crate::util::validate_package_name;
-use crate::CargoResult;
+use crate::CorgiResult;
 
 /// User-specified crate
 ///
@@ -23,7 +23,7 @@ pub struct CrateSpec {
 
 impl CrateSpec {
     /// Convert a string to a `Crate`
-    pub fn resolve(pkg_id: &str) -> CargoResult<Self> {
+    pub fn resolve(pkg_id: &str) -> CorgiResult<Self> {
         let (name, version) = pkg_id
             .split_once('@')
             .map(|(n, v)| (n, Some(v)))
@@ -45,7 +45,7 @@ impl CrateSpec {
     }
 
     /// Generate a dependency entry for this crate specifier
-    pub fn to_dependency(&self) -> CargoResult<Dependency> {
+    pub fn to_dependency(&self) -> CorgiResult<Dependency> {
         let mut dep = Dependency::new(self.name());
         if let Some(version_req) = self.version_req() {
             dep = dep.set_source(RegistrySource::new(version_req));

@@ -36,7 +36,7 @@ use crate::core::resolver::types::FeaturesSet;
 use crate::core::resolver::{Resolve, ResolveBehavior};
 use crate::core::{FeatureValue, PackageId, PackageIdSpec, PackageSet, Workspace};
 use crate::util::interning::InternedString;
-use crate::util::CargoResult;
+use crate::util::CorgiResult;
 use anyhow::bail;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::rc::Rc;
@@ -165,7 +165,7 @@ impl FeatureOpts {
         ws: &Workspace<'_>,
         has_dev_units: HasDevUnits,
         force_all_targets: ForceAllTargets,
-    ) -> CargoResult<FeatureOpts> {
+    ) -> CorgiResult<FeatureOpts> {
         let mut opts = FeatureOpts::default();
         let unstable_flags = ws.config().cli_unstable();
         let mut enable = |feat_opts: &Vec<String>| {
@@ -259,7 +259,7 @@ impl CliFeatures {
         features: &[String],
         all_features: bool,
         uses_default_features: bool,
-    ) -> CargoResult<CliFeatures> {
+    ) -> CorgiResult<CliFeatures> {
         let features = Rc::new(CliFeatures::split_features(features));
         // Some early validation to ensure correct syntax.
         for feature in features.iter() {
@@ -350,7 +350,7 @@ impl ResolvedFeatures {
         &self,
         pkg_id: PackageId,
         features_for: FeaturesFor,
-    ) -> CargoResult<Vec<InternedString>> {
+    ) -> CorgiResult<Vec<InternedString>> {
         let fk = features_for.apply_opts(&self.opts);
         if let Some(fs) = self.activated_features.get(&(pkg_id, fk)) {
             Ok(fs.iter().cloned().collect())
@@ -442,7 +442,7 @@ impl<'a, 'cfg> FeatureResolver<'a, 'cfg> {
         specs: &[PackageIdSpec],
         requested_targets: &[CompileKind],
         opts: FeatureOpts,
-    ) -> CargoResult<ResolvedFeatures> {
+    ) -> CorgiResult<ResolvedFeatures> {
         use crate::util::profile;
         let _p = profile::start("resolve features");
         let track_for_host = opts.decouple_host_deps || opts.ignore_inactive_targets;
@@ -476,7 +476,7 @@ impl<'a, 'cfg> FeatureResolver<'a, 'cfg> {
         &mut self,
         specs: &[PackageIdSpec],
         cli_features: &CliFeatures,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         let member_features = self.ws.members_with_features(specs, cli_features)?;
         for (member, cli_features) in &member_features {
             let fvs = self.fvs_from_requested(member.package_id(), cli_features);
@@ -503,7 +503,7 @@ impl<'a, 'cfg> FeatureResolver<'a, 'cfg> {
         pkg_id: PackageId,
         fk: FeaturesFor,
         fvs: &[FeatureValue],
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         log::trace!("activate_pkg {} {}", pkg_id.name(), fk);
         // Add an empty entry to ensure everything is covered. This is intended for
         // finding bugs where the resolver missed something it should have visited.
@@ -551,7 +551,7 @@ impl<'a, 'cfg> FeatureResolver<'a, 'cfg> {
         pkg_id: PackageId,
         fk: FeaturesFor,
         fv: &FeatureValue,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         log::trace!("activate_fv {} {} {}", pkg_id.name(), fk, fv);
         match fv {
             FeatureValue::Feature(f) => {
@@ -578,7 +578,7 @@ impl<'a, 'cfg> FeatureResolver<'a, 'cfg> {
         pkg_id: PackageId,
         fk: FeaturesFor,
         feature_to_enable: InternedString,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         log::trace!(
             "activate_rec {} {} feat={}",
             pkg_id.name(),
@@ -621,7 +621,7 @@ impl<'a, 'cfg> FeatureResolver<'a, 'cfg> {
         pkg_id: PackageId,
         fk: FeaturesFor,
         dep_name: InternedString,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         // Mark this dependency as activated.
         let save_decoupled = fk.apply_opts(&self.opts);
         self.activated_dependencies
@@ -666,7 +666,7 @@ impl<'a, 'cfg> FeatureResolver<'a, 'cfg> {
         dep_name: InternedString,
         dep_feature: InternedString,
         weak: bool,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         for (dep_pkg_id, deps) in self.deps(pkg_id, fk) {
             for (dep, dep_fk) in deps {
                 if dep.name_in_toml() != dep_name {

@@ -4,7 +4,7 @@ use std::task::{ready, Poll};
 use crate::core::PackageSet;
 use crate::core::{Dependency, PackageId, QueryKind, Source, SourceId, SourceMap, Summary};
 use crate::sources::config::SourceConfigMap;
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::interning::InternedString;
 use crate::util::{CanonicalUrl, Config};
 use anyhow::{bail, Context as _};
@@ -21,9 +21,9 @@ pub trait Registry {
         dep: &Dependency,
         kind: QueryKind,
         f: &mut dyn FnMut(Summary),
-    ) -> Poll<CargoResult<()>>;
+    ) -> Poll<CorgiResult<()>>;
 
-    fn query_vec(&mut self, dep: &Dependency, kind: QueryKind) -> Poll<CargoResult<Vec<Summary>>> {
+    fn query_vec(&mut self, dep: &Dependency, kind: QueryKind) -> Poll<CorgiResult<Vec<Summary>>> {
         let mut ret = Vec::new();
         self.query(dep, kind, &mut |s| ret.push(s)).map_ok(|()| ret)
     }
@@ -32,7 +32,7 @@ pub trait Registry {
     fn is_replaced(&self, source: SourceId) -> bool;
 
     /// Block until all outstanding Poll::Pending requests are Poll::Ready.
-    fn block_until_ready(&mut self) -> CargoResult<()>;
+    fn block_until_ready(&mut self) -> CorgiResult<()>;
 }
 
 /// This structure represents a registry of known packages. It internally
@@ -125,7 +125,7 @@ pub struct LockedPatchDependency {
 }
 
 impl<'cfg> PackageRegistry<'cfg> {
-    pub fn new(config: &'cfg Config) -> CargoResult<PackageRegistry<'cfg>> {
+    pub fn new(config: &'cfg Config) -> CorgiResult<PackageRegistry<'cfg>> {
         let source_config = SourceConfigMap::new(config)?;
         Ok(PackageRegistry {
             config,
@@ -141,12 +141,12 @@ impl<'cfg> PackageRegistry<'cfg> {
         })
     }
 
-    pub fn get(self, package_ids: &[PackageId]) -> CargoResult<PackageSet<'cfg>> {
+    pub fn get(self, package_ids: &[PackageId]) -> CorgiResult<PackageSet<'cfg>> {
         trace!("getting packages; sources={}", self.sources.len());
         PackageSet::new(package_ids, self.sources, self.config)
     }
 
-    fn ensure_loaded(&mut self, namespace: SourceId, kind: Kind) -> CargoResult<()> {
+    fn ensure_loaded(&mut self, namespace: SourceId, kind: Kind) -> CorgiResult<()> {
         match self.source_ids.get(&namespace) {
             // We've previously loaded this source, and we've already locked it,
             // so we're not allowed to change it even if `namespace` has a
@@ -188,7 +188,7 @@ impl<'cfg> PackageRegistry<'cfg> {
         Ok(())
     }
 
-    pub fn add_sources(&mut self, ids: impl IntoIterator<Item = SourceId>) -> CargoResult<()> {
+    pub fn add_sources(&mut self, ids: impl IntoIterator<Item = SourceId>) -> CorgiResult<()> {
         for id in ids {
             self.ensure_loaded(id, Kind::Locked)?;
         }
@@ -264,7 +264,7 @@ impl<'cfg> PackageRegistry<'cfg> {
         &mut self,
         url: &Url,
         deps: &[(&Dependency, Option<LockedPatchDependency>)],
-    ) -> CargoResult<Vec<(Dependency, PackageId)>> {
+    ) -> CorgiResult<Vec<(Dependency, PackageId)>> {
         // NOTE: None of this code is aware of required features. If a patch
         // is missing a required feature, you end up with an "unused patch"
         // warning, which is very hard to understand. Ideally the warning
@@ -450,7 +450,7 @@ impl<'cfg> PackageRegistry<'cfg> {
         &self.patches
     }
 
-    fn load(&mut self, source_id: SourceId, kind: Kind) -> CargoResult<()> {
+    fn load(&mut self, source_id: SourceId, kind: Kind) -> CorgiResult<()> {
         debug!("loading source {}", source_id);
         let source = self
             .source_config
@@ -478,7 +478,7 @@ impl<'cfg> PackageRegistry<'cfg> {
         Ok(())
     }
 
-    fn query_overrides(&mut self, dep: &Dependency) -> Poll<CargoResult<Option<Summary>>> {
+    fn query_overrides(&mut self, dep: &Dependency) -> Poll<CorgiResult<Option<Summary>>> {
         for &s in self.overrides.iter() {
             let src = self.sources.get_mut(s).unwrap();
             let dep = Dependency::new_override(dep.package_name(), s);
@@ -516,7 +516,7 @@ impl<'cfg> PackageRegistry<'cfg> {
         &self,
         override_summary: &Summary,
         real_summary: &Summary,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         let mut real_deps = real_summary.dependencies().iter().collect::<Vec<_>>();
 
         let boilerplate = "\
@@ -573,7 +573,7 @@ impl<'cfg> Registry for PackageRegistry<'cfg> {
         dep: &Dependency,
         kind: QueryKind,
         f: &mut dyn FnMut(Summary),
-    ) -> Poll<CargoResult<()>> {
+    ) -> Poll<CorgiResult<()>> {
         assert!(self.patches_locked);
         let (override_summary, n, to_warn) = {
             // Look for an override and get ready to query the real source.
@@ -719,7 +719,7 @@ impl<'cfg> Registry for PackageRegistry<'cfg> {
         }
     }
 
-    fn block_until_ready(&mut self) -> CargoResult<()> {
+    fn block_until_ready(&mut self) -> CorgiResult<()> {
         for (source_id, source) in self.sources.sources_mut() {
             source
                 .block_until_ready()
@@ -843,7 +843,7 @@ fn summary_for_patch(
     locked: &Option<LockedPatchDependency>,
     mut summaries: Vec<Summary>,
     source: &mut dyn Source,
-) -> Poll<CargoResult<(Summary, Option<PackageId>)>> {
+) -> Poll<CorgiResult<(Summary, Option<PackageId>)>> {
     if summaries.len() == 1 {
         return Poll::Ready(Ok((summaries.pop().unwrap(), None)));
     }

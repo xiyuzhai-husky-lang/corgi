@@ -2,7 +2,7 @@ use crate::core::compiler::{CompileKind, CompileMode, Layout, RustcTargetData};
 use crate::core::profiles::Profiles;
 use crate::core::{PackageIdSpec, TargetKind, Workspace};
 use crate::ops;
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::interning::InternedString;
 use crate::util::lev_distance;
 use crate::util::{Config, Progress, ProgressStyle};
@@ -27,7 +27,7 @@ pub struct CleanOptions<'a> {
 }
 
 /// Cleans the package's build artifacts.
-pub fn clean(ws: &Workspace<'_>, opts: &CleanOptions<'_>) -> CargoResult<()> {
+pub fn clean(ws: &Workspace<'_>, opts: &CleanOptions<'_>) -> CorgiResult<()> {
     let mut target_dir = ws.target_dir();
     let config = ws.config();
 
@@ -72,7 +72,7 @@ pub fn clean(ws: &Workspace<'_>, opts: &CleanOptions<'_>) -> CargoResult<()> {
             },
             CompileKind::Host => None,
         })
-        .collect::<CargoResult<_>>()?;
+        .collect::<CorgiResult<_>>()?;
     // A Vec of layouts. This is a little convoluted because there can only be
     // one host_layout.
     let layouts = if opts.targets.is_empty() {
@@ -215,7 +215,7 @@ pub fn clean(ws: &Workspace<'_>, opts: &CleanOptions<'_>) -> CargoResult<()> {
     Ok(())
 }
 
-fn escape_glob_path(pattern: &Path) -> CargoResult<String> {
+fn escape_glob_path(pattern: &Path) -> CorgiResult<String> {
     let pattern = pattern
         .to_str()
         .ok_or_else(|| anyhow::anyhow!("expected utf-8 path"))?;
@@ -226,7 +226,7 @@ fn rm_rf_glob(
     pattern: &Path,
     config: &Config,
     progress: &mut dyn CleaningProgressBar,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     // TODO: Display utf8 warning to user?  Or switch to globset?
     let pattern = pattern
         .to_str()
@@ -237,7 +237,7 @@ fn rm_rf_glob(
     Ok(())
 }
 
-fn rm_rf(path: &Path, config: &Config, progress: &mut dyn CleaningProgressBar) -> CargoResult<()> {
+fn rm_rf(path: &Path, config: &Config, progress: &mut dyn CleaningProgressBar) -> CorgiResult<()> {
     if fs::symlink_metadata(path).is_err() {
         return Ok(());
     }
@@ -260,15 +260,15 @@ fn rm_rf(path: &Path, config: &Config, progress: &mut dyn CleaningProgressBar) -
     Ok(())
 }
 
-fn clean_entire_folder(path: &Path, config: &Config) -> CargoResult<()> {
+fn clean_entire_folder(path: &Path, config: &Config) -> CorgiResult<()> {
     let num_paths = walkdir::WalkDir::new(path).into_iter().count();
     let mut progress = CleaningFolderBar::new(config, num_paths);
     rm_rf(path, config, &mut progress)
 }
 
 trait CleaningProgressBar {
-    fn display_now(&mut self) -> CargoResult<()>;
-    fn on_clean(&mut self) -> CargoResult<()>;
+    fn display_now(&mut self) -> CorgiResult<()>;
+    fn on_clean(&mut self) -> CorgiResult<()>;
 }
 
 struct CleaningFolderBar<'cfg> {
@@ -292,11 +292,11 @@ impl<'cfg> CleaningFolderBar<'cfg> {
 }
 
 impl<'cfg> CleaningProgressBar for CleaningFolderBar<'cfg> {
-    fn display_now(&mut self) -> CargoResult<()> {
+    fn display_now(&mut self) -> CorgiResult<()> {
         self.bar.tick_now(self.cur_progress(), self.max, "")
     }
 
-    fn on_clean(&mut self) -> CargoResult<()> {
+    fn on_clean(&mut self) -> CorgiResult<()> {
         self.cur += 1;
         self.bar.tick(self.cur_progress(), self.max, "")
     }
@@ -321,7 +321,7 @@ impl<'cfg> CleaningPackagesBar<'cfg> {
         }
     }
 
-    fn on_cleaning_package(&mut self, package: &str) -> CargoResult<()> {
+    fn on_cleaning_package(&mut self, package: &str) -> CorgiResult<()> {
         self.cur += 1;
         self.package_being_cleaned = String::from(package);
         self.bar
@@ -341,12 +341,12 @@ impl<'cfg> CleaningPackagesBar<'cfg> {
 }
 
 impl<'cfg> CleaningProgressBar for CleaningPackagesBar<'cfg> {
-    fn display_now(&mut self) -> CargoResult<()> {
+    fn display_now(&mut self) -> CorgiResult<()> {
         self.bar
             .tick_now(self.cur_progress(), self.max, &self.format_message())
     }
 
-    fn on_clean(&mut self) -> CargoResult<()> {
+    fn on_clean(&mut self) -> CorgiResult<()> {
         self.bar
             .tick(self.cur_progress(), self.max, &self.format_message())?;
         self.num_files_folders_cleaned += 1;

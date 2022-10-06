@@ -34,8 +34,8 @@ use crate::util::toml_mut::dependency::Source;
 use crate::util::toml_mut::dependency::WorkspaceSource;
 use crate::util::toml_mut::manifest::DepTable;
 use crate::util::toml_mut::manifest::LocalManifest;
-use crate::CargoResult;
 use crate::Config;
+use crate::CorgiResult;
 use crate_spec::CrateSpec;
 
 /// Information on what dependencies should be added
@@ -54,7 +54,7 @@ pub struct AddOptions<'a> {
 }
 
 /// Add dependencies to a manifest
-pub fn add(workspace: &Workspace<'_>, options: &AddOptions<'_>) -> CargoResult<()> {
+pub fn add(workspace: &Workspace<'_>, options: &AddOptions<'_>) -> CorgiResult<()> {
     let dep_table = options
         .section
         .to_table()
@@ -91,7 +91,7 @@ pub fn add(workspace: &Workspace<'_>, options: &AddOptions<'_>) -> CargoResult<(
                     &mut registry,
                 )
             })
-            .collect::<CargoResult<Vec<_>>>()?
+            .collect::<CorgiResult<Vec<_>>>()?
     };
 
     let was_sorted = manifest
@@ -254,7 +254,7 @@ fn resolve_dependency(
     section: &DepTable,
     config: &Config,
     registry: &mut PackageRegistry<'_>,
-) -> CargoResult<DependencyUI> {
+) -> CorgiResult<DependencyUI> {
     let crate_spec = arg
         .crate_spec
         .as_deref()
@@ -421,7 +421,7 @@ fn resolve_dependency(
 ///  for currently. This is because `git` and its associated keys, `path`, and
 /// `version`  should all bee checked before this is called. `rename` is checked
 /// for as it turns into `package`
-fn check_invalid_ws_keys(toml_key: &str, arg: &DepOp) -> CargoResult<()> {
+fn check_invalid_ws_keys(toml_key: &str, arg: &DepOp) -> CorgiResult<()> {
     fn err_msg(toml_key: &str, flag: &str, field: &str) -> String {
         format!(
             "cannot override workspace dependency with `{flag}`, \
@@ -454,7 +454,7 @@ fn get_existing_dependency(
     manifest: &LocalManifest,
     dep_key: &str,
     section: &DepTable,
-) -> CargoResult<Option<Dependency>> {
+) -> CorgiResult<Option<Dependency>> {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
     enum Key {
         Error,
@@ -515,7 +515,7 @@ fn get_latest_dependency(
     _flag_allow_prerelease: bool,
     config: &Config,
     registry: &mut PackageRegistry<'_>,
-) -> CargoResult<Dependency> {
+) -> CorgiResult<Dependency> {
     let query = dependency.query(config)?;
     match query {
         MaybeWorkspace::Workspace(_) => {
@@ -556,7 +556,7 @@ fn select_package(
     dependency: &Dependency,
     config: &Config,
     registry: &mut PackageRegistry<'_>,
-) -> CargoResult<Dependency> {
+) -> CorgiResult<Dependency> {
     let query = dependency.query(config)?;
     match query {
         MaybeWorkspace::Workspace(_) => {
@@ -599,7 +599,7 @@ fn select_package(
     }
 }
 
-fn infer_package(mut packages: Vec<Package>, src: &dyn std::fmt::Display) -> CargoResult<Package> {
+fn infer_package(mut packages: Vec<Package>, src: &dyn std::fmt::Display) -> CorgiResult<Package> {
     let package = match packages.len() {
         0 => {
             anyhow::bail!("no packages found at `{src}`");
@@ -754,7 +754,7 @@ fn populate_available_features(
     dependency: Dependency,
     query: &crate::core::dependency::Dependency,
     registry: &mut PackageRegistry<'_>,
-) -> CargoResult<DependencyUI> {
+) -> CorgiResult<DependencyUI> {
     let mut dependency = DependencyUI::new(dependency);
 
     if !dependency.available_features.is_empty() {
@@ -787,7 +787,7 @@ fn populate_available_features(
     Ok(dependency)
 }
 
-fn print_action_msg(shell: &mut Shell, dep: &DependencyUI, section: &[String]) -> CargoResult<()> {
+fn print_action_msg(shell: &mut Shell, dep: &DependencyUI, section: &[String]) -> CorgiResult<()> {
     if matches!(shell.verbosity(), crate::core::shell::Verbosity::Quiet) {
         return Ok(());
     }
@@ -827,7 +827,7 @@ fn print_action_msg(shell: &mut Shell, dep: &DependencyUI, section: &[String]) -
     shell.status("Adding", message)
 }
 
-fn print_dep_table_msg(shell: &mut Shell, dep: &DependencyUI) -> CargoResult<()> {
+fn print_dep_table_msg(shell: &mut Shell, dep: &DependencyUI) -> CorgiResult<()> {
     if matches!(shell.verbosity(), crate::core::shell::Verbosity::Quiet) {
         return Ok(());
     }
@@ -888,7 +888,7 @@ fn is_sorted(mut it: impl Iterator<Item = impl PartialOrd>) -> bool {
     true
 }
 
-fn find_workspace_dep(toml_key: &str, root_manifest: &Path) -> CargoResult<Dependency> {
+fn find_workspace_dep(toml_key: &str, root_manifest: &Path) -> CorgiResult<Dependency> {
     let manifest = LocalManifest::try_new(root_manifest)?;
     let manifest = manifest
         .data

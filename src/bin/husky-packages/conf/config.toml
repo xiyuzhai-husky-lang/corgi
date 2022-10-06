@@ -3,6 +3,6 @@ port = 3000
 log_level = "info"
 
 index_url = "https://github.com/ancient-software/husky-packages.io.git"
-local = "index"
+local_repo = "index"
 
 packages_dir = "packages"

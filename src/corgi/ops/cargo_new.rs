@@ -1,5 +1,5 @@
 use crate::core::{Edition, Shell, Workspace};
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::{existing_vcs_repo, FossilRepo, GitRepo, HgRepo, PijulRepo};
 use crate::util::{restricted_names, Config};
 use anyhow::Context as _;
@@ -106,7 +106,7 @@ impl NewOptions {
         name: Option<String>,
         edition: Option<String>,
         registry: Option<String>,
-    ) -> CargoResult<NewOptions> {
+    ) -> CorgiResult<NewOptions> {
         let auto_detect_kind = !bin && !lib;
 
         let kind = match (bin, lib) {
@@ -142,7 +142,7 @@ struct CargoNewConfig {
     version_control: Option<VersionControl>,
 }
 
-fn get_name<'a>(path: &'a Path, opts: &'a NewOptions) -> CargoResult<&'a str> {
+fn get_name<'a>(path: &'a Path, opts: &'a NewOptions) -> CorgiResult<&'a str> {
     if let Some(ref name) = opts.name {
         return Ok(name);
     }
@@ -167,7 +167,7 @@ fn check_name(
     show_name_help: bool,
     has_bin: bool,
     shell: &mut Shell,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     // If --name is already used to override, no point in suggesting it
     // again as a fix.
     let name_help = if show_name_help {
@@ -265,7 +265,7 @@ fn detect_source_paths_and_types(
     package_path: &Path,
     package_name: &str,
     detected_files: &mut Vec<SourceFileInformation>,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let path = package_path;
     let name = package_name;
 
@@ -411,7 +411,7 @@ fn calculate_new_project_kind(
     requested_kind
 }
 
-pub fn new(opts: &NewOptions, config: &Config) -> CargoResult<()> {
+pub fn new(opts: &NewOptions, config: &Config) -> CorgiResult<()> {
     let path = &opts.path;
     if path.exists() {
         anyhow::bail!(
@@ -446,7 +446,7 @@ pub fn new(opts: &NewOptions, config: &Config) -> CargoResult<()> {
     Ok(())
 }
 
-pub fn init(opts: &NewOptions, config: &Config) -> CargoResult<NewProjectKind> {
+pub fn init(opts: &NewOptions, config: &Config) -> CorgiResult<NewProjectKind> {
     // This is here just as a random location to exercise the internal error handling.
     if std::env::var_os("__CARGO_TEST_INTERNAL_ERROR").is_some() {
         return Err(crate::util::internal("internal error test"));
@@ -638,7 +638,7 @@ impl IgnoreList {
 /// Writes the ignore file to the given directory. If the ignore file for the
 /// given vcs system already exists, its content is read and duplicate ignore
 /// file entries are filtered out.
-fn write_ignore_file(base_path: &Path, list: &IgnoreList, vcs: VersionControl) -> CargoResult<()> {
+fn write_ignore_file(base_path: &Path, list: &IgnoreList, vcs: VersionControl) -> CorgiResult<()> {
     // Fossil only supports project-level settings in a dedicated subdirectory.
     if vcs == VersionControl::Fossil {
         paths::create_dir_all(base_path.join(".fossil-settings"))?;
@@ -670,7 +670,7 @@ fn write_ignore_file(base_path: &Path, list: &IgnoreList, vcs: VersionControl) -
 }
 
 /// Initializes the correct VCS system based on the provided config.
-fn init_vcs(path: &Path, vcs: VersionControl, config: &Config) -> CargoResult<()> {
+fn init_vcs(path: &Path, vcs: VersionControl, config: &Config) -> CorgiResult<()> {
     match vcs {
         VersionControl::Git => {
             if !path.join(".git").exists() {
@@ -704,7 +704,7 @@ fn init_vcs(path: &Path, vcs: VersionControl, config: &Config) -> CargoResult<()
     Ok(())
 }
 
-fn mk(config: &Config, opts: &MkOptions<'_>) -> CargoResult<()> {
+fn mk(config: &Config, opts: &MkOptions<'_>) -> CorgiResult<()> {
     let path = opts.path;
     let name = opts.name;
     let cfg = config.get::<CargoNewConfig>("cargo-new")?;

@@ -1,6 +1,6 @@
 use anyhow::Error;
 
-use crate::util::errors::{CargoResult, HttpNot200};
+use crate::util::errors::{CorgiResult, HttpNot200};
 use crate::util::Config;
 use std::task::Poll;
 
@@ -24,14 +24,14 @@ pub struct Retry<'a> {
 }
 
 impl<'a> Retry<'a> {
-    pub fn new(config: &'a Config) -> CargoResult<Retry<'a>> {
+    pub fn new(config: &'a Config) -> CorgiResult<Retry<'a>> {
         Ok(Retry {
             config,
             remaining: config.net_config()?.retry.unwrap_or(2),
         })
     }
 
-    pub fn r#try<T>(&mut self, f: impl FnOnce() -> CargoResult<T>) -> CargoResult<Option<T>> {
+    pub fn r#try<T>(&mut self, f: impl FnOnce() -> CorgiResult<T>) -> CorgiResult<Option<T>> {
         match f() {
             Err(ref e) if maybe_spurious(e) && self.remaining > 0 => {
                 let msg = format!(
@@ -91,15 +91,15 @@ fn maybe_spurious(err: &Error) -> bool {
 /// # Examples
 ///
 /// ```
-/// # use crate::corgi::util::{CargoResult, Config};
+/// # use crate::corgi::util::{CorgiResult, Config};
 /// # let download_something = || return Ok(());
 /// # let config = Config::default().unwrap();
 /// use corgi::util::network;
 /// let cargo_result = network::with_retry(&config, || download_something());
 /// ```
-pub fn with_retry<T, F>(config: &Config, mut callback: F) -> CargoResult<T>
+pub fn with_retry<T, F>(config: &Config, mut callback: F) -> CorgiResult<T>
 where
-    F: FnMut() -> CargoResult<T>,
+    F: FnMut() -> CorgiResult<T>,
 {
     let mut retry = Retry::new(config)?;
     loop {
@@ -124,7 +124,7 @@ fn with_retry_repeats_the_call_then_works() {
         url: "Uri".to_string(),
     }
     .into();
-    let mut results: Vec<CargoResult<()>> = vec![Ok(()), Err(error1), Err(error2)];
+    let mut results: Vec<CorgiResult<()>> = vec![Ok(()), Err(error1), Err(error2)];
     let config = Config::default().unwrap();
     *config.shell() = Shell::from_write(Box::new(Vec::new()));
     let result = with_retry(&config, || results.pop().unwrap());
@@ -147,7 +147,7 @@ fn with_retry_finds_nested_spurious_errors() {
         url: "Uri".to_string(),
     });
     let error2 = anyhow::Error::from(error2.context("A second chained error"));
-    let mut results: Vec<CargoResult<()>> = vec![Ok(()), Err(error1), Err(error2)];
+    let mut results: Vec<CorgiResult<()>> = vec![Ok(()), Err(error1), Err(error2)];
     let config = Config::default().unwrap();
     *config.shell() = Shell::from_write(Box::new(Vec::new()));
     let result = with_retry(&config, || results.pop().unwrap());

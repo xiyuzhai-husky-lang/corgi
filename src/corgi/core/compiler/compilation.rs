@@ -9,7 +9,7 @@ use cargo_util::{paths, ProcessBuilder};
 use super::BuildContext;
 use crate::core::compiler::{CompileKind, Metadata, Unit};
 use crate::core::Package;
-use crate::util::{config, CargoResult, Config};
+use crate::util::{config, Config, CorgiResult};
 
 /// Structure with enough information to run `rustdoc --test`.
 pub struct Doctest {
@@ -105,7 +105,7 @@ pub struct Compilation<'cfg> {
 }
 
 impl<'cfg> Compilation<'cfg> {
-    pub fn new<'a>(bcx: &BuildContext<'a, 'cfg>) -> CargoResult<Compilation<'cfg>> {
+    pub fn new<'a>(bcx: &BuildContext<'a, 'cfg>) -> CorgiResult<Compilation<'cfg>> {
         let mut rustc = bcx.rustc().process();
         let mut primary_rustc_process = bcx.build_config.primary_unit_rustc.clone();
         let mut rustc_workspace_wrapper_process = bcx.rustc().workspace_process();
@@ -156,7 +156,7 @@ impl<'cfg> Compilation<'cfg> {
                 .iter()
                 .chain(Some(&CompileKind::Host))
                 .map(|kind| Ok((*kind, target_runner(bcx, *kind)?)))
-                .collect::<CargoResult<HashMap<_, _>>>()?,
+                .collect::<CorgiResult<HashMap<_, _>>>()?,
         })
     }
 
@@ -172,7 +172,7 @@ impl<'cfg> Compilation<'cfg> {
         unit: &Unit,
         is_primary: bool,
         is_workspace: bool,
-    ) -> CargoResult<ProcessBuilder> {
+    ) -> CorgiResult<ProcessBuilder> {
         let rustc = if is_primary && self.primary_rustc_process.is_some() {
             self.primary_rustc_process.clone().unwrap()
         } else if is_workspace {
@@ -190,7 +190,7 @@ impl<'cfg> Compilation<'cfg> {
         &self,
         unit: &Unit,
         script_meta: Option<Metadata>,
-    ) -> CargoResult<ProcessBuilder> {
+    ) -> CorgiResult<ProcessBuilder> {
         let rustdoc = ProcessBuilder::new(&*self.config.rustdoc()?);
         let cmd = fill_rustc_tool_env(rustdoc, unit);
         let mut cmd = self.fill_env(cmd, &unit.pkg, script_meta, unit.kind, true)?;
@@ -214,7 +214,7 @@ impl<'cfg> Compilation<'cfg> {
         &self,
         cmd: T,
         pkg: &Package,
-    ) -> CargoResult<ProcessBuilder> {
+    ) -> CorgiResult<ProcessBuilder> {
         self.fill_env(
             ProcessBuilder::new(cmd),
             pkg,
@@ -241,7 +241,7 @@ impl<'cfg> Compilation<'cfg> {
         kind: CompileKind,
         pkg: &Package,
         script_meta: Option<Metadata>,
-    ) -> CargoResult<ProcessBuilder> {
+    ) -> CorgiResult<ProcessBuilder> {
         let builder = if let Some((runner, args)) = self.target_runner(kind) {
             let mut builder = ProcessBuilder::new(runner);
             builder.args(args);
@@ -265,7 +265,7 @@ impl<'cfg> Compilation<'cfg> {
         script_meta: Option<Metadata>,
         kind: CompileKind,
         is_rustc_tool: bool,
-    ) -> CargoResult<ProcessBuilder> {
+    ) -> CorgiResult<ProcessBuilder> {
         let mut search_path = Vec::new();
         if is_rustc_tool {
             search_path.push(self.deps_output[&CompileKind::Host].clone());
@@ -387,7 +387,7 @@ fn fill_rustc_tool_env(mut cmd: ProcessBuilder, unit: &Unit) -> ProcessBuilder {
 fn target_runner(
     bcx: &BuildContext<'_, '_>,
     kind: CompileKind,
-) -> CargoResult<Option<(PathBuf, Vec<String>)>> {
+) -> CorgiResult<Option<(PathBuf, Vec<String>)>> {
     let target = bcx.target_data.short_name(&kind);
 
     // try target.{}.runner

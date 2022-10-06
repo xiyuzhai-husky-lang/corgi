@@ -3,7 +3,7 @@ use crate::core::{GitReference, Workspace};
 use crate::ops;
 use crate::sources::path::PathSource;
 use crate::sources::CRATES_IO_REGISTRY;
-use crate::util::{CargoResult, Config};
+use crate::util::{Config, CorgiResult};
 use anyhow::{bail, Context as _};
 use cargo_util::{paths, Sha256};
 use serde::Serialize;
@@ -21,7 +21,7 @@ pub struct VendorOptions<'a> {
     pub extra: Vec<PathBuf>,
 }
 
-pub fn vendor(ws: &Workspace<'_>, opts: &VendorOptions<'_>) -> CargoResult<()> {
+pub fn vendor(ws: &Workspace<'_>, opts: &VendorOptions<'_>) -> CorgiResult<()> {
     let config = ws.config();
     let mut extra_workspaces = Vec::new();
     for extra in opts.extra.iter() {
@@ -81,7 +81,7 @@ fn sync(
     config: &Config,
     workspaces: &[&Workspace<'_>],
     opts: &VendorOptions<'_>,
-) -> CargoResult<VendorConfig> {
+) -> CorgiResult<VendorConfig> {
     let canonical_destination = opts.destination.canonicalize();
     let canonical_destination = canonical_destination.as_deref().unwrap_or(opts.destination);
     let dest_dir_already_exists = canonical_destination.exists();
@@ -318,7 +318,7 @@ fn cp_sources(
     dst: &Path,
     cksums: &mut BTreeMap<String, String>,
     tmp_buf: &mut [u8],
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     for p in paths {
         let relative = p.strip_prefix(&src).unwrap();
 
@@ -359,7 +359,7 @@ fn cp_sources(
     Ok(())
 }
 
-fn copy_and_checksum(src_path: &Path, dst_path: &Path, buf: &mut [u8]) -> CargoResult<String> {
+fn copy_and_checksum(src_path: &Path, dst_path: &Path, buf: &mut [u8]) -> CorgiResult<String> {
     let mut src = File::open(src_path).with_context(|| format!("failed to open {:?}", src_path))?;
     let mut dst_opts = OpenOptions::new();
     dst_opts.write(true).create(true).truncate(true);

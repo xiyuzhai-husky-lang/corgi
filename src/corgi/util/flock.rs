@@ -3,7 +3,7 @@ use std::io;
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::{Display, Path, PathBuf};
 
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::Config;
 use anyhow::Context as _;
 use cargo_util::paths;
@@ -49,7 +49,7 @@ impl FileLock {
     ///
     /// This can be useful if a directory is locked with a sentinel file but it
     /// needs to be cleared out as it may be corrupt.
-    pub fn remove_siblings(&self) -> CargoResult<()> {
+    pub fn remove_siblings(&self) -> CorgiResult<()> {
         let path = self.path();
         for entry in path.parent().unwrap().read_dir()? {
             let entry = entry?;
@@ -147,7 +147,7 @@ impl Filesystem {
     ///
     /// Handles errors where other Cargo processes are also attempting to
     /// concurrently create this directory.
-    pub fn create_dir(&self) -> CargoResult<()> {
+    pub fn create_dir(&self) -> CorgiResult<()> {
         paths::create_dir_all(&self.root)
     }
 
@@ -167,7 +167,7 @@ impl Filesystem {
     ///
     /// The returned file can be accessed to look at the path and also has
     /// read/write access to the underlying file.
-    pub fn open_rw<P>(&self, path: P, config: &Config, msg: &str) -> CargoResult<FileLock>
+    pub fn open_rw<P>(&self, path: P, config: &Config, msg: &str) -> CorgiResult<FileLock>
     where
         P: AsRef<Path>,
     {
@@ -189,7 +189,7 @@ impl Filesystem {
     /// The returned file can be accessed to look at the path and also has read
     /// access to the underlying file. Any writes to the file will return an
     /// error.
-    pub fn open_ro<P>(&self, path: P, config: &Config, msg: &str) -> CargoResult<FileLock>
+    pub fn open_ro<P>(&self, path: P, config: &Config, msg: &str) -> CorgiResult<FileLock>
     where
         P: AsRef<Path>,
     {
@@ -209,7 +209,7 @@ impl Filesystem {
         state: State,
         config: &Config,
         msg: &str,
-    ) -> CargoResult<FileLock> {
+    ) -> CorgiResult<FileLock> {
         let path = self.root.join(path);
 
         // If we want an exclusive lock then if we fail because of NotFound it's
@@ -280,7 +280,7 @@ fn acquire(
     path: &Path,
     lock_try: &dyn Fn() -> io::Result<()>,
     lock_block: &dyn Fn() -> io::Result<()>,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     // File locking on Unix is currently implemented via `flock`, which is known
     // to be broken on NFS. We could in theory just ignore errors that happen on
     // NFS, but apparently the failure mode [1] for `flock` on NFS is **blocking

@@ -6,7 +6,7 @@ use corgi::core::{PackageIdSpec, Shell};
 use corgi::util::config::{self, Config, SslVersionConfig, StringList};
 use corgi::util::interning::InternedString;
 use corgi::util::toml::{self, VecStringOrBool as VSOB};
-use corgi::CargoResult;
+use corgi::CorgiResult;
 use serde::Deserialize;
 use std::borrow::Borrow;
 use std::collections::{BTreeMap, HashMap};
@@ -71,7 +71,7 @@ impl ConfigBuilder {
     }
 
     /// Creates the `Config`, returning a Result.
-    pub fn build_err(&self) -> CargoResult<Config> {
+    pub fn build_err(&self) -> CorgiResult<Config> {
         let output = Box::new(fs::File::create(paths::root().join("shell.out")).unwrap());
         let shell = Shell::from_write(output);
         let cwd = self.cwd.clone().unwrap_or_else(|| paths::root());

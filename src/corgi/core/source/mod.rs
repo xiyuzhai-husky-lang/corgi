@@ -4,7 +4,7 @@ use std::task::Poll;
 
 use crate::core::package::PackageSet;
 use crate::core::{Dependency, Package, PackageId, Summary};
-use crate::util::{CargoResult, Config};
+use crate::util::{Config, CorgiResult};
 
 mod source_id;
 
@@ -34,9 +34,9 @@ pub trait Source {
         dep: &Dependency,
         kind: QueryKind,
         f: &mut dyn FnMut(Summary),
-    ) -> Poll<CargoResult<()>>;
+    ) -> Poll<CorgiResult<()>>;
 
-    fn query_vec(&mut self, dep: &Dependency, kind: QueryKind) -> Poll<CargoResult<Vec<Summary>>> {
+    fn query_vec(&mut self, dep: &Dependency, kind: QueryKind) -> Poll<CorgiResult<Vec<Summary>>> {
         let mut ret = Vec::new();
         self.query(dep, kind, &mut |s| ret.push(s)).map_ok(|_| ret)
     }
@@ -45,9 +45,9 @@ pub trait Source {
     fn invalidate_cache(&mut self);
 
     /// Fetches the full package for each name and version specified.
-    fn download(&mut self, package: PackageId) -> CargoResult<MaybePackage>;
+    fn download(&mut self, package: PackageId) -> CorgiResult<MaybePackage>;
 
-    fn download_now(self: Box<Self>, package: PackageId, config: &Config) -> CargoResult<Package>
+    fn download_now(self: Box<Self>, package: PackageId, config: &Config) -> CorgiResult<Package>
     where
         Self: std::marker::Sized,
     {
@@ -58,7 +58,7 @@ pub trait Source {
         Ok(Package::clone(pkg))
     }
 
-    fn finish_download(&mut self, package: PackageId, contents: Vec<u8>) -> CargoResult<Package>;
+    fn finish_download(&mut self, package: PackageId, contents: Vec<u8>) -> CorgiResult<Package>;
 
     /// Generates a unique string which represents the fingerprint of the
     /// current state of the source.
@@ -69,7 +69,7 @@ pub trait Source {
     ///
     /// The `pkg` argument is the package which this fingerprint should only be
     /// interested in for when this source may contain multiple packages.
-    fn fingerprint(&self, pkg: &Package) -> CargoResult<String>;
+    fn fingerprint(&self, pkg: &Package) -> CorgiResult<String>;
 
     /// If this source supports it, verifies the source of the package
     /// specified.
@@ -78,7 +78,7 @@ pub trait Source {
     /// verification during the `download` step, but this is intended to be run
     /// just before a crate is compiled so it may perform more expensive checks
     /// which may not be cacheable.
-    fn verify(&self, _pkg: PackageId) -> CargoResult<()> {
+    fn verify(&self, _pkg: PackageId) -> CorgiResult<()> {
         Ok(())
     }
 
@@ -98,7 +98,7 @@ pub trait Source {
 
     /// Query if a package is yanked. Only registry sources can mark packages
     /// as yanked. This ignores the yanked whitelist.
-    fn is_yanked(&mut self, _pkg: PackageId) -> Poll<CargoResult<bool>>;
+    fn is_yanked(&mut self, _pkg: PackageId) -> Poll<CorgiResult<bool>>;
 
     /// Block until all outstanding Poll::Pending requests are `Poll::Ready`.
     ///
@@ -107,7 +107,7 @@ pub trait Source {
     ///
     /// If no queries previously returned `Poll::Pending`, and `invalidate_cache`
     /// was not called, this function should be a no-op.
-    fn block_until_ready(&mut self) -> CargoResult<()>;
+    fn block_until_ready(&mut self) -> CorgiResult<()>;
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -151,7 +151,7 @@ impl<'a, T: Source + ?Sized + 'a> Source for Box<T> {
         dep: &Dependency,
         kind: QueryKind,
         f: &mut dyn FnMut(Summary),
-    ) -> Poll<CargoResult<()>> {
+    ) -> Poll<CorgiResult<()>> {
         (**self).query(dep, kind, f)
     }
 
@@ -160,21 +160,21 @@ impl<'a, T: Source + ?Sized + 'a> Source for Box<T> {
     }
 
     /// Forwards to `Source::download`.
-    fn download(&mut self, id: PackageId) -> CargoResult<MaybePackage> {
+    fn download(&mut self, id: PackageId) -> CorgiResult<MaybePackage> {
         (**self).download(id)
     }
 
-    fn finish_download(&mut self, id: PackageId, data: Vec<u8>) -> CargoResult<Package> {
+    fn finish_download(&mut self, id: PackageId, data: Vec<u8>) -> CorgiResult<Package> {
         (**self).finish_download(id, data)
     }
 
     /// Forwards to `Source::fingerprint`.
-    fn fingerprint(&self, pkg: &Package) -> CargoResult<String> {
+    fn fingerprint(&self, pkg: &Package) -> CorgiResult<String> {
         (**self).fingerprint(pkg)
     }
 
     /// Forwards to `Source::verify`.
-    fn verify(&self, pkg: PackageId) -> CargoResult<()> {
+    fn verify(&self, pkg: PackageId) -> CorgiResult<()> {
         (**self).verify(pkg)
     }
 
@@ -190,11 +190,11 @@ impl<'a, T: Source + ?Sized + 'a> Source for Box<T> {
         (**self).add_to_yanked_whitelist(pkgs);
     }
 
-    fn is_yanked(&mut self, pkg: PackageId) -> Poll<CargoResult<bool>> {
+    fn is_yanked(&mut self, pkg: PackageId) -> Poll<CorgiResult<bool>> {
         (**self).is_yanked(pkg)
     }
 
-    fn block_until_ready(&mut self) -> CargoResult<()> {
+    fn block_until_ready(&mut self) -> CorgiResult<()> {
         (**self).block_until_ready()
     }
 }
@@ -221,7 +221,7 @@ impl<'a, T: Source + ?Sized + 'a> Source for &'a mut T {
         dep: &Dependency,
         kind: QueryKind,
         f: &mut dyn FnMut(Summary),
-    ) -> Poll<CargoResult<()>> {
+    ) -> Poll<CorgiResult<()>> {
         (**self).query(dep, kind, f)
     }
 
@@ -229,19 +229,19 @@ impl<'a, T: Source + ?Sized + 'a> Source for &'a mut T {
         (**self).invalidate_cache()
     }
 
-    fn download(&mut self, id: PackageId) -> CargoResult<MaybePackage> {
+    fn download(&mut self, id: PackageId) -> CorgiResult<MaybePackage> {
         (**self).download(id)
     }
 
-    fn finish_download(&mut self, id: PackageId, data: Vec<u8>) -> CargoResult<Package> {
+    fn finish_download(&mut self, id: PackageId, data: Vec<u8>) -> CorgiResult<Package> {
         (**self).finish_download(id, data)
     }
 
-    fn fingerprint(&self, pkg: &Package) -> CargoResult<String> {
+    fn fingerprint(&self, pkg: &Package) -> CorgiResult<String> {
         (**self).fingerprint(pkg)
     }
 
-    fn verify(&self, pkg: PackageId) -> CargoResult<()> {
+    fn verify(&self, pkg: PackageId) -> CorgiResult<()> {
         (**self).verify(pkg)
     }
 
@@ -257,11 +257,11 @@ impl<'a, T: Source + ?Sized + 'a> Source for &'a mut T {
         (**self).add_to_yanked_whitelist(pkgs);
     }
 
-    fn is_yanked(&mut self, pkg: PackageId) -> Poll<CargoResult<bool>> {
+    fn is_yanked(&mut self, pkg: PackageId) -> Poll<CorgiResult<bool>> {
         (**self).is_yanked(pkg)
     }
 
-    fn block_until_ready(&mut self) -> CargoResult<()> {
+    fn block_until_ready(&mut self) -> CorgiResult<()> {
         (**self).block_until_ready()
     }
 }

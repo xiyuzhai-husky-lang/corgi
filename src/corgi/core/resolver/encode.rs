@@ -113,7 +113,7 @@
 
 use super::{Resolve, ResolveVersion};
 use crate::core::{Dependency, GitReference, Package, PackageId, SourceId, Workspace};
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::interning::InternedString;
 use crate::util::{internal, Graph};
 use anyhow::{bail, Context as _};
@@ -153,7 +153,7 @@ impl EncodableResolve {
     /// `features`. Care should be taken when using this Resolve. One of the
     /// primary uses is to be used with `resolve_with_previous` to guide the
     /// resolver to create a complete Resolve.
-    pub fn into_resolve(self, original: &str, ws: &Workspace<'_>) -> CargoResult<Resolve> {
+    pub fn into_resolve(self, original: &str, ws: &Workspace<'_>) -> CorgiResult<Resolve> {
         let path_deps = build_path_deps(ws)?;
         let mut checksums = HashMap::new();
 
@@ -402,7 +402,7 @@ impl EncodableResolve {
     }
 }
 
-fn build_path_deps(ws: &Workspace<'_>) -> CargoResult<HashMap<String, SourceId>> {
+fn build_path_deps(ws: &Workspace<'_>) -> CorgiResult<HashMap<String, SourceId>> {
     // If a crate is **not** a path source, then we're probably in a situation
     // such as `cargo install` with a lock file from a remote dependency. In
     // that case we don't need to fixup any path dependencies (as they're not
@@ -509,7 +509,7 @@ impl fmt::Display for EncodablePackageId {
 impl FromStr for EncodablePackageId {
     type Err = anyhow::Error;
 
-    fn from_str(s: &str) -> CargoResult<EncodablePackageId> {
+    fn from_str(s: &str) -> CorgiResult<EncodablePackageId> {
         let mut s = s.splitn(3, ' ');
         let name = s.next().unwrap();
         let version = s.next();

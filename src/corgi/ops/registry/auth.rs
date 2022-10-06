@@ -1,7 +1,7 @@
 //! Registry authentication support.
 
 use crate::sources::CRATES_IO_REGISTRY;
-use crate::util::{config, CargoResult, Config};
+use crate::util::{config, Config, CorgiResult};
 use anyhow::{bail, format_err, Context as _};
 use cargo_util::ProcessError;
 use std::io::{Read, Write};
@@ -23,7 +23,7 @@ pub(super) fn auth_token(
     credential: &RegistryConfig,
     registry_name: Option<&str>,
     api_url: &str,
-) -> CargoResult<String> {
+) -> CorgiResult<String> {
     let token = match (cli_token, credential) {
         (None, RegistryConfig::None) => {
             bail!("no upload token found, please run `cargo login` or pass `--token`");
@@ -45,7 +45,7 @@ pub(super) fn login(
     credential_process: Option<&(PathBuf, Vec<String>)>,
     registry_name: Option<&str>,
     api_url: &str,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     if let Some(process) = credential_process {
         let registry_name = registry_name.unwrap_or(CRATES_IO_REGISTRY);
         run_command(
@@ -67,7 +67,7 @@ pub(super) fn logout(
     credential_process: Option<&(PathBuf, Vec<String>)>,
     registry_name: Option<&str>,
     api_url: &str,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     if let Some(process) = credential_process {
         let registry_name = registry_name.unwrap_or(CRATES_IO_REGISTRY);
         run_command(config, process, registry_name, api_url, Action::Erase)?;
@@ -83,7 +83,7 @@ fn run_command(
     name: &str,
     api_url: &str,
     action: Action,
-) -> CargoResult<Option<String>> {
+) -> CorgiResult<Option<String>> {
     let cred_proc;
     let (exe, args) = if process.0.to_str().unwrap_or("").starts_with("cargo:") {
         cred_proc = sysroot_credential(config, process)?;
@@ -217,7 +217,7 @@ fn run_command(
 fn sysroot_credential(
     config: &Config,
     process: &(PathBuf, Vec<String>),
-) -> CargoResult<(PathBuf, Vec<String>)> {
+) -> CorgiResult<(PathBuf, Vec<String>)> {
     let cred_name = process.0.to_str().unwrap().strip_prefix("cargo:").unwrap();
     let cargo = config.cargo_exe()?;
     let root = cargo

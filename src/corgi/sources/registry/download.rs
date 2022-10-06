@@ -8,7 +8,7 @@ use crate::sources::registry::{
     RegistryConfig, CHECKSUM_TEMPLATE, CRATE_TEMPLATE, LOWER_PREFIX_TEMPLATE, PREFIX_TEMPLATE,
     VERSION_TEMPLATE,
 };
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::{Config, Filesystem};
 use std::fmt::Write as FmtWrite;
 use std::fs::{self, File, OpenOptions};
@@ -26,7 +26,7 @@ pub(super) fn download(
     pkg: PackageId,
     checksum: &str,
     registry_config: RegistryConfig,
-) -> CargoResult<MaybeLock> {
+) -> CorgiResult<MaybeLock> {
     let filename = filename(pkg);
     let path = cache_path.join(&filename);
     let path = config.assert_package_cache_locked(&path);
@@ -81,7 +81,7 @@ pub(super) fn finish_download(
     pkg: PackageId,
     checksum: &str,
     data: &[u8],
-) -> CargoResult<File> {
+) -> CorgiResult<File> {
     // Verify what we just downloaded
     let actual = Sha256::new().update(data).finish_hex();
     if actual != checksum {

@@ -11,7 +11,7 @@ use serde::ser;
 
 use crate::core::source::SourceId;
 use crate::util::interning::InternedString;
-use crate::util::{CargoResult, ToSemver};
+use crate::util::{CorgiResult, ToSemver};
 
 lazy_static::lazy_static! {
     static ref PACKAGE_ID_CACHE: Mutex<HashSet<&'static PackageIdInner>> =
@@ -136,7 +136,7 @@ impl PackageId {
         name: impl Into<InternedString>,
         version: T,
         sid: SourceId,
-    ) -> CargoResult<PackageId> {
+    ) -> CorgiResult<PackageId> {
         let v = version.to_semver()?;
         Ok(PackageId::pure(name.into(), v, sid))
     }

@@ -14,7 +14,7 @@ use cargo_test_support::paths::CargoPathExt;
 use cargo_test_support::registry::{self, Dependency, Package};
 use cargo_test_support::{cargo_exe, execs, paths, process, project, rustc_host};
 use cargo_util::{ProcessBuilder, ProcessError};
-use corgi::CargoResult;
+use corgi::CorgiResult;
 use semver::Version;
 use std::fs;
 
@@ -354,7 +354,7 @@ fn new_features() {
         };
 
         // Runs `cargo build` and returns the versions selected in the lock.
-        let run_cargo = || -> CargoResult<ToolchainBehavior> {
+        let run_cargo = || -> CorgiResult<ToolchainBehavior> {
             match tc_process("cargo", toolchain)
                 .args(&["build", "--verbose"])
                 .cwd(p.root())

@@ -4,7 +4,7 @@ use crate::core::resolver::features::FeaturesFor;
 use crate::core::{PackageId, PackageIdSpec, Resolve, Shell, Target, Workspace};
 use crate::util::interning::InternedString;
 use crate::util::toml::{ProfilePackageSpec, StringOrBool, TomlProfile, TomlProfiles, U32OrBool};
-use crate::util::{closest_msg, config, CargoResult, Config};
+use crate::util::{closest_msg, config, Config, CorgiResult};
 use anyhow::{bail, Context as _};
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::hash::Hash;
@@ -33,7 +33,7 @@ pub struct Profiles {
 }
 
 impl Profiles {
-    pub fn new(ws: &Workspace<'_>, requested_profile: InternedString) -> CargoResult<Profiles> {
+    pub fn new(ws: &Workspace<'_>, requested_profile: InternedString) -> CorgiResult<Profiles> {
         let config = ws.config();
         let incremental = match env::var_os("CARGO_INCREMENTAL") {
             Some(v) => Some(v == "1"),
@@ -140,7 +140,7 @@ impl Profiles {
         name: InternedString,
         profile: &TomlProfile,
         profiles: &BTreeMap<InternedString, TomlProfile>,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         match &profile.dir_name {
             None => {}
             Some(dir_name) => {
@@ -182,7 +182,7 @@ impl Profiles {
         profile: &TomlProfile,
         set: &mut HashSet<InternedString>,
         profiles: &BTreeMap<InternedString, TomlProfile>,
-    ) -> CargoResult<ProfileMaker> {
+    ) -> CorgiResult<ProfileMaker> {
         let mut maker = match profile.inherits {
             Some(inherits_name) if inherits_name == "dev" || inherits_name == "release" => {
                 // These are the root profiles added in `add_root_profiles`.
@@ -316,7 +316,7 @@ impl Profiles {
         profiles: Option<&TomlProfiles>,
         shell: &mut Shell,
         resolve: &Resolve,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         for (name, profile) in &self.by_name {
             // If the user did not specify an override, skip this. This is here
             // to avoid generating errors for inherited profiles which don't
@@ -345,7 +345,7 @@ impl Profiles {
     }
 
     /// Returns the profile maker for the given profile name.
-    fn get_profile_maker(&self, name: InternedString) -> CargoResult<&ProfileMaker> {
+    fn get_profile_maker(&self, name: InternedString) -> CorgiResult<&ProfileMaker> {
         self.by_name
             .get(&name)
             .ok_or_else(|| anyhow::format_err!("profile `{}` is not defined", name))
@@ -1028,7 +1028,7 @@ impl UnitFor {
 fn merge_config_profiles(
     ws: &Workspace<'_>,
     requested_profile: InternedString,
-) -> CargoResult<BTreeMap<InternedString, TomlProfile>> {
+) -> CorgiResult<BTreeMap<InternedString, TomlProfile>> {
     let mut profiles = match ws.profiles() {
         Some(profiles) => profiles.get_all().clone(),
         None => BTreeMap::new(),
@@ -1070,7 +1070,7 @@ fn merge_config_profiles(
 }
 
 /// Helper for fetching a profile from config.
-fn get_config_profile(ws: &Workspace<'_>, name: &str) -> CargoResult<Option<TomlProfile>> {
+fn get_config_profile(ws: &Workspace<'_>, name: &str) -> CorgiResult<Option<TomlProfile>> {
     let profile: Option<config::Value<TomlProfile>> =
         ws.config().get(&format!("profile.{}", name))?;
     let profile = match profile {
@@ -1101,7 +1101,7 @@ fn validate_packages_unique(
     resolve: &Resolve,
     name: &str,
     toml: &Option<TomlProfile>,
-) -> CargoResult<HashSet<PackageIdSpec>> {
+) -> CorgiResult<HashSet<PackageIdSpec>> {
     let toml = match toml {
         Some(ref toml) => toml,
         None => return Ok(HashSet::new()),
@@ -1159,7 +1159,7 @@ fn validate_packages_unmatched(
     name: &str,
     toml: &TomlProfile,
     found: &HashSet<PackageIdSpec>,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let overrides = match toml.package.as_ref() {
         Some(overrides) => overrides,
         None => return Ok(()),

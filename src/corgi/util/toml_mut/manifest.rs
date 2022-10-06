@@ -10,7 +10,7 @@ use super::dependency::Dependency;
 use crate::core::dependency::DepKind;
 use crate::core::FeatureValue;
 use crate::util::interning::InternedString;
-use crate::CargoResult;
+use crate::CorgiResult;
 
 /// Dependency table to add deps to.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -95,7 +95,7 @@ pub struct Manifest {
 
 impl Manifest {
     /// Get the manifest's package name.
-    pub fn package_name(&self) -> CargoResult<&str> {
+    pub fn package_name(&self) -> CorgiResult<&str> {
         self.data
             .as_table()
             .get("package")
@@ -105,12 +105,12 @@ impl Manifest {
     }
 
     /// Get the specified table from the manifest.
-    pub fn get_table<'a>(&'a self, table_path: &[String]) -> CargoResult<&'a toml_edit::Item> {
+    pub fn get_table<'a>(&'a self, table_path: &[String]) -> CorgiResult<&'a toml_edit::Item> {
         /// Descend into a manifest until the required table is found.
         fn descend<'a>(
             input: &'a toml_edit::Item,
             path: &[String],
-        ) -> CargoResult<&'a toml_edit::Item> {
+        ) -> CorgiResult<&'a toml_edit::Item> {
             if let Some(segment) = path.get(0) {
                 let value = input
                     .get(&segment)
@@ -133,12 +133,12 @@ impl Manifest {
     pub fn get_table_mut<'a>(
         &'a mut self,
         table_path: &[String],
-    ) -> CargoResult<&'a mut toml_edit::Item> {
+    ) -> CorgiResult<&'a mut toml_edit::Item> {
         /// Descend into a manifest until the required table is found.
         fn descend<'a>(
             input: &'a mut toml_edit::Item,
             path: &[String],
-        ) -> CargoResult<&'a mut toml_edit::Item> {
+        ) -> CorgiResult<&'a mut toml_edit::Item> {
             if let Some(segment) = path.get(0) {
                 let mut default_table = toml_edit::Table::new();
                 default_table.set_implicit(true);
@@ -270,7 +270,7 @@ impl DerefMut for LocalManifest {
 
 impl LocalManifest {
     /// Construct the `LocalManifest` corresponding to the `Path` provided..
-    pub fn try_new(path: &Path) -> CargoResult<Self> {
+    pub fn try_new(path: &Path) -> CorgiResult<Self> {
         if !path.is_absolute() {
             anyhow::bail!("can only edit absolute paths, got {}", path.display());
         }
@@ -283,7 +283,7 @@ impl LocalManifest {
     }
 
     /// Write changes back to the file.
-    pub fn write(&self) -> CargoResult<()> {
+    pub fn write(&self) -> CorgiResult<()> {
         if !self.manifest.data.contains_key("package")
             && !self.manifest.data.contains_key("project")
         {
@@ -311,7 +311,7 @@ impl LocalManifest {
     pub fn get_dependency_versions<'s>(
         &'s self,
         dep_key: &'s str,
-    ) -> impl Iterator<Item = (DepTable, CargoResult<Dependency>)> + 's {
+    ) -> impl Iterator<Item = (DepTable, CorgiResult<Dependency>)> + 's {
         let crate_root = self.path.parent().expect("manifest path is absolute");
         self.get_sections()
             .into_iter()
@@ -342,7 +342,7 @@ impl LocalManifest {
         &mut self,
         table_path: &[String],
         dep: &Dependency,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         let crate_root = self
             .path
             .parent()

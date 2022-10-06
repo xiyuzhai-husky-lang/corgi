@@ -2,7 +2,7 @@ use crate::core::PackageId;
 use crate::core::{PackageIdSpec, SourceId};
 use crate::ops::common_for_install_and_uninstall::*;
 use crate::sources::PathSource;
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::Config;
 use crate::util::Filesystem;
 use anyhow::bail;
@@ -15,7 +15,7 @@ pub fn uninstall(
     specs: Vec<&str>,
     bins: &[String],
     config: &Config,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     if specs.len() > 1 && !bins.is_empty() {
         bail!("A binary can only be associated with a single installed package, specifying multiple specs with --bin is redundant.");
     }
@@ -74,14 +74,14 @@ pub fn uninstall_one(
     spec: &str,
     bins: &[String],
     config: &Config,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let tracker = InstallTracker::load(config, root)?;
     let all_pkgs = tracker.all_installed_bins().map(|(pkg_id, _set)| *pkg_id);
     let pkgid = PackageIdSpec::query_str(spec, all_pkgs)?;
     uninstall_pkgid(root, tracker, pkgid, bins, config)
 }
 
-fn uninstall_cwd(root: &Filesystem, bins: &[String], config: &Config) -> CargoResult<()> {
+fn uninstall_cwd(root: &Filesystem, bins: &[String], config: &Config) -> CorgiResult<()> {
     let tracker = InstallTracker::load(config, root)?;
     let source_id = SourceId::for_path(config.cwd())?;
     let mut src = path_source(source_id, config)?;
@@ -101,7 +101,7 @@ fn uninstall_pkgid(
     pkgid: PackageId,
     bins: &[String],
     config: &Config,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let mut to_remove = Vec::new();
     let installed = match tracker.installed_bins(pkgid) {
         Some(bins) => bins.clone(),

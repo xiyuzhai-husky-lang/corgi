@@ -3,7 +3,7 @@ use crate::core::GitReference;
 use crate::core::{Dependency, Package, PackageId, Summary};
 use crate::sources::git::utils::GitRemote;
 use crate::sources::PathSource;
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::hex::short_hash;
 use crate::util::Config;
 use anyhow::Context;
@@ -24,7 +24,7 @@ pub struct GitSource<'cfg> {
 }
 
 impl<'cfg> GitSource<'cfg> {
-    pub fn new(source_id: SourceId, config: &'cfg Config) -> CargoResult<GitSource<'cfg>> {
+    pub fn new(source_id: SourceId, config: &'cfg Config) -> CorgiResult<GitSource<'cfg>> {
         assert!(source_id.is_git(), "id is not git, id={}", source_id);
 
         let remote = GitRemote::new(source_id.url());
@@ -52,7 +52,7 @@ impl<'cfg> GitSource<'cfg> {
         self.remote.url()
     }
 
-    pub fn read_packages(&mut self) -> CargoResult<Vec<Package>> {
+    pub fn read_packages(&mut self) -> CorgiResult<Vec<Package>> {
         if self.path_source.is_none() {
             self.invalidate_cache();
             self.block_until_ready()?;
@@ -91,7 +91,7 @@ impl<'cfg> Source for GitSource<'cfg> {
         dep: &Dependency,
         kind: QueryKind,
         f: &mut dyn FnMut(Summary),
-    ) -> Poll<CargoResult<()>> {
+    ) -> Poll<CorgiResult<()>> {
         if let Some(src) = self.path_source.as_mut() {
             src.query(dep, kind, f)
         } else {
@@ -111,7 +111,7 @@ impl<'cfg> Source for GitSource<'cfg> {
         self.source_id
     }
 
-    fn block_until_ready(&mut self) -> CargoResult<()> {
+    fn block_until_ready(&mut self) -> CorgiResult<()> {
         if self.path_source.is_some() {
             return Ok(());
         }
@@ -202,7 +202,7 @@ impl<'cfg> Source for GitSource<'cfg> {
         self.path_source.as_mut().unwrap().update()
     }
 
-    fn download(&mut self, id: PackageId) -> CargoResult<MaybePackage> {
+    fn download(&mut self, id: PackageId) -> CorgiResult<MaybePackage> {
         trace!(
             "getting packages for package ID `{}` from `{:?}`",
             id,
@@ -214,11 +214,11 @@ impl<'cfg> Source for GitSource<'cfg> {
             .download(id)
     }
 
-    fn finish_download(&mut self, _id: PackageId, _data: Vec<u8>) -> CargoResult<Package> {
+    fn finish_download(&mut self, _id: PackageId, _data: Vec<u8>) -> CorgiResult<Package> {
         panic!("no download should have started")
     }
 
-    fn fingerprint(&self, _pkg: &Package) -> CargoResult<String> {
+    fn fingerprint(&self, _pkg: &Package) -> CorgiResult<String> {
         Ok(self.locked_rev.as_ref().unwrap().to_string())
     }
 
@@ -228,7 +228,7 @@ impl<'cfg> Source for GitSource<'cfg> {
 
     fn add_to_yanked_whitelist(&mut self, _pkgs: &[PackageId]) {}
 
-    fn is_yanked(&mut self, _pkg: PackageId) -> Poll<CargoResult<bool>> {
+    fn is_yanked(&mut self, _pkg: PackageId) -> Poll<CorgiResult<bool>> {
         Poll::Ready(Ok(false))
     }
 

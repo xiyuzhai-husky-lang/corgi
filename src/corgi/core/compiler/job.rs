@@ -2,7 +2,7 @@ use std::fmt;
 use std::mem;
 
 use super::job_queue::JobState;
-use crate::util::CargoResult;
+use crate::util::CorgiResult;
 
 pub struct Job {
     work: Work,
@@ -12,13 +12,13 @@ pub struct Job {
 /// Each proc should send its description before starting.
 /// It should send either once or close immediately.
 pub struct Work {
-    inner: Box<dyn FnOnce(&JobState<'_, '_>) -> CargoResult<()> + Send>,
+    inner: Box<dyn FnOnce(&JobState<'_, '_>) -> CorgiResult<()> + Send>,
 }
 
 impl Work {
     pub fn new<F>(f: F) -> Work
     where
-        F: FnOnce(&JobState<'_, '_>) -> CargoResult<()> + Send + 'static,
+        F: FnOnce(&JobState<'_, '_>) -> CorgiResult<()> + Send + 'static,
     {
         Work { inner: Box::new(f) }
     }
@@ -27,7 +27,7 @@ impl Work {
         Work::new(|_| Ok(()))
     }
 
-    pub fn call(self, tx: &JobState<'_, '_>) -> CargoResult<()> {
+    pub fn call(self, tx: &JobState<'_, '_>) -> CorgiResult<()> {
         (self.inner)(tx)
     }
 
@@ -58,7 +58,7 @@ impl Job {
 
     /// Consumes this job by running it, returning the result of the
     /// computation.
-    pub fn run(self, state: &JobState<'_, '_>) -> CargoResult<()> {
+    pub fn run(self, state: &JobState<'_, '_>) -> CorgiResult<()> {
         self.work.call(state)
     }
 

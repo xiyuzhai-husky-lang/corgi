@@ -1,6 +1,6 @@
 use crate::core::{Dependency, PackageId, SourceId};
 use crate::util::interning::InternedString;
-use crate::util::{CargoResult, Config};
+use crate::util::{Config, CorgiResult};
 use anyhow::bail;
 use semver::Version;
 use std::collections::{BTreeMap, HashMap, HashSet};
@@ -34,7 +34,7 @@ impl Summary {
         dependencies: Vec<Dependency>,
         features: &BTreeMap<InternedString, Vec<InternedString>>,
         links: Option<impl Into<InternedString>>,
-    ) -> CargoResult<Summary> {
+    ) -> CorgiResult<Summary> {
         // ****CAUTION**** If you change anything here that may raise a new
         // error, be sure to coordinate that change with either the index
         // schema field or the SummariesCache version.
@@ -137,7 +137,7 @@ fn build_feature_map(
     pkg_id: PackageId,
     features: &BTreeMap<InternedString, Vec<InternedString>>,
     dependencies: &[Dependency],
-) -> CargoResult<FeatureMap> {
+) -> CorgiResult<FeatureMap> {
     use self::FeatureValue::*;
     let mut dep_map = HashMap::new();
     for dep in dependencies.iter() {
@@ -394,7 +394,7 @@ impl fmt::Display for FeatureValue {
 
 pub type FeatureMap = BTreeMap<InternedString, Vec<FeatureValue>>;
 
-fn validate_feature_name(config: &Config, pkg_id: PackageId, name: &str) -> CargoResult<()> {
+fn validate_feature_name(config: &Config, pkg_id: PackageId, name: &str) -> CorgiResult<()> {
     let mut chars = name.chars();
     const FUTURE: &str = "This was previously accepted but is being phased out; \
         it will become a hard error in a future release.\n\

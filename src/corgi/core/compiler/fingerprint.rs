@@ -332,7 +332,7 @@ use serde::{Deserialize, Serialize};
 use crate::core::compiler::unit_graph::UnitDep;
 use crate::core::Package;
 use crate::util;
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::interning::InternedString;
 use crate::util::{internal, path_args, profile, StableHasher};
 use crate::CARGO_ENV;
@@ -355,7 +355,7 @@ use super::{BuildContext, Context, FileFlavor, Unit};
 /// transitively propagate throughout the dependency graph, it only forces this
 /// one unit which is very unlikely to be what you want unless you're
 /// exclusively talking about top-level units.
-pub fn prepare_target(cx: &mut Context<'_, '_>, unit: &Unit, force: bool) -> CargoResult<Job> {
+pub fn prepare_target(cx: &mut Context<'_, '_>, unit: &Unit, force: bool) -> CorgiResult<Job> {
     let _p = profile::start(format!(
         "fingerprint: {} / {}",
         unit.pkg.package_id(),
@@ -714,7 +714,7 @@ impl LocalFingerprint {
         pkg_root: &Path,
         target_root: &Path,
         cargo_exe: &Path,
-    ) -> CargoResult<Option<StaleItem>> {
+    ) -> CorgiResult<Option<StaleItem>> {
         match self {
             // We need to parse `dep_info`, learn about the crate's dependencies.
             //
@@ -827,7 +827,7 @@ impl Fingerprint {
     /// The purpose of this is exclusively to produce a diagnostic message
     /// indicating why we're recompiling something. This function always returns
     /// an error, it will never return success.
-    fn compare(&self, old: &Fingerprint) -> CargoResult<()> {
+    fn compare(&self, old: &Fingerprint) -> CorgiResult<()> {
         if self.rustc != old.rustc {
             bail!("rust compiler has changed")
         }
@@ -994,7 +994,7 @@ impl Fingerprint {
         pkg_root: &Path,
         target_root: &Path,
         cargo_exe: &Path,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         assert!(!self.fs_status.up_to_date());
 
         let mut mtimes = HashMap::new();
@@ -1151,7 +1151,7 @@ impl hash::Hash for Fingerprint {
 }
 
 impl DepFingerprint {
-    fn new(cx: &mut Context<'_, '_>, parent: &Unit, dep: &UnitDep) -> CargoResult<DepFingerprint> {
+    fn new(cx: &mut Context<'_, '_>, parent: &Unit, dep: &UnitDep) -> CorgiResult<DepFingerprint> {
         let fingerprint = calculate(cx, &dep.unit)?;
         // We need to be careful about what we hash here. We have a goal of
         // supporting renaming a project directory and not rebuilding
@@ -1225,7 +1225,7 @@ impl StaleItem {
 ///
 /// Information like file modification time is only calculated for path
 /// dependencies.
-fn calculate(cx: &mut Context<'_, '_>, unit: &Unit) -> CargoResult<Arc<Fingerprint>> {
+fn calculate(cx: &mut Context<'_, '_>, unit: &Unit) -> CorgiResult<Arc<Fingerprint>> {
     // This function is slammed quite a lot, so the result is memoized.
     if let Some(s) = cx.fingerprints.get(unit) {
         return Ok(Arc::clone(s));
@@ -1257,7 +1257,7 @@ fn calculate(cx: &mut Context<'_, '_>, unit: &Unit) -> CargoResult<Arc<Fingerpri
 
 /// Calculate a fingerprint for a "normal" unit, or anything that's not a build
 /// script. This is an internal helper of `calculate`, don't call directly.
-fn calculate_normal(cx: &mut Context<'_, '_>, unit: &Unit) -> CargoResult<Fingerprint> {
+fn calculate_normal(cx: &mut Context<'_, '_>, unit: &Unit) -> CorgiResult<Fingerprint> {
     // Recursively calculate the fingerprint for all of our dependencies.
     //
     // Skip fingerprints of binaries because they don't actually induce a
@@ -1270,7 +1270,7 @@ fn calculate_normal(cx: &mut Context<'_, '_>, unit: &Unit) -> CargoResult<Finger
         .into_iter()
         .filter(|dep| !dep.unit.target.is_bin())
         .map(|dep| DepFingerprint::new(cx, unit, &dep))
-        .collect::<CargoResult<Vec<_>>>()?;
+        .collect::<CorgiResult<Vec<_>>>()?;
     deps.sort_by(|a, b| a.pkg_id.cmp(&b.pkg_id));
 
     // Afterwards calculate our own fingerprint information.
@@ -1353,7 +1353,7 @@ fn calculate_normal(cx: &mut Context<'_, '_>, unit: &Unit) -> CargoResult<Finger
 
 /// Calculate a fingerprint for an "execute a build script" unit.  This is an
 /// internal helper of `calculate`, don't call directly.
-fn calculate_run_custom_build(cx: &mut Context<'_, '_>, unit: &Unit) -> CargoResult<Fingerprint> {
+fn calculate_run_custom_build(cx: &mut Context<'_, '_>, unit: &Unit) -> CorgiResult<Fingerprint> {
     assert!(unit.mode.is_run_custom_build());
     // Using the `BuildDeps` information we'll have previously parsed and
     // inserted into `build_explicit_deps` built an initial snapshot of the
@@ -1397,7 +1397,7 @@ See https://doc.rust-lang.org/cargo/reference/build-scripts.html#rerun-if-change
         let deps = Vec::from(cx.unit_deps(unit));
         deps.into_iter()
             .map(|dep| DepFingerprint::new(cx, unit, &dep))
-            .collect::<CargoResult<Vec<_>>>()?
+            .collect::<CorgiResult<Vec<_>>>()?
     };
 
     Ok(Fingerprint {
@@ -1454,8 +1454,8 @@ fn build_script_local_fingerprints(
     Box<
         dyn FnOnce(
                 &BuildDeps,
-                Option<&dyn Fn() -> CargoResult<String>>,
-            ) -> CargoResult<Option<Vec<LocalFingerprint>>>
+                Option<&dyn Fn() -> CorgiResult<String>>,
+            ) -> CorgiResult<Option<Vec<LocalFingerprint>>>
             + Send,
     >,
     bool,
@@ -1467,7 +1467,7 @@ fn build_script_local_fingerprints(
         debug!("override local fingerprints deps {}", unit.pkg);
         return (
             Box::new(
-                move |_: &BuildDeps, _: Option<&dyn Fn() -> CargoResult<String>>| {
+                move |_: &BuildDeps, _: Option<&dyn Fn() -> CorgiResult<String>>| {
                     Ok(Some(vec![fingerprint]))
                 },
             ),
@@ -1485,7 +1485,7 @@ fn build_script_local_fingerprints(
     let pkg_root = unit.pkg.root().to_path_buf();
     let target_dir = target_root(cx);
     let calculate =
-        move |deps: &BuildDeps, pkg_fingerprint: Option<&dyn Fn() -> CargoResult<String>>| {
+        move |deps: &BuildDeps, pkg_fingerprint: Option<&dyn Fn() -> CorgiResult<String>>| {
             if deps.rerun_if_changed.is_empty() && deps.rerun_if_env_changed.is_empty() {
                 match pkg_fingerprint {
                     // FIXME: this is somewhat buggy with respect to docker and
@@ -1579,7 +1579,7 @@ fn local_fingerprints_deps(
     local
 }
 
-fn write_fingerprint(loc: &Path, fingerprint: &Fingerprint) -> CargoResult<()> {
+fn write_fingerprint(loc: &Path, fingerprint: &Fingerprint) -> CorgiResult<()> {
     debug_assert_ne!(fingerprint.rustc, 0);
     // fingerprint::new().rustc == 0, make sure it doesn't make it to the file system.
     // This is mostly so outside tools can reliably find out what rust version this file is for,
@@ -1598,7 +1598,7 @@ fn write_fingerprint(loc: &Path, fingerprint: &Fingerprint) -> CargoResult<()> {
 }
 
 /// Prepare for work when a package starts to build
-pub fn prepare_init(cx: &mut Context<'_, '_>, unit: &Unit) -> CargoResult<()> {
+pub fn prepare_init(cx: &mut Context<'_, '_>, unit: &Unit) -> CorgiResult<()> {
     let new1 = cx.files().fingerprint_dir(unit);
 
     // Doc tests have no output, thus no fingerprint.
@@ -1625,7 +1625,7 @@ fn compare_old_fingerprint(
     loc: &Path,
     new_fingerprint: &Fingerprint,
     mtime_on_use: bool,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let old_fingerprint_short = paths::read(loc)?;
 
     if mtime_on_use {
@@ -1656,7 +1656,7 @@ fn compare_old_fingerprint(
     result
 }
 
-fn log_compare(unit: &Unit, compare: &CargoResult<()>) {
+fn log_compare(unit: &Unit, compare: &CorgiResult<()>) {
     let ce = match compare {
         Ok(..) => return,
         Err(e) => e,
@@ -1683,7 +1683,7 @@ pub fn parse_dep_info(
     pkg_root: &Path,
     target_root: &Path,
     dep_info: &Path,
-) -> CargoResult<Option<RustcDepInfo>> {
+) -> CorgiResult<Option<RustcDepInfo>> {
     let data = match paths::read_bytes(dep_info) {
         Ok(data) => data,
         Err(_) => return Ok(None),
@@ -1707,7 +1707,7 @@ pub fn parse_dep_info(
     Ok(Some(ret))
 }
 
-fn pkg_fingerprint(bcx: &BuildContext<'_, '_>, pkg: &Package) -> CargoResult<String> {
+fn pkg_fingerprint(bcx: &BuildContext<'_, '_>, pkg: &Package) -> CorgiResult<String> {
     let source_id = pkg.package_id().source_id();
     let sources = bcx.packages.sources();
 
@@ -1820,7 +1820,7 @@ pub fn translate_dep_info(
     target_root: &Path,
     rustc_cmd: &ProcessBuilder,
     allow_package: bool,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let depinfo = parse_rustc_dep_info(rustc_dep_info)?;
 
     let target_root = target_root.canonicalize()?;
@@ -1961,7 +1961,7 @@ impl EncodedDepInfo {
         }
     }
 
-    fn serialize(&self) -> CargoResult<Vec<u8>> {
+    fn serialize(&self) -> CorgiResult<Vec<u8>> {
         let mut ret = Vec::new();
         let dst = &mut ret;
         write_usize(dst, self.files.len());
@@ -1999,7 +1999,7 @@ impl EncodedDepInfo {
 }
 
 /// Parse the `.d` dep-info file generated by rustc.
-pub fn parse_rustc_dep_info(rustc_dep_info: &Path) -> CargoResult<RustcDepInfo> {
+pub fn parse_rustc_dep_info(rustc_dep_info: &Path) -> CorgiResult<RustcDepInfo> {
     let contents = paths::read(rustc_dep_info)?;
     let mut ret = RustcDepInfo::default();
     let mut found_deps = false;
@@ -2041,7 +2041,7 @@ pub fn parse_rustc_dep_info(rustc_dep_info: &Path) -> CargoResult<RustcDepInfo> 
     // rustc tries to fit env var names and values all on a single line, which
     // means it needs to escape `\r` and `\n`. The escape syntax used is "\n"
     // which means that `\` also needs to be escaped.
-    fn unescape_env(s: &str) -> CargoResult<String> {
+    fn unescape_env(s: &str) -> CorgiResult<String> {
         let mut ret = String::with_capacity(s.len());
         let mut chars = s.chars();
         while let Some(c) = chars.next() {

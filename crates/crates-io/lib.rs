@@ -37,7 +37,7 @@ pub struct Crate {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct NewCrate {
+pub struct NewPackage {
     pub name: String,
     pub vers: String,
     pub deps: Vec<NewCrateDependency>,
@@ -234,7 +234,7 @@ impl Registry {
         Ok(serde_json::from_str::<Users>(&body)?.users)
     }
 
-    pub fn publish(&mut self, krate: &NewCrate, mut tarball: &File) -> Result<Warnings> {
+    pub fn publish(&mut self, krate: &NewPackage, mut tarball: &File) -> Result<Warnings> {
         let json = serde_json::to_string(krate)?;
         // Prepare the body. The format of the upload request is:
         //

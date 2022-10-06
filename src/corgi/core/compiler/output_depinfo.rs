@@ -28,11 +28,11 @@ use std::io::{BufWriter, Write};
 use std::path::{Path, PathBuf};
 
 use super::{fingerprint, Context, FileFlavor, Unit};
-use crate::util::{internal, CargoResult};
+use crate::util::{internal, CorgiResult};
 use cargo_util::paths;
 use log::debug;
 
-fn render_filename<P: AsRef<Path>>(path: P, basedir: Option<&str>) -> CargoResult<String> {
+fn render_filename<P: AsRef<Path>>(path: P, basedir: Option<&str>) -> CorgiResult<String> {
     let path = path.as_ref();
     if let Some(basedir) = basedir {
         let norm_path = normalize_path(path);
@@ -46,7 +46,7 @@ fn render_filename<P: AsRef<Path>>(path: P, basedir: Option<&str>) -> CargoResul
     }
 }
 
-fn wrap_path(path: &Path) -> CargoResult<String> {
+fn wrap_path(path: &Path) -> CorgiResult<String> {
     path.to_str()
         .ok_or_else(|| internal(format!("path `{:?}` not utf-8", path)))
         .map(|f| f.replace(" ", "\\ "))
@@ -57,7 +57,7 @@ fn add_deps_for_unit(
     cx: &mut Context<'_, '_>,
     unit: &Unit,
     visited: &mut HashSet<Unit>,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     if !visited.insert(unit.clone()) {
         return Ok(());
     }
@@ -108,7 +108,7 @@ fn add_deps_for_unit(
 /// Save a `.d` dep-info file for the given unit.
 ///
 /// This only saves files for uplifted artifacts.
-pub fn output_depinfo(cx: &mut Context<'_, '_>, unit: &Unit) -> CargoResult<()> {
+pub fn output_depinfo(cx: &mut Context<'_, '_>, unit: &Unit) -> CorgiResult<()> {
     let bcx = cx.bcx;
     let mut deps = BTreeSet::new();
     let mut visited = HashSet::new();
@@ -129,7 +129,7 @@ pub fn output_depinfo(cx: &mut Context<'_, '_>, unit: &Unit) -> CargoResult<()> 
     let deps = deps
         .iter()
         .map(|f| render_filename(f, basedir))
-        .collect::<CargoResult<Vec<_>>>()?;
+        .collect::<CorgiResult<Vec<_>>>()?;
 
     for output in cx
         .outputs(unit)?

@@ -3,7 +3,7 @@ use crate::core::compiler::{CompileKind, CompileMode};
 use crate::core::profiles::{Profile, UnitFor};
 use crate::core::{PackageId, Target};
 use crate::util::interning::InternedString;
-use crate::util::CargoResult;
+use crate::util::CorgiResult;
 use crate::Config;
 use std::collections::HashMap;
 use std::io::Write;
@@ -73,7 +73,7 @@ pub fn emit_serialized_unit_graph(
     root_units: &[Unit],
     unit_graph: &UnitGraph,
     config: &Config,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let mut units: Vec<(&Unit, &Vec<UnitDep>)> = unit_graph.iter().collect();
     units.sort_unstable();
     // Create a map for quick lookup for dependencies.

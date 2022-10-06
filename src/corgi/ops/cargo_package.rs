@@ -12,7 +12,7 @@ use crate::core::resolver::CliFeatures;
 use crate::core::{Feature, Shell, Verbosity, Workspace};
 use crate::core::{Package, PackageId, PackageSet, Resolve, SourceId};
 use crate::sources::PathSource;
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::toml::TomlManifest;
 use crate::util::{self, restricted_names, Config, FileLock};
 use crate::{drop_println, ops};
@@ -82,7 +82,7 @@ pub fn package_one(
     ws: &Workspace<'_>,
     pkg: &Package,
     opts: &PackageOpts<'_>,
-) -> CargoResult<Option<FileLock>> {
+) -> CorgiResult<Option<FileLock>> {
     let config = ws.config();
     let mut src = PathSource::new(pkg.root(), pkg.package_id().source_id(), config);
     src.update()?;
@@ -154,7 +154,7 @@ pub fn package_one(
     return Ok(Some(dst));
 }
 
-pub fn package(ws: &Workspace<'_>, opts: &PackageOpts<'_>) -> CargoResult<Option<Vec<FileLock>>> {
+pub fn package(ws: &Workspace<'_>, opts: &PackageOpts<'_>) -> CorgiResult<Option<Vec<FileLock>>> {
     let pkgs = ws.members_with_features(
         &opts.to_package.to_package_id_specs(ws)?,
         &opts.cli_features,
@@ -206,7 +206,7 @@ fn build_ar_list(
     pkg: &Package,
     src_files: Vec<PathBuf>,
     vcs_info: Option<VcsInfo>,
-) -> CargoResult<Vec<ArchiveFile>> {
+) -> CorgiResult<Vec<ArchiveFile>> {
     let mut result = Vec::new();
     let root = pkg.root();
     for src_file in src_files {
@@ -306,7 +306,7 @@ fn check_for_file_and_add(
     pkg: &Package,
     result: &mut Vec<ArchiveFile>,
     ws: &Workspace<'_>,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     match abs_file_path.strip_prefix(&pkg.root()) {
         Ok(rel_file_path) => {
             if !result.iter().any(|ar| ar.rel_path == rel_file_path) {
@@ -351,7 +351,7 @@ fn check_for_file_and_add(
 }
 
 /// Construct `Cargo.lock` for the package to be published.
-fn build_lock(ws: &Workspace<'_>, orig_pkg: &Package) -> CargoResult<String> {
+fn build_lock(ws: &Workspace<'_>, orig_pkg: &Package) -> CorgiResult<String> {
     let config = ws.config();
     let orig_resolve = ops::load_pkg_lockfile(ws)?;
 
@@ -387,7 +387,7 @@ fn build_lock(ws: &Workspace<'_>, orig_pkg: &Package) -> CargoResult<String> {
 
 // Checks that the package has some piece of metadata that a human can
 // use to tell what the package is about.
-fn check_metadata(pkg: &Package, config: &Config) -> CargoResult<()> {
+fn check_metadata(pkg: &Package, config: &Config) -> CorgiResult<()> {
     let md = pkg.manifest().metadata();
 
     let mut missing = vec![];
@@ -434,7 +434,7 @@ fn check_repo_state(
     p: &Package,
     src_files: &[PathBuf],
     config: &Config,
-) -> CargoResult<Option<VcsInfo>> {
+) -> CorgiResult<Option<VcsInfo>> {
     if let Ok(repo) = git2::Repository::discover(p.root()) {
         if let Some(workdir) = repo.workdir() {
             debug!("found a git repo at {:?}", workdir);
@@ -475,7 +475,7 @@ fn check_repo_state(
     // directory is dirty or not, thus we have to assume that it's clean.
     return Ok(None);
 
-    fn git(p: &Package, src_files: &[PathBuf], repo: &git2::Repository) -> CargoResult<GitVcsInfo> {
+    fn git(p: &Package, src_files: &[PathBuf], repo: &git2::Repository) -> CorgiResult<GitVcsInfo> {
         // This is a collection of any dirty or untracked files. This covers:
         // - new/modified/deleted/renamed/type change (index or worktree)
         // - untracked files (which are "new" worktree files)
@@ -520,7 +520,7 @@ fn check_repo_state(
     fn collect_statuses(
         repo: &git2::Repository,
         dirty_files: &mut Vec<PathBuf>,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         let mut status_opts = git2::StatusOptions::new();
         // Exclude submodules, as they are being handled manually by recursing
         // into each one so that details about specific files can be
@@ -554,7 +554,7 @@ fn check_repo_state(
     fn status_submodules(
         repo: &git2::Repository,
         dirty_files: &mut Vec<PathBuf>,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         for submodule in repo.submodules()? {
             // Ignore submodules that don't open, they are probably not initialized.
             // If its files are required, then the verification step should fail.
@@ -573,7 +573,7 @@ fn tar(
     ar_files: Vec<ArchiveFile>,
     dst: &File,
     filename: &str,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     // Prepare the encoder and its header.
     let filename = Path::new(filename);
     let encoder = GzBuilder::new()
@@ -641,7 +641,7 @@ fn compare_resolve(
     current_pkg: &Package,
     orig_resolve: &Resolve,
     new_resolve: &Resolve,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     if config.shell().verbosity() != Verbosity::Verbose {
         return Ok(());
     }
@@ -727,7 +727,7 @@ pub fn check_yanked(
     pkg_set: &PackageSet<'_>,
     resolve: &Resolve,
     hint: &str,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     // Checking the yanked status involves taking a look at the registry and
     // maybe updating files, so be sure to lock it here.
     let _lock = config.acquire_package_cache_lock()?;
@@ -771,7 +771,7 @@ fn run_verify(
     pkg: &Package,
     tar: &FileLock,
     opts: &PackageOpts<'_>,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let config = ws.config();
 
     config.shell().status("Verifying", pkg)?;
@@ -852,8 +852,8 @@ fn run_verify(
     Ok(())
 }
 
-fn hash_all(path: &Path) -> CargoResult<HashMap<PathBuf, u64>> {
-    fn wrap(path: &Path) -> CargoResult<HashMap<PathBuf, u64>> {
+fn hash_all(path: &Path) -> CorgiResult<HashMap<PathBuf, u64>> {
+    fn wrap(path: &Path) -> CorgiResult<HashMap<PathBuf, u64>> {
         let mut result = HashMap::new();
         let walker = walkdir::WalkDir::new(path).into_iter();
         for entry in walker.filter_entry(|e| !(e.depth() == 1 && e.file_name() == "target")) {
@@ -918,7 +918,7 @@ fn report_hash_difference(orig: &HashMap<PathBuf, u64>, after: &HashMap<PathBuf,
 //
 // To help out in situations like this, issue about weird filenames when
 // packaging as a "heads up" that something may not work on other platforms.
-fn check_filename(file: &Path, shell: &mut Shell) -> CargoResult<()> {
+fn check_filename(file: &Path, shell: &mut Shell) -> CorgiResult<()> {
     let name = match file.file_name() {
         Some(name) => name,
         None => return Ok(()),

@@ -4,7 +4,7 @@ use crate::core::compiler::artifact;
 use crate::core::compiler::context::Metadata;
 use crate::core::compiler::job_queue::JobState;
 use crate::core::{profiles::ProfileRoot, PackageId, Target};
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::machine_message::{self, Message};
 use crate::util::{internal, profile};
 use anyhow::{bail, Context as _};
@@ -110,7 +110,7 @@ pub struct BuildDeps {
 }
 
 /// Prepares a `Work` that executes the target as a custom build script.
-pub fn prepare(cx: &mut Context<'_, '_>, unit: &Unit) -> CargoResult<Job> {
+pub fn prepare(cx: &mut Context<'_, '_>, unit: &Unit) -> CorgiResult<Job> {
     let _p = profile::start(format!(
         "build script prepare: {}/{}",
         unit.pkg,
@@ -136,7 +136,7 @@ fn emit_build_output(
     output: &BuildOutput,
     out_dir: &Path,
     package_id: PackageId,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let library_paths = output
         .library_paths
         .iter()
@@ -156,7 +156,7 @@ fn emit_build_output(
     Ok(())
 }
 
-fn build_work(cx: &mut Context<'_, '_>, unit: &Unit) -> CargoResult<Job> {
+fn build_work(cx: &mut Context<'_, '_>, unit: &Unit) -> CorgiResult<Job> {
     assert!(unit.mode.is_run_custom_build());
     let bcx = &cx.bcx;
     let dependencies = cx.unit_deps(unit);
@@ -522,7 +522,7 @@ impl BuildOutput {
         extra_check_cfg: bool,
         nightly_features_allowed: bool,
         targets: &[Target],
-    ) -> CargoResult<BuildOutput> {
+    ) -> CorgiResult<BuildOutput> {
         let contents = paths::read_bytes(path)?;
         BuildOutput::parse(
             &contents,
@@ -549,7 +549,7 @@ impl BuildOutput {
         extra_check_cfg: bool,
         nightly_features_allowed: bool,
         targets: &[Target],
-    ) -> CargoResult<BuildOutput> {
+    ) -> CorgiResult<BuildOutput> {
         let mut library_paths = Vec::new();
         let mut library_links = Vec::new();
         let mut linker_args = Vec::new();
@@ -759,7 +759,7 @@ impl BuildOutput {
     pub fn parse_rustc_flags(
         value: &str,
         whence: &str,
-    ) -> CargoResult<(Vec<PathBuf>, Vec<String>)> {
+    ) -> CorgiResult<(Vec<PathBuf>, Vec<String>)> {
         let value = value.trim();
         let mut flags_iter = value
             .split(|c: char| c.is_whitespace())
@@ -801,7 +801,7 @@ impl BuildOutput {
         Ok((library_paths, library_links))
     }
 
-    pub fn parse_rustc_env(value: &str, whence: &str) -> CargoResult<(String, String)> {
+    pub fn parse_rustc_env(value: &str, whence: &str) -> CorgiResult<(String, String)> {
         let mut iter = value.splitn(2, '=');
         let name = iter.next();
         let val = iter.next();
@@ -812,7 +812,7 @@ impl BuildOutput {
     }
 }
 
-fn prepare_metabuild(cx: &Context<'_, '_>, unit: &Unit, deps: &[String]) -> CargoResult<()> {
+fn prepare_metabuild(cx: &Context<'_, '_>, unit: &Unit, deps: &[String]) -> CorgiResult<()> {
     let mut output = Vec::new();
     let available_deps = cx.unit_deps(unit);
     // Filter out optional dependencies, and look up the actual lib name.
@@ -872,7 +872,7 @@ impl BuildDeps {
 ///
 /// The given set of units to this function is the initial set of
 /// targets/profiles which are being built.
-pub fn build_map(cx: &mut Context<'_, '_>) -> CargoResult<()> {
+pub fn build_map(cx: &mut Context<'_, '_>) -> CorgiResult<()> {
     let mut ret = HashMap::new();
     for unit in &cx.bcx.roots {
         build(&mut ret, cx, unit)?;
@@ -887,7 +887,7 @@ pub fn build_map(cx: &mut Context<'_, '_>) -> CargoResult<()> {
         out: &'a mut HashMap<Unit, BuildScripts>,
         cx: &mut Context<'_, '_>,
         unit: &Unit,
-    ) -> CargoResult<&'a BuildScripts> {
+    ) -> CorgiResult<&'a BuildScripts> {
         // Do a quick pre-flight check to see if we've already calculated the
         // set of dependencies.
         if out.contains_key(unit) {

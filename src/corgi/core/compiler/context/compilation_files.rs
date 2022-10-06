@@ -11,7 +11,7 @@ use log::debug;
 use super::{BuildContext, CompileKind, Context, FileFlavor, Layout};
 use crate::core::compiler::{CompileMode, CompileTarget, CrateType, FileType, Unit};
 use crate::core::{Target, TargetKind, Workspace};
-use crate::util::{self, CargoResult, StableHasher};
+use crate::util::{self, CorgiResult, StableHasher};
 
 /// This is a generic version number that can be changed to make
 /// backwards-incompatible changes to any file structures in the output
@@ -337,7 +337,7 @@ impl<'a, 'cfg: 'a> CompilationFiles<'a, 'cfg> {
         target: &Target,
         kind: CompileKind,
         bcx: &BuildContext<'_, '_>,
-    ) -> CargoResult<PathBuf> {
+    ) -> CorgiResult<PathBuf> {
         assert!(target.is_bin());
         let dest = self.layout(kind).dest();
         let info = bcx.target_data.info(kind);
@@ -364,7 +364,7 @@ impl<'a, 'cfg: 'a> CompilationFiles<'a, 'cfg> {
         &self,
         unit: &Unit,
         bcx: &BuildContext<'a, 'cfg>,
-    ) -> CargoResult<Arc<Vec<OutputFile>>> {
+    ) -> CorgiResult<Arc<Vec<OutputFile>>> {
         self.outputs[unit]
             .try_borrow_with(|| self.calc_outputs(unit, bcx))
             .map(Arc::clone)
@@ -425,7 +425,7 @@ impl<'a, 'cfg: 'a> CompilationFiles<'a, 'cfg> {
         &self,
         unit: &Unit,
         bcx: &BuildContext<'a, 'cfg>,
-    ) -> CargoResult<Arc<Vec<OutputFile>>> {
+    ) -> CorgiResult<Arc<Vec<OutputFile>>> {
         let ret = match unit.mode {
             CompileMode::Doc { .. } => {
                 let path = self
@@ -479,7 +479,7 @@ impl<'a, 'cfg: 'a> CompilationFiles<'a, 'cfg> {
         &self,
         unit: &Unit,
         bcx: &BuildContext<'a, 'cfg>,
-    ) -> CargoResult<Vec<OutputFile>> {
+    ) -> CorgiResult<Vec<OutputFile>> {
         let out_dir = self.out_dir(unit);
 
         let info = bcx.target_data.info(unit.kind);

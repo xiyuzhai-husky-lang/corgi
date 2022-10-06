@@ -1,4 +1,4 @@
-use crate::util::{CargoResult, IntoUrl};
+use crate::util::{CorgiResult, IntoUrl};
 
 use url::Url;
 
@@ -6,11 +6,11 @@ use url::Url;
 /// a Url.
 pub trait IntoUrlWithBase {
     /// Performs the conversion
-    fn into_url_with_base<U: IntoUrl>(self, base: Option<U>) -> CargoResult<Url>;
+    fn into_url_with_base<U: IntoUrl>(self, base: Option<U>) -> CorgiResult<Url>;
 }
 
 impl<'a> IntoUrlWithBase for &'a str {
-    fn into_url_with_base<U: IntoUrl>(self, base: Option<U>) -> CargoResult<Url> {
+    fn into_url_with_base<U: IntoUrl>(self, base: Option<U>) -> CorgiResult<Url> {
         let base_url = match base {
             Some(base) => Some(
                 base.into_url()

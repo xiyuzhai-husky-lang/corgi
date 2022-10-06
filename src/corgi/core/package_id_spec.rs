@@ -7,7 +7,7 @@ use serde::{de, ser};
 use url::Url;
 
 use crate::core::PackageId;
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::interning::InternedString;
 use crate::util::lev_distance;
 use crate::util::{validate_package_name, IntoUrl, ToSemver};
@@ -49,7 +49,7 @@ impl PackageIdSpec {
     /// for spec in specs {
     ///     assert!(PackageIdSpec::parse(spec).is_ok());
     /// }
-    pub fn parse(spec: &str) -> CargoResult<PackageIdSpec> {
+    pub fn parse(spec: &str) -> CorgiResult<PackageIdSpec> {
         if spec.contains("://") {
             if let Ok(url) = spec.into_url() {
                 return PackageIdSpec::from_url(url);
@@ -82,7 +82,7 @@ impl PackageIdSpec {
     }
 
     /// Roughly equivalent to `PackageIdSpec::parse(spec)?.query(i)`
-    pub fn query_str<I>(spec: &str, i: I) -> CargoResult<PackageId>
+    pub fn query_str<I>(spec: &str, i: I) -> CorgiResult<PackageId>
     where
         I: IntoIterator<Item = PackageId>,
     {
@@ -105,7 +105,7 @@ impl PackageIdSpec {
     }
 
     /// Tries to convert a valid `Url` to a `PackageIdSpec`.
-    fn from_url(mut url: Url) -> CargoResult<PackageIdSpec> {
+    fn from_url(mut url: Url) -> CorgiResult<PackageIdSpec> {
         if url.query().is_some() {
             bail!("cannot have a query string in a pkgid: {}", url)
         }
@@ -187,7 +187,7 @@ impl PackageIdSpec {
 
     /// Checks a list of `PackageId`s to find 1 that matches this `PackageIdSpec`. If 0, 2, or
     /// more are found, then this returns an error.
-    pub fn query<I>(&self, i: I) -> CargoResult<PackageId>
+    pub fn query<I>(&self, i: I) -> CorgiResult<PackageId>
     where
         I: IntoIterator<Item = PackageId>,
     {

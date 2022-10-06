@@ -8,7 +8,7 @@ use crate::core::compiler::{BuildContext, Context, TimingOutput};
 use crate::core::PackageId;
 use crate::util::cpu::State;
 use crate::util::machine_message::{self, Message};
-use crate::util::{CargoResult, Config};
+use crate::util::{Config, CorgiResult};
 use anyhow::Context as _;
 use cargo_util::paths;
 use std::collections::HashMap;
@@ -296,7 +296,7 @@ impl<'cfg> Timings<'cfg> {
         &mut self,
         cx: &Context<'_, '_>,
         error: &Option<anyhow::Error>,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         if !self.enabled {
             return Ok(());
         }
@@ -311,7 +311,7 @@ impl<'cfg> Timings<'cfg> {
     }
 
     /// Save HTML report to disk.
-    fn report_html(&self, cx: &Context<'_, '_>, error: &Option<anyhow::Error>) -> CargoResult<()> {
+    fn report_html(&self, cx: &Context<'_, '_>, error: &Option<anyhow::Error>) -> CorgiResult<()> {
         let duration = self.start.elapsed().as_secs_f64();
         let timestamp = self.start_str.replace(&['-', ':'][..], "");
         let timings_path = cx.files().host_root().join("cargo-timings");
@@ -367,7 +367,7 @@ impl<'cfg> Timings<'cfg> {
         duration: f64,
         bcx: &BuildContext<'_, '_>,
         error: &Option<anyhow::Error>,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         let targets: Vec<String> = self
             .root_targets
             .iter()
@@ -456,7 +456,7 @@ impl<'cfg> Timings<'cfg> {
         Ok(())
     }
 
-    fn write_js_data(&self, f: &mut impl Write) -> CargoResult<()> {
+    fn write_js_data(&self, f: &mut impl Write) -> CorgiResult<()> {
         // Create a map to link indices of unlocked units.
         let unit_map: HashMap<Unit, usize> = self
             .unit_times
@@ -536,7 +536,7 @@ impl<'cfg> Timings<'cfg> {
     }
 
     /// Render the table of all units.
-    fn write_unit_table(&self, f: &mut impl Write) -> CargoResult<()> {
+    fn write_unit_table(&self, f: &mut impl Write) -> CorgiResult<()> {
         write!(
             f,
             r#"

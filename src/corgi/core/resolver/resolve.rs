@@ -1,7 +1,7 @@
 use super::encode::Metadata;
 use crate::core::dependency::DepKind;
 use crate::core::{Dependency, PackageId, PackageIdSpec, Summary, Target};
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::interning::InternedString;
 use crate::util::Graph;
 use std::borrow::Borrow;
@@ -130,7 +130,7 @@ impl Resolve {
         }
     }
 
-    pub fn merge_from(&mut self, previous: &Resolve) -> CargoResult<()> {
+    pub fn merge_from(&mut self, previous: &Resolve) -> CorgiResult<()> {
         // Given a previous instance of resolve, it should be forbidden to ever
         // have a checksums which *differ*. If the same package ID has differing
         // checksums, then something has gone wrong such as:
@@ -278,11 +278,11 @@ unable to verify that `{0}` is the same as when the lockfile was generated
             .unwrap_or_else(|| panic!("Unknown dependency {:?} for package {:?}", dep, pkg))
     }
 
-    pub fn query(&self, spec: &str) -> CargoResult<PackageId> {
+    pub fn query(&self, spec: &str) -> CorgiResult<PackageId> {
         PackageIdSpec::query_str(spec, self.iter())
     }
 
-    pub fn specs_to_ids(&self, specs: &[PackageIdSpec]) -> CargoResult<Vec<PackageId>> {
+    pub fn specs_to_ids(&self, specs: &[PackageIdSpec]) -> CorgiResult<Vec<PackageId>> {
         specs.iter().map(|s| s.query(self.iter())).collect()
     }
 
@@ -303,7 +303,7 @@ unable to verify that `{0}` is the same as when the lockfile was generated
         from: PackageId,
         to: PackageId,
         to_target: &Target,
-    ) -> CargoResult<(InternedString, Option<InternedString>)> {
+    ) -> CorgiResult<(InternedString, Option<InternedString>)> {
         let empty_set: HashSet<Dependency> = HashSet::new();
         let deps = if from == to {
             &empty_set

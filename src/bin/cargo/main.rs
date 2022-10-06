@@ -4,7 +4,7 @@
 use cargo_util::{ProcessBuilder, ProcessError};
 use corgi::util::toml::StringOrVec;
 use corgi::util::CliError;
-use corgi::util::{self, closest_msg, command_prelude, CargoResult, CliResult, Config};
+use corgi::util::{self, closest_msg, command_prelude, CliResult, Config, CorgiResult};
 use std::collections::BTreeMap;
 use std::env;
 use std::ffi::OsStr;
@@ -61,7 +61,7 @@ fn builtin_aliases_execs(cmd: &str) -> Option<&(&str, &str, &str)> {
 /// 2. If an `Err` occurs (missing key, type mismatch, or any possible error),
 ///    try to get it as an array again.
 /// 3. If still cannot find any, finds one insides [`BUILTIN_ALIASES`].
-fn aliased_command(config: &Config, command: &str) -> CargoResult<Option<Vec<String>>> {
+fn aliased_command(config: &Config, command: &str) -> CorgiResult<Option<Vec<String>>> {
     let alias_name = format!("alias.{}", command);
     let user_alias = match config.get_string(&alias_name) {
         Ok(Some(record)) => Some(

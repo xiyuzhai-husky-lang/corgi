@@ -14,7 +14,7 @@ use serde::Serialize;
 use super::context::OutputFile;
 use super::{CompileKind, CompileMode, Context, Unit};
 use crate::core::TargetKind;
-use crate::util::{internal, CargoResult, Config};
+use crate::util::{internal, Config, CorgiResult};
 use cargo_util::ProcessBuilder;
 
 #[derive(Debug, Serialize)]
@@ -71,7 +71,7 @@ impl Invocation {
         }
     }
 
-    pub fn update_cmd(&mut self, cmd: &ProcessBuilder) -> CargoResult<()> {
+    pub fn update_cmd(&mut self, cmd: &ProcessBuilder) -> CorgiResult<()> {
         self.program = cmd
             .get_program()
             .to_str()
@@ -110,7 +110,7 @@ impl BuildPlan {
         }
     }
 
-    pub fn add(&mut self, cx: &Context<'_, '_>, unit: &Unit) -> CargoResult<()> {
+    pub fn add(&mut self, cx: &Context<'_, '_>, unit: &Unit) -> CorgiResult<()> {
         let id = self.plan.invocations.len();
         self.invocation_map.insert(unit.buildkey(), id);
         let deps = cx
@@ -128,7 +128,7 @@ impl BuildPlan {
         invocation_name: &str,
         cmd: &ProcessBuilder,
         outputs: &[OutputFile],
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         let id = self.invocation_map[invocation_name];
         let invocation =
             self.plan.invocations.get_mut(id).ok_or_else(|| {

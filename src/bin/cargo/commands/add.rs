@@ -10,7 +10,7 @@ use corgi::ops::resolve_ws;
 use corgi::util::command_prelude::*;
 use corgi::util::interning::InternedString;
 use corgi::util::toml_mut::manifest::DepTable;
-use corgi::CargoResult;
+use corgi::CorgiResult;
 
 pub fn cli() -> Command {
     clap::Command::new("add")
@@ -203,7 +203,7 @@ pub fn exec(config: &mut Config, args: &ArgMatches) -> CliResult {
     Ok(())
 }
 
-fn parse_dependencies(config: &Config, matches: &ArgMatches) -> CargoResult<Vec<DepOp>> {
+fn parse_dependencies(config: &Config, matches: &ArgMatches) -> CorgiResult<Vec<DepOp>> {
     let path = matches.get_one::<String>("path");
     let git = matches.get_one::<String>("git");
     let branch = matches.get_one::<String>("branch");

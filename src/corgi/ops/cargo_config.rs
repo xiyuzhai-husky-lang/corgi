@@ -1,7 +1,7 @@
 //! Implementation of `cargo config` subcommand.
 
 use crate::util::config::{Config, ConfigKey, ConfigValue as CV, Definition};
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::{drop_eprintln, drop_println};
 use anyhow::{bail, format_err, Error};
 use serde_json::json;
@@ -22,7 +22,7 @@ impl ConfigFormat {
 
 impl FromStr for ConfigFormat {
     type Err = Error;
-    fn from_str(s: &str) -> CargoResult<Self> {
+    fn from_str(s: &str) -> CorgiResult<Self> {
         match s {
             "toml" => Ok(ConfigFormat::Toml),
             "json" => Ok(ConfigFormat::Json),
@@ -50,7 +50,7 @@ pub struct GetOptions<'a> {
     pub merged: bool,
 }
 
-pub fn get(config: &Config, opts: &GetOptions<'_>) -> CargoResult<()> {
+pub fn get(config: &Config, opts: &GetOptions<'_>) -> CorgiResult<()> {
     if opts.show_origin && !matches!(opts.format, ConfigFormat::Toml) {
         bail!(
             "the `{}` format does not support --show-origin, try the `toml` format instead",
@@ -222,7 +222,7 @@ fn print_json(config: &Config, key: &ConfigKey, cv: &CV, include_key: bool) {
     }
 }
 
-fn print_toml_unmerged(config: &Config, opts: &GetOptions<'_>, key: &ConfigKey) -> CargoResult<()> {
+fn print_toml_unmerged(config: &Config, opts: &GetOptions<'_>, key: &ConfigKey) -> CorgiResult<()> {
     let print_table = |cv: &CV| {
         drop_println!(config, "# {}", cv.definition());
         print_toml(config, opts, &ConfigKey::new(), cv);
@@ -230,7 +230,7 @@ fn print_toml_unmerged(config: &Config, opts: &GetOptions<'_>, key: &ConfigKey) 
     };
     // This removes entries from the given CV so that all that remains is the
     // given key. Returns false if no entries were found.
-    fn trim_cv(mut cv: &mut CV, key: &ConfigKey) -> CargoResult<bool> {
+    fn trim_cv(mut cv: &mut CV, key: &ConfigKey) -> CorgiResult<bool> {
         for (i, part) in key.parts().enumerate() {
             match cv {
                 CV::Table(map, _def) => {

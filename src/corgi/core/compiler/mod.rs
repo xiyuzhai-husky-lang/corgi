@@ -56,7 +56,7 @@ pub use crate::core::compiler::unit::{Unit, UnitInterner};
 use crate::core::manifest::TargetSourcePath;
 use crate::core::profiles::{PanicStrategy, Profile, Strip};
 use crate::core::{Feature, PackageId, Target};
-use crate::util::errors::{CargoResult, VerboseError};
+use crate::util::errors::{CorgiResult, VerboseError};
 use crate::util::interning::InternedString;
 use crate::util::machine_message::{self, Message};
 use crate::util::{add_path_args, internal, iter_join_onto, profile};
@@ -106,9 +106,9 @@ pub trait Executor: Send + Sync + 'static {
         id: PackageId,
         target: &Target,
         mode: CompileMode,
-        on_stdout_line: &mut dyn FnMut(&str) -> CargoResult<()>,
-        on_stderr_line: &mut dyn FnMut(&str) -> CargoResult<()>,
-    ) -> CargoResult<()>;
+        on_stdout_line: &mut dyn FnMut(&str) -> CorgiResult<()>,
+        on_stderr_line: &mut dyn FnMut(&str) -> CorgiResult<()>,
+    ) -> CorgiResult<()>;
 
     /// Queried when queuing each unit of work. If it returns true, then the
     /// unit will always be rebuilt, independent of whether it needs to be.
@@ -129,9 +129,9 @@ impl Executor for DefaultExecutor {
         _id: PackageId,
         _target: &Target,
         _mode: CompileMode,
-        on_stdout_line: &mut dyn FnMut(&str) -> CargoResult<()>,
-        on_stderr_line: &mut dyn FnMut(&str) -> CargoResult<()>,
-    ) -> CargoResult<()> {
+        on_stdout_line: &mut dyn FnMut(&str) -> CorgiResult<()>,
+        on_stderr_line: &mut dyn FnMut(&str) -> CorgiResult<()>,
+    ) -> CorgiResult<()> {
         cmd.exec_with_streaming(on_stdout_line, on_stderr_line, false)
             .map(drop)
     }
@@ -144,7 +144,7 @@ fn compile<'cfg>(
     unit: &Unit,
     exec: &Arc<dyn Executor>,
     force_rebuild: bool,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let bcx = cx.bcx;
     let build_plan = bcx.build_config.build_plan;
     if !cx.compiled.insert(unit.clone()) {
@@ -206,7 +206,7 @@ fn compile<'cfg>(
     Ok(())
 }
 
-fn rustc(cx: &mut Context<'_, '_>, unit: &Unit, exec: &Arc<dyn Executor>) -> CargoResult<Work> {
+fn rustc(cx: &mut Context<'_, '_>, unit: &Unit, exec: &Arc<dyn Executor>) -> CorgiResult<Work> {
     let mut rustc = prepare_rustc(cx, &unit.target.rustc_crate_types(), unit)?;
     let build_plan = cx.bcx.build_config.build_plan;
 
@@ -408,7 +408,7 @@ fn rustc(cx: &mut Context<'_, '_>, unit: &Unit, exec: &Arc<dyn Executor>) -> Car
         pass_l_flag: bool,
         target: &Target,
         current_id: PackageId,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         for key in build_scripts.to_link.iter() {
             let output = build_script_outputs.get(key.1).ok_or_else(|| {
                 internal(format!(
@@ -445,7 +445,7 @@ fn rustc(cx: &mut Context<'_, '_>, unit: &Unit, exec: &Arc<dyn Executor>) -> Car
 
 /// Link the compiled target (often of form `foo-{metadata_hash}`) to the
 /// final target. This must happen during both "Fresh" and "Compile".
-fn link_targets(cx: &mut Context<'_, '_>, unit: &Unit, fresh: bool) -> CargoResult<Work> {
+fn link_targets(cx: &mut Context<'_, '_>, unit: &Unit, fresh: bool) -> CorgiResult<Work> {
     let bcx = cx.bcx;
     let outputs = cx.outputs(unit)?;
     let export_dir = cx.files().export_dir();
@@ -527,7 +527,7 @@ fn add_plugin_deps(
     build_script_outputs: &BuildScriptOutputs,
     build_scripts: &BuildScripts,
     root_output: &Path,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let var = paths::dylib_path_envvar();
     let search_path = rustc.get_env(var).unwrap_or_default();
     let mut search_path = env::split_paths(&search_path).collect::<Vec<_>>();
@@ -588,7 +588,7 @@ fn prepare_rustc(
     cx: &mut Context<'_, '_>,
     crate_types: &[CrateType],
     unit: &Unit,
-) -> CargoResult<ProcessBuilder> {
+) -> CorgiResult<ProcessBuilder> {
     let is_primary = cx.is_primary_package(unit);
     let is_workspace = cx.bcx.ws.is_member(&unit.pkg);
 
@@ -618,7 +618,7 @@ fn prepare_rustc(
     Ok(base)
 }
 
-fn rustdoc(cx: &mut Context<'_, '_>, unit: &Unit) -> CargoResult<Work> {
+fn rustdoc(cx: &mut Context<'_, '_>, unit: &Unit) -> CorgiResult<Work> {
     let bcx = cx.bcx;
     // script_metadata is not needed here, it is only for tests.
     let mut rustdoc = cx.compilation.rustdoc_process(unit, None)?;
@@ -652,7 +652,7 @@ fn rustdoc(cx: &mut Context<'_, '_>, unit: &Unit) -> CargoResult<Work> {
     let metadata = cx.metadata_for_doc_units[unit];
     rustdoc.arg("-C").arg(format!("metadata={}", metadata));
 
-    let scrape_output_path = |unit: &Unit| -> CargoResult<PathBuf> {
+    let scrape_output_path = |unit: &Unit| -> CorgiResult<PathBuf> {
         let output_dir = cx.files().deps_dir(unit);
         Ok(output_dir.join(format!("{}.examples", unit.buildkey())))
     };
@@ -823,7 +823,7 @@ fn build_base_args(
     cmd: &mut ProcessBuilder,
     unit: &Unit,
     crate_types: &[CrateType],
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     assert!(!unit.mode.is_run_custom_build());
 
     let bcx = cx.bcx;
@@ -1106,7 +1106,7 @@ fn build_deps_args(
     cmd: &mut ProcessBuilder,
     cx: &mut Context<'_, '_>,
     unit: &Unit,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let bcx = cx.bcx;
     cmd.arg("-L").arg(&{
         let mut deps = OsString::from("dependency=");
@@ -1178,7 +1178,7 @@ fn add_custom_flags(
     cmd: &mut ProcessBuilder,
     build_script_outputs: &BuildScriptOutputs,
     metadata: Option<Metadata>,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     if let Some(metadata) = metadata {
         if let Some(output) = build_script_outputs.get(metadata) {
             for cfg in output.cfgs.iter() {
@@ -1204,13 +1204,13 @@ pub fn extern_args(
     cx: &Context<'_, '_>,
     unit: &Unit,
     unstable_opts: &mut bool,
-) -> CargoResult<Vec<OsString>> {
+) -> CorgiResult<Vec<OsString>> {
     let mut result = Vec::new();
     let deps = cx.unit_deps(unit);
 
     // Closure to add one dependency to `result`.
     let mut link_to =
-        |dep: &UnitDep, extern_crate_name: InternedString, noprelude: bool| -> CargoResult<()> {
+        |dep: &UnitDep, extern_crate_name: InternedString, noprelude: bool| -> CorgiResult<()> {
             let mut value = OsString::new();
             let mut opts = Vec::new();
             if unit
@@ -1328,7 +1328,7 @@ fn on_stdout_line(
     line: &str,
     _package_id: PackageId,
     _target: &Target,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     state.stdout(line.to_string())?;
     Ok(())
 }
@@ -1340,7 +1340,7 @@ fn on_stderr_line(
     manifest_path: &std::path::Path,
     target: &Target,
     options: &mut OutputOptions,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     if on_stderr_line_inner(state, line, package_id, manifest_path, target, options)? {
         // Check if caching is enabled.
         if let Some((path, cell)) = &mut options.cache_cell {
@@ -1362,7 +1362,7 @@ fn on_stderr_line_inner(
     manifest_path: &std::path::Path,
     target: &Target,
     options: &mut OutputOptions,
-) -> CargoResult<bool> {
+) -> CorgiResult<bool> {
     // We primarily want to use this function to process JSON messages from
     // rustc. The compiler should always print one JSON message per line, and
     // otherwise it may have other output intermingled (think RUST_LOG or

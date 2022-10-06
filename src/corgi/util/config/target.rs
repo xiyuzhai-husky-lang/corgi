@@ -1,6 +1,6 @@
 use super::{Config, ConfigKey, ConfigRelativePath, OptValue, PathAndArgs, StringList, CV};
 use crate::core::compiler::{BuildOutput, LinkType};
-use crate::util::CargoResult;
+use crate::util::CorgiResult;
 use serde::Deserialize;
 use std::collections::{BTreeMap, HashMap};
 use std::path::PathBuf;
@@ -38,7 +38,7 @@ pub struct TargetConfig {
 }
 
 /// Loads all of the `target.'cfg()'` tables.
-pub(super) fn load_target_cfgs(config: &Config) -> CargoResult<Vec<(String, TargetCfgConfig)>> {
+pub(super) fn load_target_cfgs(config: &Config) -> CorgiResult<Vec<(String, TargetCfgConfig)>> {
     // Load all [target] tables, filter out the cfg() entries.
     let mut result = Vec::new();
     // Use a BTreeMap so the keys are sorted. This is important for
@@ -66,7 +66,7 @@ pub(super) fn load_target_cfgs(config: &Config) -> CargoResult<Vec<(String, Targ
 }
 
 /// Returns true if the `[target]` table should be applied to host targets.
-pub(super) fn get_target_applies_to_host(config: &Config) -> CargoResult<bool> {
+pub(super) fn get_target_applies_to_host(config: &Config) -> CorgiResult<bool> {
     if config.cli_unstable().target_applies_to_host {
         if let Ok(target_applies_to_host) = config.get::<bool>("target-applies-to-host") {
             Ok(target_applies_to_host)
@@ -83,7 +83,7 @@ pub(super) fn get_target_applies_to_host(config: &Config) -> CargoResult<bool> {
 }
 
 /// Loads a single `[host]` table for the given triple.
-pub(super) fn load_host_triple(config: &Config, triple: &str) -> CargoResult<TargetConfig> {
+pub(super) fn load_host_triple(config: &Config, triple: &str) -> CorgiResult<TargetConfig> {
     if config.cli_unstable().host_config {
         let host_triple_prefix = format!("host.{}", triple);
         let host_triple_key = ConfigKey::from_str(&host_triple_prefix);
@@ -103,12 +103,12 @@ pub(super) fn load_host_triple(config: &Config, triple: &str) -> CargoResult<Tar
 }
 
 /// Loads a single `[target]` table for the given triple.
-pub(super) fn load_target_triple(config: &Config, triple: &str) -> CargoResult<TargetConfig> {
+pub(super) fn load_target_triple(config: &Config, triple: &str) -> CorgiResult<TargetConfig> {
     load_config_table(config, &format!("target.{}", triple))
 }
 
 /// Loads a single table for the given prefix.
-fn load_config_table(config: &Config, prefix: &str) -> CargoResult<TargetConfig> {
+fn load_config_table(config: &Config, prefix: &str) -> CorgiResult<TargetConfig> {
     // This needs to get each field individually because it cannot fetch the
     // struct all at once due to `links_overrides`. Can't use `serde(flatten)`
     // because it causes serde to use `deserialize_map` which means the config
@@ -135,7 +135,7 @@ fn parse_links_overrides(
     target_key: &ConfigKey,
     links: HashMap<String, CV>,
     config: &Config,
-) -> CargoResult<BTreeMap<String, BuildOutput>> {
+) -> CorgiResult<BTreeMap<String, BuildOutput>> {
     let mut links_overrides = BTreeMap::new();
     let extra_check_cfg = match config.cli_unstable().check_cfg {
         Some((_, _, _, output)) => output,
@@ -241,7 +241,7 @@ fn extra_link_args<'a>(
     link_type: LinkType,
     key: &str,
     value: &'a CV,
-) -> CargoResult<impl Iterator<Item = (LinkType, String)> + 'a> {
+) -> CorgiResult<impl Iterator<Item = (LinkType, String)> + 'a> {
     let args = value.list(key)?;
     Ok(args.iter().map(move |v| (link_type.clone(), v.0.clone())))
 }

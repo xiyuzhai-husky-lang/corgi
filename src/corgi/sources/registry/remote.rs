@@ -3,7 +3,7 @@ use crate::sources::git;
 use crate::sources::registry::download;
 use crate::sources::registry::MaybeLock;
 use crate::sources::registry::{LoadResponse, RegistryConfig, RegistryData};
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::interning::InternedString;
 use crate::util::{Config, Filesystem};
 use anyhow::Context as _;
@@ -53,7 +53,7 @@ impl<'cfg> RemoteRegistry<'cfg> {
         }
     }
 
-    fn repo(&self) -> CargoResult<&git2::Repository> {
+    fn repo(&self) -> CorgiResult<&git2::Repository> {
         self.repo.try_borrow_with(|| {
             let path = self.config.assert_package_cache_locked(&self.index_path);
 
@@ -96,7 +96,7 @@ impl<'cfg> RemoteRegistry<'cfg> {
         })
     }
 
-    fn head(&self) -> CargoResult<git2::Oid> {
+    fn head(&self) -> CorgiResult<git2::Oid> {
         if self.head.get().is_none() {
             let repo = self.repo()?;
             let oid = self.index_git_ref.resolve(repo)?;
@@ -105,7 +105,7 @@ impl<'cfg> RemoteRegistry<'cfg> {
         Ok(self.head.get().unwrap())
     }
 
-    fn tree(&self) -> CargoResult<Ref<'_, git2::Tree<'_>>> {
+    fn tree(&self) -> CorgiResult<Ref<'_, git2::Tree<'_>>> {
         {
             let tree = self.tree.borrow();
             if tree.is_some() {
@@ -146,7 +146,7 @@ impl<'cfg> RemoteRegistry<'cfg> {
 const LAST_UPDATED_FILE: &str = ".last-updated";
 
 impl<'cfg> RegistryData for RemoteRegistry<'cfg> {
-    fn prepare(&self) -> CargoResult<()> {
+    fn prepare(&self) -> CorgiResult<()> {
         self.repo()?; // create intermediate dirs and initialize the repo
         Ok(())
     }
@@ -171,7 +171,7 @@ impl<'cfg> RegistryData for RemoteRegistry<'cfg> {
         _root: &Path,
         path: &Path,
         index_version: Option<&str>,
-    ) -> Poll<CargoResult<LoadResponse>> {
+    ) -> Poll<CorgiResult<LoadResponse>> {
         if self.needs_update {
             return Poll::Pending;
         }
@@ -188,7 +188,7 @@ impl<'cfg> RegistryData for RemoteRegistry<'cfg> {
             registry: &RemoteRegistry<'_>,
             path: &Path,
             index_version: Option<&str>,
-        ) -> CargoResult<LoadResponse> {
+        ) -> CorgiResult<LoadResponse> {
             let repo = registry.repo()?;
             let tree = registry.tree()?;
             let entry = tree.get_path(path);
@@ -232,7 +232,7 @@ impl<'cfg> RegistryData for RemoteRegistry<'cfg> {
         }
     }
 
-    fn config(&mut self) -> Poll<CargoResult<Option<RegistryConfig>>> {
+    fn config(&mut self) -> Poll<CorgiResult<Option<RegistryConfig>>> {
         debug!("loading config");
         self.prepare()?;
         self.config.assert_package_cache_locked(&self.index_path);
@@ -245,7 +245,7 @@ impl<'cfg> RegistryData for RemoteRegistry<'cfg> {
         }
     }
 
-    fn block_until_ready(&mut self) -> CargoResult<()> {
+    fn block_until_ready(&mut self) -> CorgiResult<()> {
         if !self.needs_update {
             return Ok(());
         }
@@ -310,7 +310,7 @@ impl<'cfg> RegistryData for RemoteRegistry<'cfg> {
         self.updated
     }
 
-    fn download(&mut self, pkg: PackageId, checksum: &str) -> CargoResult<MaybeLock> {
+    fn download(&mut self, pkg: PackageId, checksum: &str) -> CorgiResult<MaybeLock> {
         let registry_config = loop {
             match self.config()? {
                 Poll::Pending => self.block_until_ready()?,
@@ -332,7 +332,7 @@ impl<'cfg> RegistryData for RemoteRegistry<'cfg> {
         pkg: PackageId,
         checksum: &str,
         data: &[u8],
-    ) -> CargoResult<File> {
+    ) -> CorgiResult<File> {
         download::finish_download(&self.cache_path, &self.config, pkg, checksum, data)
     }
 

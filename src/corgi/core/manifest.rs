@@ -518,7 +518,7 @@ impl Manifest {
         }
     }
 
-    pub fn feature_gate(&self) -> CargoResult<()> {
+    pub fn feature_gate(&self) -> CorgiResult<()> {
         if self.im_a_teapot.is_some() {
             self.unstable_features
                 .require(Feature::test_dummy_unstable())

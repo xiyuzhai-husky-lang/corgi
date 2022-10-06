@@ -4,7 +4,7 @@ use std::time::{Duration, Instant};
 
 use crate::core::shell::Verbosity;
 use crate::util::config::ProgressWhen;
-use crate::util::{CargoResult, Config};
+use crate::util::{Config, CorgiResult};
 use cargo_util::is_ci;
 use unicode_width::UnicodeWidthChar;
 
@@ -97,7 +97,7 @@ impl<'cfg> Progress<'cfg> {
         Self::with_style(name, ProgressStyle::Percentage, cfg)
     }
 
-    pub fn tick(&mut self, cur: usize, max: usize, msg: &str) -> CargoResult<()> {
+    pub fn tick(&mut self, cur: usize, max: usize, msg: &str) -> CorgiResult<()> {
         let s = match &mut self.state {
             Some(s) => s,
             None => return Ok(()),
@@ -122,7 +122,7 @@ impl<'cfg> Progress<'cfg> {
         s.tick(cur, max, msg)
     }
 
-    pub fn tick_now(&mut self, cur: usize, max: usize, msg: &str) -> CargoResult<()> {
+    pub fn tick_now(&mut self, cur: usize, max: usize, msg: &str) -> CorgiResult<()> {
         match self.state {
             Some(ref mut s) => s.tick(cur, max, msg),
             None => Ok(()),
@@ -136,7 +136,7 @@ impl<'cfg> Progress<'cfg> {
         }
     }
 
-    pub fn print_now(&mut self, msg: &str) -> CargoResult<()> {
+    pub fn print_now(&mut self, msg: &str) -> CorgiResult<()> {
         match &mut self.state {
             Some(s) => s.print("", msg),
             None => Ok(()),
@@ -181,7 +181,7 @@ impl Throttle {
 }
 
 impl<'cfg> State<'cfg> {
-    fn tick(&mut self, cur: usize, max: usize, msg: &str) -> CargoResult<()> {
+    fn tick(&mut self, cur: usize, max: usize, msg: &str) -> CorgiResult<()> {
         if self.done {
             return Ok(());
         }
@@ -199,7 +199,7 @@ impl<'cfg> State<'cfg> {
         Ok(())
     }
 
-    fn print(&mut self, prefix: &str, msg: &str) -> CargoResult<()> {
+    fn print(&mut self, prefix: &str, msg: &str) -> CorgiResult<()> {
         self.throttle.update();
         self.try_update_max_width();
 

@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex};
 use crate::core::compiler::compilation::{self, UnitOutput};
 use crate::core::compiler::{self, artifact, Unit};
 use crate::core::PackageId;
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::profile;
 use anyhow::{bail, Context as _};
 use filetime::FileTime;
@@ -80,7 +80,7 @@ pub struct Context<'a, 'cfg> {
 }
 
 impl<'a, 'cfg> Context<'a, 'cfg> {
-    pub fn new(bcx: &'a BuildContext<'a, 'cfg>) -> CargoResult<Self> {
+    pub fn new(bcx: &'a BuildContext<'a, 'cfg>) -> CorgiResult<Self> {
         // Load up the jobserver that we'll use to manage our parallelism. This
         // is the same as the GNU make implementation of a jobserver, and
         // intentionally so! It's hoped that we can interact with GNU make and
@@ -120,7 +120,7 @@ impl<'a, 'cfg> Context<'a, 'cfg> {
 
     /// Starts compilation, waits for it to finish, and returns information
     /// about the result of compilation.
-    pub fn compile(mut self, exec: &Arc<dyn Executor>) -> CargoResult<Compilation<'cfg>> {
+    pub fn compile(mut self, exec: &Arc<dyn Executor>) -> CorgiResult<Compilation<'cfg>> {
         let mut queue = JobQueue::new(self.bcx);
         let mut plan = BuildPlan::new();
         let build_plan = self.bcx.build_config.build_plan;
@@ -290,7 +290,7 @@ impl<'a, 'cfg> Context<'a, 'cfg> {
     }
 
     /// Returns the executable for the specified unit (if any).
-    pub fn get_executable(&mut self, unit: &Unit) -> CargoResult<Option<PathBuf>> {
+    pub fn get_executable(&mut self, unit: &Unit) -> CorgiResult<Option<PathBuf>> {
         let is_binary = unit.target.is_executable();
         let is_test = unit.mode.is_any_test();
         if !unit.mode.generates_executable() || !(is_binary || is_test) {
@@ -303,7 +303,7 @@ impl<'a, 'cfg> Context<'a, 'cfg> {
             .map(|output| output.bin_dst().clone()))
     }
 
-    pub fn prepare_units(&mut self) -> CargoResult<()> {
+    pub fn prepare_units(&mut self) -> CorgiResult<()> {
         let dest = self.bcx.profiles.get_dir_name();
         let host_layout = Layout::new(self.bcx.ws, None, &dest)?;
         let mut targets = HashMap::new();
@@ -328,7 +328,7 @@ impl<'a, 'cfg> Context<'a, 'cfg> {
 
     /// Prepare this context, ensuring that all filesystem directories are in
     /// place.
-    pub fn prepare(&mut self) -> CargoResult<()> {
+    pub fn prepare(&mut self) -> CorgiResult<()> {
         let _p = profile::start("preparing layout");
 
         self.files_mut()
@@ -363,7 +363,7 @@ impl<'a, 'cfg> Context<'a, 'cfg> {
     }
 
     /// Returns the filenames that the given unit will generate.
-    pub fn outputs(&self, unit: &Unit) -> CargoResult<Arc<Vec<OutputFile>>> {
+    pub fn outputs(&self, unit: &Unit) -> CorgiResult<Arc<Vec<OutputFile>>> {
         self.files.as_ref().unwrap().outputs(unit, self.bcx)
     }
 
@@ -409,7 +409,7 @@ impl<'a, 'cfg> Context<'a, 'cfg> {
 
     /// Returns the list of filenames read by cargo to generate the `BuildContext`
     /// (all `Cargo.toml`, etc.).
-    pub fn build_plan_inputs(&self) -> CargoResult<Vec<PathBuf>> {
+    pub fn build_plan_inputs(&self) -> CorgiResult<Vec<PathBuf>> {
         // Keep sorted for consistency.
         let mut inputs = BTreeSet::new();
         // Note: dev-deps are skipped if they are not present in the unit graph.
@@ -430,7 +430,7 @@ impl<'a, 'cfg> Context<'a, 'cfg> {
         }
     }
 
-    fn check_collisions(&self) -> CargoResult<()> {
+    fn check_collisions(&self) -> CorgiResult<()> {
         let mut output_collisions = HashMap::new();
         let describe_collision = |unit: &Unit, other_unit: &Unit, path: &PathBuf| -> String {
             format!(
@@ -457,7 +457,7 @@ impl<'a, 'cfg> Context<'a, 'cfg> {
                                 other_unit: &Unit,
                                 path: &PathBuf,
                                 suggestion: &str|
-         -> CargoResult<()> {
+         -> CorgiResult<()> {
             if unit.target.name() == other_unit.target.name() {
                 self.bcx.config.shell().warn(format!(
                     "output filename collision.\n\
@@ -489,7 +489,7 @@ impl<'a, 'cfg> Context<'a, 'cfg> {
             }
         };
 
-        fn doc_collision_error(unit: &Unit, other_unit: &Unit) -> CargoResult<()> {
+        fn doc_collision_error(unit: &Unit, other_unit: &Unit) -> CorgiResult<()> {
             bail!(
                 "document output filename collision\n\
                  The {} `{}` in package `{}` has the same name as the {} `{}` in package `{}`.\n\
@@ -602,7 +602,7 @@ impl<'a, 'cfg> Context<'a, 'cfg> {
         self.rmeta_required.contains(unit)
     }
 
-    pub fn new_jobserver(&mut self) -> CargoResult<Client> {
+    pub fn new_jobserver(&mut self) -> CorgiResult<Client> {
         let tokens = self.bcx.jobs() as usize;
         let client = Client::new(tokens).with_context(|| "failed to create jobserver")?;
 

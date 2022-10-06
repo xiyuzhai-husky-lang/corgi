@@ -4,7 +4,7 @@ use std::io::prelude::*;
 use termcolor::Color::{Cyan, Green, Red, Yellow};
 use termcolor::{self, Color, ColorSpec, StandardStream, WriteColor};
 
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 
 pub enum TtyWidth {
     NoTty,
@@ -130,7 +130,7 @@ impl Shell {
         message: Option<&dyn fmt::Display>,
         color: Color,
         justified: bool,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         match self.verbosity {
             Verbosity::Quiet => Ok(()),
             _ => {
@@ -196,7 +196,7 @@ impl Shell {
     }
 
     /// Shortcut to right-align and color green a status message.
-    pub fn status<T, U>(&mut self, status: T, message: U) -> CargoResult<()>
+    pub fn status<T, U>(&mut self, status: T, message: U) -> CorgiResult<()>
     where
         T: fmt::Display,
         U: fmt::Display,
@@ -204,7 +204,7 @@ impl Shell {
         self.print(&status, Some(&message), Green, true)
     }
 
-    pub fn status_header<T>(&mut self, status: T) -> CargoResult<()>
+    pub fn status_header<T>(&mut self, status: T) -> CorgiResult<()>
     where
         T: fmt::Display,
     {
@@ -217,7 +217,7 @@ impl Shell {
         status: T,
         message: U,
         color: Color,
-    ) -> CargoResult<()>
+    ) -> CorgiResult<()>
     where
         T: fmt::Display,
         U: fmt::Display,
@@ -226,9 +226,9 @@ impl Shell {
     }
 
     /// Runs the callback only if we are in verbose mode.
-    pub fn verbose<F>(&mut self, mut callback: F) -> CargoResult<()>
+    pub fn verbose<F>(&mut self, mut callback: F) -> CorgiResult<()>
     where
-        F: FnMut(&mut Shell) -> CargoResult<()>,
+        F: FnMut(&mut Shell) -> CorgiResult<()>,
     {
         match self.verbosity {
             Verbosity::Verbose => callback(self),
@@ -237,9 +237,9 @@ impl Shell {
     }
 
     /// Runs the callback if we are not in verbose mode.
-    pub fn concise<F>(&mut self, mut callback: F) -> CargoResult<()>
+    pub fn concise<F>(&mut self, mut callback: F) -> CorgiResult<()>
     where
-        F: FnMut(&mut Shell) -> CargoResult<()>,
+        F: FnMut(&mut Shell) -> CorgiResult<()>,
     {
         match self.verbosity {
             Verbosity::Verbose => Ok(()),
@@ -248,7 +248,7 @@ impl Shell {
     }
 
     /// Prints a red 'error' message.
-    pub fn error<T: fmt::Display>(&mut self, message: T) -> CargoResult<()> {
+    pub fn error<T: fmt::Display>(&mut self, message: T) -> CorgiResult<()> {
         if self.needs_clear {
             self.err_erase_line();
         }
@@ -257,7 +257,7 @@ impl Shell {
     }
 
     /// Prints an amber 'warning' message.
-    pub fn warn<T: fmt::Display>(&mut self, message: T) -> CargoResult<()> {
+    pub fn warn<T: fmt::Display>(&mut self, message: T) -> CorgiResult<()> {
         match self.verbosity {
             Verbosity::Quiet => Ok(()),
             _ => self.print(&"warning", Some(&message), Yellow, false),
@@ -265,7 +265,7 @@ impl Shell {
     }
 
     /// Prints a cyan 'note' message.
-    pub fn note<T: fmt::Display>(&mut self, message: T) -> CargoResult<()> {
+    pub fn note<T: fmt::Display>(&mut self, message: T) -> CorgiResult<()> {
         self.print(&"note", Some(&message), Cyan, false)
     }
 
@@ -280,7 +280,7 @@ impl Shell {
     }
 
     /// Updates the color choice (always, never, or auto) from a string..
-    pub fn set_color_choice(&mut self, color: Option<&str>) -> CargoResult<()> {
+    pub fn set_color_choice(&mut self, color: Option<&str>) -> CorgiResult<()> {
         if let ShellOut::Stream {
             ref mut stdout,
             ref mut stderr,
@@ -340,7 +340,7 @@ impl Shell {
         &mut self,
         fragment: impl fmt::Display,
         color: &ColorSpec,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         self.output.write_stdout(fragment, color)
     }
 
@@ -351,12 +351,12 @@ impl Shell {
         &mut self,
         fragment: impl fmt::Display,
         color: &ColorSpec,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         self.output.write_stderr(fragment, color)
     }
 
     /// Prints a message to stderr and translates ANSI escape code into console colors.
-    pub fn print_ansi_stderr(&mut self, message: &[u8]) -> CargoResult<()> {
+    pub fn print_ansi_stderr(&mut self, message: &[u8]) -> CorgiResult<()> {
         if self.needs_clear {
             self.err_erase_line();
         }
@@ -372,7 +372,7 @@ impl Shell {
     }
 
     /// Prints a message to stdout and translates ANSI escape code into console colors.
-    pub fn print_ansi_stdout(&mut self, message: &[u8]) -> CargoResult<()> {
+    pub fn print_ansi_stdout(&mut self, message: &[u8]) -> CorgiResult<()> {
         if self.needs_clear {
             self.err_erase_line();
         }
@@ -387,7 +387,7 @@ impl Shell {
         Ok(())
     }
 
-    pub fn print_json<T: serde::ser::Serialize>(&mut self, obj: &T) -> CargoResult<()> {
+    pub fn print_json<T: serde::ser::Serialize>(&mut self, obj: &T) -> CorgiResult<()> {
         // Path may fail to serialize to JSON ...
         let encoded = serde_json::to_string(&obj)?;
         // ... but don't fail due to a closed pipe.
@@ -412,7 +412,7 @@ impl ShellOut {
         message: Option<&dyn fmt::Display>,
         color: Color,
         justified: bool,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         match *self {
             ShellOut::Stream { ref mut stderr, .. } => {
                 stderr.reset()?;
@@ -446,7 +446,7 @@ impl ShellOut {
     }
 
     /// Write a styled fragment
-    fn write_stdout(&mut self, fragment: impl fmt::Display, color: &ColorSpec) -> CargoResult<()> {
+    fn write_stdout(&mut self, fragment: impl fmt::Display, color: &ColorSpec) -> CorgiResult<()> {
         match *self {
             ShellOut::Stream { ref mut stdout, .. } => {
                 stdout.reset()?;
@@ -462,7 +462,7 @@ impl ShellOut {
     }
 
     /// Write a styled fragment
-    fn write_stderr(&mut self, fragment: impl fmt::Display, color: &ColorSpec) -> CargoResult<()> {
+    fn write_stderr(&mut self, fragment: impl fmt::Display, color: &ColorSpec) -> CorgiResult<()> {
         match *self {
             ShellOut::Stream { ref mut stderr, .. } => {
                 stderr.reset()?;

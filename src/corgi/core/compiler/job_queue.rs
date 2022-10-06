@@ -79,7 +79,7 @@ use crate::core::{PackageId, Shell, TargetKind};
 use crate::util::diagnostic_server::{self, DiagnosticPrinter};
 use crate::util::errors::AlreadyPrintedError;
 use crate::util::machine_message::{self, Message as _};
-use crate::util::CargoResult;
+use crate::util::CorgiResult;
 use crate::util::{self, internal, profile};
 use crate::util::{Config, DependencyQueue, Progress, ProgressStyle, Queue};
 
@@ -270,7 +270,7 @@ impl<'cfg> DiagDedupe<'cfg> {
     ///
     /// Returns `true` if the message was emitted, or `false` if it was
     /// suppressed for being a duplicate.
-    fn emit_diag(&self, diag: &str) -> CargoResult<bool> {
+    fn emit_diag(&self, diag: &str) -> CorgiResult<bool> {
         let h = util::hash_u64(diag);
         if !self.seen.borrow_mut().insert(h) {
             return Ok(false);
@@ -318,7 +318,7 @@ enum Message {
     },
     FixDiagnostic(diagnostic_server::Message),
     Token(io::Result<Acquired>),
-    Finish(JobId, Artifact, CargoResult<()>),
+    Finish(JobId, Artifact, CorgiResult<()>),
     FutureIncompatReport(JobId, Vec<FutureBreakageItem>),
 
     // This client should get release_raw called on it with one of our tokens
@@ -343,7 +343,7 @@ impl<'a, 'cfg> JobState<'a, 'cfg> {
             .push(Message::BuildPlanMsg(module_name, cmd, filenames));
     }
 
-    pub fn stdout(&self, stdout: String) -> CargoResult<()> {
+    pub fn stdout(&self, stdout: String) -> CorgiResult<()> {
         if let Some(dedupe) = self.output {
             writeln!(dedupe.config.shell().out(), "{}", stdout)?;
         } else {
@@ -352,7 +352,7 @@ impl<'a, 'cfg> JobState<'a, 'cfg> {
         Ok(())
     }
 
-    pub fn stderr(&self, stderr: String) -> CargoResult<()> {
+    pub fn stderr(&self, stderr: String) -> CorgiResult<()> {
         if let Some(dedupe) = self.output {
             let mut shell = dedupe.config.shell();
             shell.print_ansi_stderr(stderr.as_bytes())?;
@@ -363,7 +363,7 @@ impl<'a, 'cfg> JobState<'a, 'cfg> {
         Ok(())
     }
 
-    pub fn emit_diag(&self, level: String, diag: String) -> CargoResult<()> {
+    pub fn emit_diag(&self, level: String, diag: String) -> CorgiResult<()> {
         if let Some(dedupe) = self.output {
             let emitted = dedupe.emit_diag(&diag)?;
             if level == "warning" {
@@ -424,7 +424,7 @@ impl<'cfg> JobQueue<'cfg> {
         }
     }
 
-    pub fn enqueue(&mut self, cx: &Context<'_, 'cfg>, unit: &Unit, job: Job) -> CargoResult<()> {
+    pub fn enqueue(&mut self, cx: &Context<'_, 'cfg>, unit: &Unit, job: Job) -> CorgiResult<()> {
         let dependencies = cx.unit_deps(unit);
         let mut queue_deps = dependencies
             .iter()
@@ -501,7 +501,7 @@ impl<'cfg> JobQueue<'cfg> {
     /// This function will spawn off `config.jobs()` workers to build all of the
     /// necessary dependencies, in order. Freshness is propagated as far as
     /// possible along each dependency chain.
-    pub fn execute(mut self, cx: &mut Context<'_, '_>, plan: &mut BuildPlan) -> CargoResult<()> {
+    pub fn execute(mut self, cx: &mut Context<'_, '_>, plan: &mut BuildPlan) -> CorgiResult<()> {
         let _p = profile::start("executing the job graph");
         self.queue.queue_finished();
 
@@ -571,7 +571,7 @@ impl<'cfg> DrainState<'cfg> {
         cx: &mut Context<'_, '_>,
         jobserver_helper: &HelperThread,
         scope: &'s Scope<'s, '_>,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         // Dequeue as much work as we can, learning about everything
         // possible that can run. Note that this is also the point where we
         // start requesting job tokens. Each job after the first needs to
@@ -634,7 +634,7 @@ impl<'cfg> DrainState<'cfg> {
     }
 
     // If we managed to acquire some extra tokens, send them off to a waiting rustc.
-    fn grant_rustc_token_requests(&mut self) -> CargoResult<()> {
+    fn grant_rustc_token_requests(&mut self) -> CorgiResult<()> {
         while !self.to_send_clients.is_empty() && self.has_extra_tokens() {
             let (id, client) = self.pop_waiting_client();
             // This unwrap is guaranteed to succeed. `active` must be at least
@@ -1052,7 +1052,7 @@ impl<'cfg> DrainState<'cfg> {
             struct FinishOnDrop<'a> {
                 messages: &'a Queue<Message>,
                 id: JobId,
-                result: Option<CargoResult<()>>,
+                result: Option<CorgiResult<()>>,
             }
 
             impl Drop for FinishOnDrop<'_> {
@@ -1100,7 +1100,7 @@ impl<'cfg> DrainState<'cfg> {
         msg: Option<&str>,
         unit: &Unit,
         cx: &mut Context<'_, '_>,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         let outputs = cx.build_script_outputs.lock().unwrap();
         let metadata = match cx.find_build_script_metadata(unit) {
             Some(metadata) => metadata,
@@ -1171,7 +1171,7 @@ impl<'cfg> DrainState<'cfg> {
         unit: &Unit,
         artifact: Artifact,
         cx: &mut Context<'_, '_>,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         if unit.mode.is_run_custom_build() && unit.show_warnings(cx.bcx.config) {
             self.emit_warnings(None, unit, cx)?;
         }
@@ -1197,7 +1197,7 @@ impl<'cfg> DrainState<'cfg> {
         config: &Config,
         unit: &Unit,
         fresh: Freshness,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         if (self.compiled.contains(&unit.pkg.package_id()) && !unit.mode.is_doc())
             || (self.documented.contains(&unit.pkg.package_id()) && unit.mode.is_doc())
         {
@@ -1235,7 +1235,7 @@ impl<'cfg> DrainState<'cfg> {
         Ok(())
     }
 
-    fn back_compat_notice(&self, cx: &Context<'_, '_>, unit: &Unit) -> CargoResult<()> {
+    fn back_compat_notice(&self, cx: &Context<'_, '_>, unit: &Unit) -> CorgiResult<()> {
         if unit.pkg.name() != "diesel"
             || unit.pkg.version() >= &Version::new(1, 4, 8)
             || cx.bcx.ws.resolve_behavior() == ResolveBehavior::V1

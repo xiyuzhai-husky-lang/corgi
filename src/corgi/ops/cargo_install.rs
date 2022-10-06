@@ -8,7 +8,7 @@ use crate::core::{Dependency, Edition, Package, PackageId, Source, SourceId, Wor
 use crate::ops::CompileFilter;
 use crate::ops::{common_for_install_and_uninstall::*, FilterRule};
 use crate::sources::{GitSource, PathSource, SourceConfigMap};
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::{Config, Filesystem, Rustc, ToSemver, VersionReqExt};
 use crate::{drop_println, ops};
 
@@ -64,7 +64,7 @@ impl<'cfg, 'a> InstallablePackage<'cfg, 'a> {
         force: bool,
         no_track: bool,
         needs_update_if_source_is_index: bool,
-    ) -> CargoResult<Option<InstallablePackage<'cfg, 'a>>> {
+    ) -> CorgiResult<Option<InstallablePackage<'cfg, 'a>>> {
         if let Some(name) = krate {
             if name == "." {
                 bail!(
@@ -248,7 +248,7 @@ impl<'cfg, 'a> InstallablePackage<'cfg, 'a> {
         Ok(Some(ip))
     }
 
-    fn no_track_duplicates(&self, dst: &Path) -> CargoResult<BTreeMap<String, Option<PackageId>>> {
+    fn no_track_duplicates(&self, dst: &Path) -> CorgiResult<BTreeMap<String, Option<PackageId>>> {
         // Helper for --no-track flag to make sure it doesn't overwrite anything.
         let duplicates: BTreeMap<String, Option<PackageId>> =
             exe_names(&self.pkg, &self.opts.filter)
@@ -273,7 +273,7 @@ impl<'cfg, 'a> InstallablePackage<'cfg, 'a> {
         Ok(duplicates)
     }
 
-    fn install_one(mut self) -> CargoResult<bool> {
+    fn install_one(mut self) -> CorgiResult<bool> {
         self.config.shell().status("Installing", &self.pkg)?;
 
         let dst = self.root.join("bin").into_path_unlocked();
@@ -321,7 +321,7 @@ impl<'cfg, 'a> InstallablePackage<'cfg, 'a> {
                     bail!("Binary `{:?}` name can't be serialized into string", name)
                 }
             })
-            .collect::<CargoResult<_>>()?;
+            .collect::<CorgiResult<_>>()?;
         if binaries.is_empty() {
             // Cargo already warns the user if they use a target specifier that matches nothing,
             // but we want to error if the user asked for a _particular_ binary to be installed,
@@ -419,7 +419,7 @@ impl<'cfg, 'a> InstallablePackage<'cfg, 'a> {
         // Repeat for binaries which replace existing ones but don't pop the error
         // up until after updating metadata.
         let replace_result = {
-            let mut try_install = || -> CargoResult<()> {
+            let mut try_install = || -> CorgiResult<()> {
                 for &bin in to_replace.iter() {
                     let src = staging_dir.path().join(bin);
                     let dst = dst.join(bin);
@@ -522,7 +522,7 @@ impl<'cfg, 'a> InstallablePackage<'cfg, 'a> {
         }
     }
 
-    fn check_yanked_install(&self) -> CargoResult<()> {
+    fn check_yanked_install(&self) -> CorgiResult<()> {
         if self.ws.ignore_lock() || !self.ws.root().join("Cargo.lock").exists() {
             return Ok(());
         }
@@ -548,7 +548,7 @@ pub fn install(
     opts: &ops::CompileOptions,
     force: bool,
     no_track: bool,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let root = resolve_root(root, config)?;
     let dst = root.join("bin").into_path_unlocked();
     let map = SourceConfigMap::new(config)?;
@@ -679,7 +679,7 @@ fn is_installed(
     root: &Filesystem,
     dst: &Path,
     force: bool,
-) -> CargoResult<bool> {
+) -> CorgiResult<bool> {
     let tracker = InstallTracker::load(config, root)?;
     let (freshness, _duplicates) =
         tracker.check_upgrade(dst, pkg, force, opts, target, &rustc.verbose_version)?;
@@ -697,7 +697,7 @@ fn installed_exact_package<T>(
     root: &Filesystem,
     dst: &Path,
     force: bool,
-) -> CargoResult<Option<Package>>
+) -> CorgiResult<Option<Package>>
 where
     T: Source,
 {
@@ -725,7 +725,7 @@ fn make_ws_rustc_target<'cfg>(
     opts: &ops::CompileOptions,
     source_id: &SourceId,
     pkg: Package,
-) -> CargoResult<(Workspace<'cfg>, Rustc, String)> {
+) -> CorgiResult<(Workspace<'cfg>, Rustc, String)> {
     let mut ws = if source_id.is_git() || source_id.is_path() {
         Workspace::new(pkg.manifest_path(), config)?
     } else {
@@ -745,7 +745,7 @@ fn make_ws_rustc_target<'cfg>(
 
 /// Parses x.y.z as if it were =x.y.z, and gives CLI-specific error messages in the case of invalid
 /// values.
-fn parse_semver_flag(v: &str) -> CargoResult<VersionReq> {
+fn parse_semver_flag(v: &str) -> CorgiResult<VersionReq> {
     // If the version begins with character <, >, =, ^, ~ parse it as a
     // version range, otherwise parse it as a specific version
     let first = v
@@ -792,7 +792,7 @@ fn parse_semver_flag(v: &str) -> CargoResult<VersionReq> {
 }
 
 /// Display a list of installed binaries.
-pub fn install_list(dst: Option<&str>, config: &Config) -> CargoResult<()> {
+pub fn install_list(dst: Option<&str>, config: &Config) -> CorgiResult<()> {
     let root = resolve_root(dst, config)?;
     let tracker = InstallTracker::load(config, &root)?;
     for (k, v) in tracker.all_installed_bins() {
@@ -812,7 +812,7 @@ fn remove_orphaned_bins(
     duplicates: &BTreeMap<String, Option<PackageId>>,
     pkg: &Package,
     dst: &Path,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let filter = ops::CompileFilter::new_all_targets();
     let all_self_names = exe_names(pkg, &filter);
     let mut to_remove: HashMap<PackageId, BTreeSet<String>> = HashMap::new();

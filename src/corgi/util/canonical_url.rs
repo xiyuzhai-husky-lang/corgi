@@ -1,4 +1,4 @@
-use crate::util::{errors::CargoResult, IntoUrl};
+use crate::util::{errors::CorgiResult, IntoUrl};
 use std::hash::{self, Hash};
 use url::Url;
 
@@ -16,7 +16,7 @@ use url::Url;
 pub struct CanonicalUrl(Url);
 
 impl CanonicalUrl {
-    pub fn new(url: &Url) -> CargoResult<CanonicalUrl> {
+    pub fn new(url: &Url) -> CorgiResult<CanonicalUrl> {
         let mut url = url.clone();
 
         // cannot-be-a-base-urls (e.g., `github.com:rust-lang/rustfmt.git`)

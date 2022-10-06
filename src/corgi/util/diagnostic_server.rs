@@ -15,7 +15,7 @@ use log::warn;
 use serde::{Deserialize, Serialize};
 
 use crate::core::Edition;
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::Config;
 
 const DIAGNOSTICS_SERVER_VAR: &str = "__CARGO_FIX_DIAGNOSTICS_SERVER";
@@ -96,7 +96,7 @@ impl<'a> DiagnosticPrinter<'a> {
         }
     }
 
-    pub fn print(&mut self, msg: &Message) -> CargoResult<()> {
+    pub fn print(&mut self, msg: &Message) -> CorgiResult<()> {
         match msg {
             Message::Migrating {
                 file,

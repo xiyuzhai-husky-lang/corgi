@@ -1,9 +1,9 @@
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use cargo_util::paths;
 use std::path::{Path, PathBuf};
 
 /// Finds the root `Cargo.toml`.
-pub fn find_root_manifest_for_wd(cwd: &Path) -> CargoResult<PathBuf> {
+pub fn find_root_manifest_for_wd(cwd: &Path) -> CorgiResult<PathBuf> {
     let valid_corgi_toml_file_name = "Cargo.toml";
     let invalid_corgi_toml_file_name = "cargo.toml";
     let mut invalid_corgi_toml_path_exists = false;
@@ -34,7 +34,7 @@ pub fn find_root_manifest_for_wd(cwd: &Path) -> CargoResult<PathBuf> {
 }
 
 /// Returns the path to the `file` in `pwd`, if it exists.
-pub fn find_project_manifest_exact(pwd: &Path, file: &str) -> CargoResult<PathBuf> {
+pub fn find_project_manifest_exact(pwd: &Path, file: &str) -> CorgiResult<PathBuf> {
     let manifest = pwd.join(file);
 
     if manifest.exists() {

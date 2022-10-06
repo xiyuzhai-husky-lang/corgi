@@ -1,6 +1,6 @@
 use crate::core::compiler::CompileKind;
 use crate::util::interning::InternedString;
-use crate::util::{CargoResult, Config, RustfixDiagnosticServer};
+use crate::util::{Config, CorgiResult, RustfixDiagnosticServer};
 use anyhow::{bail, Context as _};
 use cargo_util::ProcessBuilder;
 use serde::ser;
@@ -46,7 +46,7 @@ pub struct BuildConfig {
     pub timing_outputs: Vec<TimingOutput>,
 }
 
-fn default_parallelism() -> CargoResult<u32> {
+fn default_parallelism() -> CorgiResult<u32> {
     Ok(available_parallelism()
         .context("failed to determine the amount of parallelism available")?
         .get() as u32)
@@ -67,7 +67,7 @@ impl BuildConfig {
         keep_going: bool,
         requested_targets: &[String],
         mode: CompileMode,
-    ) -> CargoResult<BuildConfig> {
+    ) -> CorgiResult<BuildConfig> {
         let cfg = config.build_config()?;
         let requested_kinds = CompileKind::from_requested_targets(config, requested_targets)?;
         if jobs.is_some() && config.jobserver_from_env().is_some() {
@@ -117,7 +117,7 @@ impl BuildConfig {
         self.mode == CompileMode::Test || self.mode == CompileMode::Bench
     }
 
-    pub fn single_requested_kind(&self) -> CargoResult<CompileKind> {
+    pub fn single_requested_kind(&self) -> CorgiResult<CompileKind> {
         match self.requested_kinds.len() {
             1 => Ok(self.requested_kinds[0]),
             _ => bail!("only one `--target` argument is supported"),

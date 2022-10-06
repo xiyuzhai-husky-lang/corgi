@@ -7,7 +7,7 @@ use crate::core::resolver::features::{CliFeatures, FeaturesFor, ResolvedFeatures
 use crate::core::resolver::Resolve;
 use crate::core::{FeatureMap, FeatureValue, Package, PackageId, PackageIdSpec, Workspace};
 use crate::util::interning::InternedString;
-use crate::util::CargoResult;
+use crate::util::CorgiResult;
 use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
@@ -277,7 +277,7 @@ pub fn build<'a>(
     requested_kinds: &[CompileKind],
     package_map: HashMap<PackageId, &'a Package>,
     opts: &TreeOptions,
-) -> CargoResult<Graph<'a>> {
+) -> CorgiResult<Graph<'a>> {
     let mut graph = Graph::new(package_map);
     let mut members_with_features = ws.members_with_features(specs, cli_features)?;
     members_with_features.sort_unstable_by_key(|e| e.0.package_id());

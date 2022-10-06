@@ -31,7 +31,7 @@ use crate::core::{Dependency, Package, PackageId, PackageSet, Target, TargetKind
 use crate::ops::resolve_all_features;
 use crate::util::interning::InternedString;
 use crate::util::Config;
-use crate::CargoResult;
+use crate::CorgiResult;
 
 const IS_NO_ARTIFACT_DEP: Option<&'static Artifact> = None;
 
@@ -86,7 +86,7 @@ pub fn build_unit_dependencies<'a, 'cfg>(
     target_data: &'a RustcTargetData<'cfg>,
     profiles: &'a Profiles,
     interner: &'a UnitInterner,
-) -> CargoResult<UnitGraph> {
+) -> CorgiResult<UnitGraph> {
     if roots.is_empty() {
         // If -Zbuild-std, don't attach units if there is nothing to build.
         // Otherwise, other parts of the code may be confused by seeing units
@@ -143,7 +143,7 @@ pub fn build_unit_dependencies<'a, 'cfg>(
 fn calc_deps_of_std(
     mut state: &mut State<'_, '_>,
     std_roots: &HashMap<CompileKind, Vec<Unit>>,
-) -> CargoResult<Option<UnitGraph>> {
+) -> CorgiResult<Option<UnitGraph>> {
     if std_roots.is_empty() {
         return Ok(None);
     }
@@ -191,7 +191,7 @@ fn attach_std_deps(
 
 /// Compute all the dependencies of the given root units.
 /// The result is stored in state.unit_dependencies.
-fn deps_of_roots(roots: &[Unit], state: &mut State<'_, '_>) -> CargoResult<()> {
+fn deps_of_roots(roots: &[Unit], state: &mut State<'_, '_>) -> CorgiResult<()> {
     for unit in roots.iter() {
         // Dependencies of tests/benches should not have `panic` set.
         // We check the global test mode to see if we are running in `cargo
@@ -230,7 +230,7 @@ fn deps_of_roots(roots: &[Unit], state: &mut State<'_, '_>) -> CargoResult<()> {
 /// transitive dependencies.
 ///
 /// The result is stored in `state.unit_dependencies`.
-fn deps_of(unit: &Unit, state: &mut State<'_, '_>, unit_for: UnitFor) -> CargoResult<()> {
+fn deps_of(unit: &Unit, state: &mut State<'_, '_>, unit_for: UnitFor) -> CorgiResult<()> {
     // Currently the `unit_dependencies` map does not include `unit_for`. This should
     // be safe for now. `TestDependency` only exists to clear the `panic`
     // flag, and you'll never ask for a `unit` with `panic` set as a
@@ -254,7 +254,7 @@ fn compute_deps(
     unit: &Unit,
     state: &mut State<'_, '_>,
     unit_for: UnitFor,
-) -> CargoResult<Vec<UnitDep>> {
+) -> CorgiResult<Vec<UnitDep>> {
     if unit.mode.is_run_custom_build() {
         return compute_deps_custom_build(unit, unit_for, state);
     } else if unit.mode.is_doc() {
@@ -383,7 +383,7 @@ fn compute_deps(
                         IS_NO_ARTIFACT_DEP,
                     )
                 })
-                .collect::<CargoResult<Vec<UnitDep>>>()?,
+                .collect::<CorgiResult<Vec<UnitDep>>>()?,
         );
     }
 
@@ -399,7 +399,7 @@ fn calc_artifact_deps<'a>(
     deps: &[&Dependency],
     state: &State<'a, '_>,
     ret: &mut Vec<UnitDep>,
-) -> CargoResult<Option<&'a Target>> {
+) -> CorgiResult<Option<&'a Target>> {
     let mut has_artifact_lib = false;
     let mut maybe_non_artifact_lib = false;
     let artifact_pkg = state.get(dep_id);
@@ -450,7 +450,7 @@ fn compute_deps_custom_build(
     unit: &Unit,
     unit_for: UnitFor,
     state: &State<'_, '_>,
-) -> CargoResult<Vec<UnitDep>> {
+) -> CorgiResult<Vec<UnitDep>> {
     if let Some(links) = unit.pkg.manifest().links() {
         if state
             .target_data
@@ -546,7 +546,7 @@ fn artifact_targets_to_unit_deps(
     compile_kind: CompileKind,
     artifact_pkg: &Package,
     dep: &Dependency,
-) -> CargoResult<Vec<UnitDep>> {
+) -> CorgiResult<Vec<UnitDep>> {
     let ret =
         match_artifacts_kind_with_targets(dep, artifact_pkg.targets(), parent.pkg.name().as_str())?
             .into_iter()
@@ -600,7 +600,7 @@ fn match_artifacts_kind_with_targets<'a>(
     artifact_dep: &Dependency,
     targets: &'a [Target],
     parent_package: &str,
-) -> CargoResult<HashSet<&'a Target>> {
+) -> CorgiResult<HashSet<&'a Target>> {
     let mut out = HashSet::new();
     let artifact_requirements = artifact_dep.artifact().expect("artifact present");
     for artifact_kind in artifact_requirements.kinds() {
@@ -635,7 +635,7 @@ fn compute_deps_doc(
     unit: &Unit,
     state: &mut State<'_, '_>,
     unit_for: UnitFor,
-) -> CargoResult<Vec<UnitDep>> {
+) -> CorgiResult<Vec<UnitDep>> {
     // To document a library, we depend on dependencies actually being
     // built. If we're documenting *all* libraries, then we also depend on
     // the documentation of the library being built.
@@ -732,7 +732,7 @@ fn maybe_lib(
     unit: &Unit,
     state: &mut State<'_, '_>,
     unit_for: UnitFor,
-) -> CargoResult<Option<UnitDep>> {
+) -> CorgiResult<Option<UnitDep>> {
     unit.pkg
         .targets()
         .iter()
@@ -765,7 +765,7 @@ fn dep_build_script(
     unit: &Unit,
     unit_for: UnitFor,
     state: &State<'_, '_>,
-) -> CargoResult<Option<UnitDep>> {
+) -> CorgiResult<Option<UnitDep>> {
     unit.pkg
         .targets()
         .iter()
@@ -843,7 +843,7 @@ fn new_unit_dep(
     kind: CompileKind,
     mode: CompileMode,
     artifact: Option<&Artifact>,
-) -> CargoResult<UnitDep> {
+) -> CorgiResult<UnitDep> {
     let is_local = pkg.package_id().source_id().is_path() && !state.is_std;
     let profile = state.profiles.get_profile(
         pkg.package_id(),
@@ -867,7 +867,7 @@ fn new_unit_dep_with_profile(
     mode: CompileMode,
     profile: Profile,
     artifact: Option<&Artifact>,
-) -> CargoResult<UnitDep> {
+) -> CorgiResult<UnitDep> {
     let (extern_crate_name, dep_name) = state.resolve().extern_crate_name_and_dep_name(
         parent.pkg.package_id(),
         pkg.package_id(),

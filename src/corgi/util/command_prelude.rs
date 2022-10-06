@@ -12,7 +12,7 @@ use crate::util::{
     print_available_benches, print_available_binaries, print_available_examples,
     print_available_packages, print_available_tests,
 };
-use crate::CargoResult;
+use crate::CorgiResult;
 use anyhow::bail;
 use cargo_util::paths;
 use std::ffi::{OsStr, OsString};
@@ -314,7 +314,7 @@ pub enum ProfileChecking {
 }
 
 pub trait ArgMatchesExt {
-    fn value_of_u32(&self, name: &str) -> CargoResult<Option<u32>> {
+    fn value_of_u32(&self, name: &str) -> CorgiResult<Option<u32>> {
         let arg = match self._value_of(name) {
             None => None,
             Some(arg) => Some(arg.parse::<u32>().map_err(|_| {
@@ -327,7 +327,7 @@ pub trait ArgMatchesExt {
         Ok(arg)
     }
 
-    fn value_of_i32(&self, name: &str) -> CargoResult<Option<i32>> {
+    fn value_of_i32(&self, name: &str) -> CorgiResult<Option<i32>> {
         let arg = match self._value_of(name) {
             None => None,
             Some(arg) => Some(arg.parse::<i32>().map_err(|_| {
@@ -345,7 +345,7 @@ pub trait ArgMatchesExt {
         self._value_of(name).map(|path| config.cwd().join(path))
     }
 
-    fn root_manifest(&self, config: &Config) -> CargoResult<PathBuf> {
+    fn root_manifest(&self, config: &Config) -> CorgiResult<PathBuf> {
         if let Some(path) = self.value_of_path("manifest-path", config) {
             // In general, we try to avoid normalizing paths in Cargo,
             // but in this particular case we need it to fix #3586.
@@ -364,7 +364,7 @@ pub trait ArgMatchesExt {
         find_root_manifest_for_wd(config.cwd())
     }
 
-    fn workspace<'a>(&self, config: &'a Config) -> CargoResult<Workspace<'a>> {
+    fn workspace<'a>(&self, config: &'a Config) -> CorgiResult<Workspace<'a>> {
         let root = self.root_manifest(config)?;
         let mut ws = Workspace::new(&root, config)?;
         if config.cli_unstable().avoid_dev_deps {
@@ -373,7 +373,7 @@ pub trait ArgMatchesExt {
         Ok(ws)
     }
 
-    fn jobs(&self) -> CargoResult<Option<i32>> {
+    fn jobs(&self) -> CorgiResult<Option<i32>> {
         self.value_of_i32("jobs")
     }
 
@@ -398,7 +398,7 @@ pub trait ArgMatchesExt {
         config: &Config,
         default: &str,
         profile_checking: ProfileChecking,
-    ) -> CargoResult<InternedString> {
+    ) -> CorgiResult<InternedString> {
         let specified_profile = self._value_of("profile");
 
         // Check for allowed legacy names.
@@ -455,7 +455,7 @@ pub trait ArgMatchesExt {
         Ok(InternedString::new(name))
     }
 
-    fn packages_from_flags(&self) -> CargoResult<Packages> {
+    fn packages_from_flags(&self) -> CorgiResult<Packages> {
         Packages::from_flags(
             // TODO Integrate into 'workspace'
             self.flag("workspace") || self.flag("all"),
@@ -470,7 +470,7 @@ pub trait ArgMatchesExt {
         mode: CompileMode,
         workspace: Option<&Workspace<'_>>,
         profile_checking: ProfileChecking,
-    ) -> CargoResult<CompileOptions> {
+    ) -> CorgiResult<CompileOptions> {
         let spec = self.packages_from_flags()?;
         let mut message_format = None;
         let default_json = MessageFormat::Json {
@@ -629,7 +629,7 @@ pub trait ArgMatchesExt {
         Ok(opts)
     }
 
-    fn cli_features(&self) -> CargoResult<CliFeatures> {
+    fn cli_features(&self) -> CorgiResult<CliFeatures> {
         CliFeatures::from_command_line(
             &self._values_of("features"),
             self.flag("all-features"),
@@ -643,7 +643,7 @@ pub trait ArgMatchesExt {
         mode: CompileMode,
         workspace: Option<&Workspace<'_>>,
         profile_checking: ProfileChecking,
-    ) -> CargoResult<CompileOptions> {
+    ) -> CorgiResult<CompileOptions> {
         let mut compile_opts = self.compile_options(config, mode, workspace, profile_checking)?;
         let spec = self._values_of("package");
         if spec.iter().any(is_glob_pattern) {
@@ -653,7 +653,7 @@ pub trait ArgMatchesExt {
         Ok(compile_opts)
     }
 
-    fn new_options(&self, config: &Config) -> CargoResult<NewOptions> {
+    fn new_options(&self, config: &Config) -> CorgiResult<NewOptions> {
         let vcs = self._value_of("vcs").map(|vcs| match vcs {
             "git" => VersionControl::Git,
             "hg" => VersionControl::Hg,
@@ -673,7 +673,7 @@ pub trait ArgMatchesExt {
         )
     }
 
-    fn registry(&self, config: &Config) -> CargoResult<Option<String>> {
+    fn registry(&self, config: &Config) -> CorgiResult<Option<String>> {
         match self._value_of("registry") {
             Some(registry) => {
                 validate_package_name(registry, "registry name", "")?;
@@ -693,7 +693,7 @@ pub trait ArgMatchesExt {
         }
     }
 
-    fn index(&self) -> CargoResult<Option<String>> {
+    fn index(&self) -> CorgiResult<Option<String>> {
         let index = self._value_of("index").map(|s| s.to_string());
         Ok(index)
     }
@@ -702,7 +702,7 @@ pub trait ArgMatchesExt {
         &self,
         workspace: &Workspace<'_>,
         compile_opts: &CompileOptions,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         if self.is_present_with_zero_values("package") {
             print_available_packages(workspace)?
         }

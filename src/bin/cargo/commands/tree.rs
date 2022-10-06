@@ -5,7 +5,7 @@ use corgi::core::dependency::DepKind;
 use corgi::ops::tree::{self, EdgeKind};
 use corgi::ops::Packages;
 use corgi::util::print_available_packages;
-use corgi::util::CargoResult;
+use corgi::util::CorgiResult;
 use std::collections::HashSet;
 use std::str::FromStr;
 
@@ -212,7 +212,7 @@ subtree of the package given to -p.\n\
 /// Parses `--edges` option.
 ///
 /// Returns a tuple of `EdgeKind` map and `no_proc_marco` flag.
-fn parse_edge_kinds(config: &Config, args: &ArgMatches) -> CargoResult<(HashSet<EdgeKind>, bool)> {
+fn parse_edge_kinds(config: &Config, args: &ArgMatches) -> CorgiResult<(HashSet<EdgeKind>, bool)> {
     let (kinds, no_proc_macro) = {
         let mut no_proc_macro = false;
         let mut kinds = args.get_many::<String>("edges").map_or_else(

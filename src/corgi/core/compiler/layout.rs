@@ -103,7 +103,7 @@
 
 use crate::core::compiler::CompileTarget;
 use crate::core::Workspace;
-use crate::util::{CargoResult, FileLock};
+use crate::util::{CorgiResult, FileLock};
 use cargo_util::paths;
 use std::path::{Path, PathBuf};
 
@@ -148,7 +148,7 @@ impl Layout {
         ws: &Workspace<'_>,
         target: Option<CompileTarget>,
         dest: &str,
-    ) -> CargoResult<Layout> {
+    ) -> CorgiResult<Layout> {
         let mut root = ws.target_dir();
         if let Some(target) = target {
             root.push(target.short_name());
@@ -188,7 +188,7 @@ impl Layout {
     }
 
     /// Makes sure all directories stored in the Layout exist on the filesystem.
-    pub fn prepare(&mut self) -> CargoResult<()> {
+    pub fn prepare(&mut self) -> CorgiResult<()> {
         paths::create_dir_all(&self.deps)?;
         paths::create_dir_all(&self.incremental)?;
         paths::create_dir_all(&self.fingerprint)?;
@@ -235,7 +235,7 @@ impl Layout {
         &self.artifact
     }
     /// Create and return the tmp path.
-    pub fn prepare_tmp(&self) -> CargoResult<&Path> {
+    pub fn prepare_tmp(&self) -> CorgiResult<&Path> {
         paths::create_dir_all(&self.tmp)?;
         Ok(&self.tmp)
     }

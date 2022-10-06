@@ -10,7 +10,7 @@ use log::{debug, info, warn};
 use serde::{Deserialize, Serialize};
 
 use crate::util::interning::InternedString;
-use crate::util::{profile, CargoResult, StableHasher};
+use crate::util::{profile, CorgiResult, StableHasher};
 
 /// Information on the `rustc` executable
 #[derive(Debug)]
@@ -43,7 +43,7 @@ impl Rustc {
         workspace_wrapper: Option<PathBuf>,
         rustup_rustc: &Path,
         cache_location: Option<PathBuf>,
-    ) -> CargoResult<Rustc> {
+    ) -> CorgiResult<Rustc> {
         let _p = profile::start("Rustc::new");
 
         let mut cache = Cache::load(
@@ -58,7 +58,7 @@ impl Rustc {
         cmd.arg("-vV");
         let verbose_version = cache.cached_output(&cmd, 0)?.0;
 
-        let extract = |field: &str| -> CargoResult<&str> {
+        let extract = |field: &str| -> CorgiResult<&str> {
             verbose_version
                 .lines()
                 .find(|l| l.starts_with(field))
@@ -127,7 +127,7 @@ impl Rustc {
         &self,
         cmd: &ProcessBuilder,
         extra_fingerprint: u64,
-    ) -> CargoResult<(String, String)> {
+    ) -> CorgiResult<(String, String)> {
         self.cache
             .lock()
             .unwrap()
@@ -207,7 +207,7 @@ impl Cache {
                     data,
                 };
 
-                fn read(path: &Path) -> CargoResult<CacheData> {
+                fn read(path: &Path) -> CorgiResult<CacheData> {
                     let json = paths::read(path)?;
                     Ok(serde_json::from_str(&json)?)
                 }
@@ -230,7 +230,7 @@ impl Cache {
         &mut self,
         cmd: &ProcessBuilder,
         extra_fingerprint: u64,
-    ) -> CargoResult<(String, String)> {
+    ) -> CorgiResult<(String, String)> {
         let key = process_fingerprint(cmd, extra_fingerprint);
         if self.data.outputs.contains_key(&key) {
             debug!("rustc info cache hit");
@@ -296,10 +296,10 @@ fn rustc_fingerprint(
     workspace_wrapper: Option<&Path>,
     rustc: &Path,
     rustup_rustc: &Path,
-) -> CargoResult<u64> {
+) -> CorgiResult<u64> {
     let mut hasher = StableHasher::new();
 
-    let hash_exe = |hasher: &mut _, path| -> CargoResult<()> {
+    let hash_exe = |hasher: &mut _, path| -> CorgiResult<()> {
         let path = paths::resolve_executable(path)?;
         path.hash(hasher);
 

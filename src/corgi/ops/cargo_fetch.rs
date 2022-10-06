@@ -2,8 +2,8 @@ use crate::core::compiler::standard_lib;
 use crate::core::compiler::{BuildConfig, CompileMode, RustcTargetData};
 use crate::core::{PackageSet, Resolve, Workspace};
 use crate::ops;
-use crate::util::CargoResult;
 use crate::util::Config;
+use crate::util::CorgiResult;
 use std::collections::HashSet;
 
 pub struct FetchOptions<'a> {
@@ -16,7 +16,7 @@ pub struct FetchOptions<'a> {
 pub fn fetch<'a>(
     ws: &Workspace<'a>,
     options: &FetchOptions<'a>,
-) -> CargoResult<(Resolve, PackageSet<'a>)> {
+) -> CorgiResult<(Resolve, PackageSet<'a>)> {
     ws.emit_warnings()?;
     let (mut packages, resolve) = ops::resolve_ws(ws)?;
 

@@ -1,4 +1,4 @@
-use crate::util::CargoResult;
+use crate::util::CorgiResult;
 use cargo_util::paths;
 use cargo_util::ProcessBuilder;
 use std::path::Path;
@@ -31,7 +31,7 @@ pub struct PijulRepo;
 pub struct FossilRepo;
 
 impl GitRepo {
-    pub fn init(path: &Path, _: &Path) -> CargoResult<GitRepo> {
+    pub fn init(path: &Path, _: &Path) -> CorgiResult<GitRepo> {
         git2::Repository::init(path)?;
         Ok(GitRepo)
     }
@@ -41,7 +41,7 @@ impl GitRepo {
 }
 
 impl HgRepo {
-    pub fn init(path: &Path, cwd: &Path) -> CargoResult<HgRepo> {
+    pub fn init(path: &Path, cwd: &Path) -> CorgiResult<HgRepo> {
         ProcessBuilder::new("hg")
             .cwd(cwd)
             .arg("init")
@@ -50,7 +50,7 @@ impl HgRepo {
             .exec()?;
         Ok(HgRepo)
     }
-    pub fn discover(path: &Path, cwd: &Path) -> CargoResult<HgRepo> {
+    pub fn discover(path: &Path, cwd: &Path) -> CorgiResult<HgRepo> {
         ProcessBuilder::new("hg")
             .cwd(cwd)
             .arg("--cwd")
@@ -62,7 +62,7 @@ impl HgRepo {
 }
 
 impl PijulRepo {
-    pub fn init(path: &Path, cwd: &Path) -> CargoResult<PijulRepo> {
+    pub fn init(path: &Path, cwd: &Path) -> CorgiResult<PijulRepo> {
         ProcessBuilder::new("pijul")
             .cwd(cwd)
             .arg("init")
@@ -74,7 +74,7 @@ impl PijulRepo {
 }
 
 impl FossilRepo {
-    pub fn init(path: &Path, cwd: &Path) -> CargoResult<FossilRepo> {
+    pub fn init(path: &Path, cwd: &Path) -> CorgiResult<FossilRepo> {
         // fossil doesn't create the directory so we'll do that first
         paths::create_dir_all(path)?;
 

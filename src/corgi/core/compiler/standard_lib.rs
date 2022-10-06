@@ -8,7 +8,7 @@ use crate::core::resolver::features::{CliFeatures, FeaturesFor, ResolvedFeatures
 use crate::core::resolver::HasDevUnits;
 use crate::core::{Dependency, PackageId, PackageSet, Resolve, SourceId, Workspace};
 use crate::ops::{self, Packages};
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::Config;
 use std::collections::{HashMap, HashSet};
 use std::env;
@@ -66,7 +66,7 @@ pub fn resolve_std<'cfg>(
     target_data: &RustcTargetData<'cfg>,
     build_config: &BuildConfig,
     crates: &[String],
-) -> CargoResult<(PackageSet<'cfg>, Resolve, ResolvedFeatures)> {
+) -> CorgiResult<(PackageSet<'cfg>, Resolve, ResolvedFeatures)> {
     if build_config.build_plan {
         ws.config()
             .shell()
@@ -86,7 +86,7 @@ pub fn resolve_std<'cfg>(
             let dep = Dependency::parse(name, None, source_path)?;
             Ok(dep)
         })
-        .collect::<CargoResult<Vec<_>>>()?;
+        .collect::<CorgiResult<Vec<_>>>()?;
     let crates_io_url = crate::sources::CRATES_IO_INDEX.parse().unwrap();
     let patch = HashMap::from([(crates_io_url, patches)]);
     let members = vec![
@@ -173,12 +173,12 @@ pub fn generate_std_roots(
     package_set: &PackageSet<'_>,
     interner: &UnitInterner,
     profiles: &Profiles,
-) -> CargoResult<HashMap<CompileKind, Vec<Unit>>> {
+) -> CorgiResult<HashMap<CompileKind, Vec<Unit>>> {
     // Generate the root Units for the standard library.
     let std_ids = crates
         .iter()
         .map(|crate_name| std_resolve.query(crate_name))
-        .collect::<CargoResult<Vec<PackageId>>>()?;
+        .collect::<CorgiResult<Vec<PackageId>>>()?;
     // Convert PackageId to Package.
     let std_pkgs = package_set.get_many(std_ids)?;
     // Generate a map of Units for each kind requested.
@@ -223,7 +223,7 @@ pub fn generate_std_roots(
     Ok(ret)
 }
 
-fn detect_sysroot_src_path(target_data: &RustcTargetData<'_>) -> CargoResult<PathBuf> {
+fn detect_sysroot_src_path(target_data: &RustcTargetData<'_>) -> CorgiResult<PathBuf> {
     if let Some(s) = env::var_os("__CARGO_TESTS_ONLY_SRC_ROOT") {
         return Ok(s.into());
     }

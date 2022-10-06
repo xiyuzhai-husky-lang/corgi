@@ -2,7 +2,7 @@
 //! authentication/cloning.
 
 use crate::core::GitReference;
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::{network, Config, IntoUrl, MetricsCounter, Progress};
 use anyhow::{anyhow, Context as _};
 use cargo_util::{paths, ProcessBuilder};
@@ -78,7 +78,7 @@ impl GitRemote {
         &self.url
     }
 
-    pub fn rev_for(&self, path: &Path, reference: &GitReference) -> CargoResult<git2::Oid> {
+    pub fn rev_for(&self, path: &Path, reference: &GitReference) -> CorgiResult<git2::Oid> {
         reference.resolve(&self.db_at(path)?.repo)
     }
 
@@ -89,7 +89,7 @@ impl GitRemote {
         reference: &GitReference,
         locked_rev: Option<git2::Oid>,
         cargo_config: &Config,
-    ) -> CargoResult<(GitDatabase, git2::Oid)> {
+    ) -> CorgiResult<(GitDatabase, git2::Oid)> {
         // If we have a previous instance of `GitDatabase` then fetch into that
         // if we can. If that can successfully load our revision then we've
         // populated the database with the latest version of `reference`, so
@@ -136,7 +136,7 @@ impl GitRemote {
         ))
     }
 
-    pub fn db_at(&self, db_path: &Path) -> CargoResult<GitDatabase> {
+    pub fn db_at(&self, db_path: &Path) -> CorgiResult<GitDatabase> {
         let repo = git2::Repository::open(db_path)?;
         Ok(GitDatabase {
             remote: self.clone(),
@@ -153,7 +153,7 @@ impl GitDatabase {
         dest: &Path,
         cargo_config: &Config,
         parent_remote_url: &Url,
-    ) -> CargoResult<GitCheckout<'_>> {
+    ) -> CorgiResult<GitCheckout<'_>> {
         // If the existing checkout exists, and it is fresh, use it.
         // A non-fresh checkout can happen if the checkout operation was
         // interrupted. In that case, the checkout gets deleted and a new
@@ -170,7 +170,7 @@ impl GitDatabase {
         Ok(checkout)
     }
 
-    pub fn to_short_id(&self, revision: git2::Oid) -> CargoResult<GitShortID> {
+    pub fn to_short_id(&self, revision: git2::Oid) -> CorgiResult<GitShortID> {
         let obj = self.repo.find_object(revision, None)?;
         Ok(GitShortID(obj.short_id()?))
     }
@@ -179,17 +179,17 @@ impl GitDatabase {
         self.repo.revparse_single(&oid.to_string()).is_ok()
     }
 
-    pub fn resolve(&self, r: &GitReference) -> CargoResult<git2::Oid> {
+    pub fn resolve(&self, r: &GitReference) -> CorgiResult<git2::Oid> {
         r.resolve(&self.repo)
     }
 }
 
 impl GitReference {
-    pub fn resolve(&self, repo: &git2::Repository) -> CargoResult<git2::Oid> {
+    pub fn resolve(&self, repo: &git2::Repository) -> CorgiResult<git2::Oid> {
         let id = match self {
             // Note that we resolve the named tag here in sync with where it's
             // fetched into via `fetch` below.
-            GitReference::Tag(s) => (|| -> CargoResult<git2::Oid> {
+            GitReference::Tag(s) => (|| -> CorgiResult<git2::Oid> {
                 let refname = format!("refs/remotes/origin/tags/{}", s);
                 let id = repo.refname_to_id(&refname)?;
                 let obj = repo.find_object(id, None)?;
@@ -249,7 +249,7 @@ impl<'a> GitCheckout<'a> {
         database: &'a GitDatabase,
         revision: git2::Oid,
         config: &Config,
-    ) -> CargoResult<GitCheckout<'a>> {
+    ) -> CorgiResult<GitCheckout<'a>> {
         let dirname = into.parent().unwrap();
         paths::create_dir_all(&dirname)?;
         if into.exists() {
@@ -300,7 +300,7 @@ impl<'a> GitCheckout<'a> {
         }
     }
 
-    fn reset(&self, config: &Config) -> CargoResult<()> {
+    fn reset(&self, config: &Config) -> CorgiResult<()> {
         // If we're interrupted while performing this reset (e.g., we die because
         // of a signal) Cargo needs to be sure to try to check out this repo
         // again on the next go-round.
@@ -324,14 +324,14 @@ impl<'a> GitCheckout<'a> {
         Ok(())
     }
 
-    fn update_submodules(&self, cargo_config: &Config, parent_remote_url: &Url) -> CargoResult<()> {
+    fn update_submodules(&self, cargo_config: &Config, parent_remote_url: &Url) -> CorgiResult<()> {
         return update_submodules(&self.repo, cargo_config, parent_remote_url);
 
         fn update_submodules(
             repo: &git2::Repository,
             cargo_config: &Config,
             parent_remote_url: &Url,
-        ) -> CargoResult<()> {
+        ) -> CorgiResult<()> {
             debug!("update submodules for: {:?}", repo.workdir().unwrap());
 
             for mut child in repo.submodules()? {
@@ -352,7 +352,7 @@ impl<'a> GitCheckout<'a> {
             child: &mut git2::Submodule<'_>,
             cargo_config: &Config,
             parent_remote_url: &Url,
-        ) -> CargoResult<()> {
+        ) -> CorgiResult<()> {
             child.init(false)?;
 
             let child_url_str = child.url().ok_or_else(|| {
@@ -472,9 +472,9 @@ impl<'a> GitCheckout<'a> {
 /// credentials until we give it a reason to not do so. To ensure we don't
 /// just sit here looping forever we keep track of authentications we've
 /// attempted and we don't try the same ones again.
-fn with_authentication<T, F>(url: &str, cfg: &git2::Config, mut f: F) -> CargoResult<T>
+fn with_authentication<T, F>(url: &str, cfg: &git2::Config, mut f: F) -> CorgiResult<T>
 where
-    F: FnMut(&mut git2::Credentials<'_>) -> CargoResult<T>,
+    F: FnMut(&mut git2::Credentials<'_>) -> CorgiResult<T>,
 {
     let mut cred_helper = git2::CredentialHelper::new(url);
     cred_helper.config(cfg);
@@ -701,7 +701,7 @@ where
     Err(err)
 }
 
-fn reset(repo: &git2::Repository, obj: &git2::Object<'_>, config: &Config) -> CargoResult<()> {
+fn reset(repo: &git2::Repository, obj: &git2::Object<'_>, config: &Config) -> CorgiResult<()> {
     let mut pb = Progress::new("Checkout", config);
     let mut opts = git2::build::CheckoutBuilder::new();
     opts.progress(|_, cur, max| {
@@ -717,8 +717,8 @@ pub fn with_fetch_options(
     git_config: &git2::Config,
     url: &str,
     config: &Config,
-    cb: &mut dyn FnMut(git2::FetchOptions<'_>) -> CargoResult<()>,
-) -> CargoResult<()> {
+    cb: &mut dyn FnMut(git2::FetchOptions<'_>) -> CorgiResult<()>,
+) -> CorgiResult<()> {
     let mut progress = Progress::new("Fetch", config);
     network::with_retry(config, || {
         with_authentication(url, git_config, |f| {
@@ -783,7 +783,7 @@ pub fn fetch(
     url: &str,
     reference: &GitReference,
     config: &Config,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     if config.frozen() {
         anyhow::bail!(
             "attempting to update a git repository, but --frozen \
@@ -911,7 +911,7 @@ fn fetch_with_cli(
     refspecs: &[String],
     tags: bool,
     config: &Config,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let mut cmd = ProcessBuilder::new("git");
     cmd.arg("fetch");
     if tags {
@@ -953,7 +953,7 @@ fn fetch_with_cli(
 /// we may not even have `git` installed on the system! As a result we
 /// opportunistically try a `git gc` when the pack directory looks too big, and
 /// failing that we just blow away the repository and start over.
-fn maybe_gc_repo(repo: &mut git2::Repository) -> CargoResult<()> {
+fn maybe_gc_repo(repo: &mut git2::Repository) -> CorgiResult<()> {
     // Here we arbitrarily declare that if you have more than 100 files in your
     // `pack` folder that we need to do a gc.
     let entries = match repo.path().join("objects/pack").read_dir() {
@@ -1001,7 +1001,7 @@ fn maybe_gc_repo(repo: &mut git2::Repository) -> CargoResult<()> {
     reinitialize(repo)
 }
 
-fn reinitialize(repo: &mut git2::Repository) -> CargoResult<()> {
+fn reinitialize(repo: &mut git2::Repository) -> CorgiResult<()> {
     // Here we want to drop the current repository object pointed to by `repo`,
     // so we initialize temporary repository in a sub-folder, blow away the
     // existing git folder, and then recreate the git repo. Finally we blow away
@@ -1024,7 +1024,7 @@ fn reinitialize(repo: &mut git2::Repository) -> CargoResult<()> {
     Ok(())
 }
 
-fn init(path: &Path, bare: bool) -> CargoResult<git2::Repository> {
+fn init(path: &Path, bare: bool) -> CorgiResult<git2::Repository> {
     let mut opts = git2::RepositoryInitOptions::new();
     // Skip anything related to templates, they just call all sorts of issues as
     // we really don't want to use them yet they insist on being used. See #6240
@@ -1065,7 +1065,7 @@ fn github_fast_path(
     url: &str,
     reference: &GitReference,
     config: &Config,
-) -> CargoResult<FastPathRev> {
+) -> CorgiResult<FastPathRev> {
     let url = Url::parse(url)?;
     if !is_github(&url) {
         return Ok(FastPathRev::Indeterminate);

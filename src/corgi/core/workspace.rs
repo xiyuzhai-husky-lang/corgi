@@ -20,7 +20,7 @@ use crate::core::{Dependency, FeatureValue, PackageId, PackageIdSpec};
 use crate::core::{EitherManifest, Package, SourceId, VirtualManifest};
 use crate::ops;
 use crate::sources::{PathSource, CRATES_IO_INDEX, CRATES_IO_REGISTRY};
-use crate::util::errors::{CargoResult, ManifestError};
+use crate::util::errors::{CorgiResult, ManifestError};
 use crate::util::interning::InternedString;
 use crate::util::lev_distance;
 use crate::util::toml::{read_manifest, InheritableFields, TomlDependency, TomlProfiles};
@@ -184,7 +184,7 @@ impl<'cfg> Workspace<'cfg> {
     /// This function will construct the entire workspace by determining the
     /// root and all member packages. It will then validate the workspace
     /// before returning it, so `Ok` is only returned for valid workspaces.
-    pub fn new(manifest_path: &Path, config: &'cfg Config) -> CargoResult<Workspace<'cfg>> {
+    pub fn new(manifest_path: &Path, config: &'cfg Config) -> CorgiResult<Workspace<'cfg>> {
         let mut ws = Workspace::new_default(manifest_path.to_path_buf(), config);
         ws.target_dir = config.target_dir()?;
 
@@ -233,7 +233,7 @@ impl<'cfg> Workspace<'cfg> {
         current_manifest: PathBuf,
         manifest: VirtualManifest,
         config: &'cfg Config,
-    ) -> CargoResult<Workspace<'cfg>> {
+    ) -> CorgiResult<Workspace<'cfg>> {
         let mut ws = Workspace::new_default(current_manifest, config);
         ws.root_manifest = Some(root_path.join("Cargo.toml"));
         ws.target_dir = config.target_dir()?;
@@ -261,7 +261,7 @@ impl<'cfg> Workspace<'cfg> {
         config: &'cfg Config,
         target_dir: Option<Filesystem>,
         require_optional_deps: bool,
-    ) -> CargoResult<Workspace<'cfg>> {
+    ) -> CorgiResult<Workspace<'cfg>> {
         let mut ws = Workspace::new_default(package.manifest_path().to_path_buf(), config);
         ws.is_ephemeral = true;
         ws.require_optional_deps = require_optional_deps;
@@ -300,7 +300,7 @@ impl<'cfg> Workspace<'cfg> {
     /// Note that this can return an error if it the current manifest is
     /// actually a "virtual Cargo.toml", in which case an error is returned
     /// indicating that something else should be passed.
-    pub fn current(&self) -> CargoResult<&Package> {
+    pub fn current(&self) -> CorgiResult<&Package> {
         let pkg = self.current_opt().ok_or_else(|| {
             anyhow::format_err!(
                 "manifest path `{}` is a virtual manifest, but this \
@@ -312,7 +312,7 @@ impl<'cfg> Workspace<'cfg> {
         Ok(pkg)
     }
 
-    pub fn current_mut(&mut self) -> CargoResult<&mut Package> {
+    pub fn current_mut(&mut self) -> CorgiResult<&mut Package> {
         let cm = self.current_manifest.clone();
         let pkg = self.current_opt_mut().ok_or_else(|| {
             anyhow::format_err!(
@@ -395,7 +395,7 @@ impl<'cfg> Workspace<'cfg> {
         }
     }
 
-    fn config_patch(&self) -> CargoResult<HashMap<Url, Vec<Dependency>>> {
+    fn config_patch(&self) -> CorgiResult<HashMap<Url, Vec<Dependency>>> {
         let config_patch: Option<
             BTreeMap<String, BTreeMap<String, TomlDependency<ConfigRelativePath>>>,
         > = self.config.get("patch")?;
@@ -435,7 +435,7 @@ impl<'cfg> Workspace<'cfg> {
                             /* kind */ None,
                         )
                     })
-                    .collect::<CargoResult<Vec<_>>>()?,
+                    .collect::<CorgiResult<Vec<_>>>()?,
             );
         }
 
@@ -451,7 +451,7 @@ impl<'cfg> Workspace<'cfg> {
     /// Returns the root `[patch]` section of this workspace.
     ///
     /// This may be from a virtual crate or an actual crate.
-    pub fn root_patch(&self) -> CargoResult<HashMap<Url, Vec<Dependency>>> {
+    pub fn root_patch(&self) -> CorgiResult<HashMap<Url, Vec<Dependency>>> {
         let from_manifest = match self.root_maybe() {
             MaybePackage::Package(p) => p.manifest().patch(),
             MaybePackage::Virtual(vm) => vm.patch(),
@@ -586,7 +586,7 @@ impl<'cfg> Workspace<'cfg> {
         self.custom_metadata.as_ref()
     }
 
-    pub fn load_workspace_config(&mut self) -> CargoResult<Option<WorkspaceRootConfig>> {
+    pub fn load_workspace_config(&mut self) -> CorgiResult<Option<WorkspaceRootConfig>> {
         // If we didn't find a root, it must mean there is no [workspace] section, and thus no
         // metadata.
         if let Some(root_path) = &self.root_manifest {
@@ -615,7 +615,7 @@ impl<'cfg> Workspace<'cfg> {
     ///
     /// Returns an error if `manifest_path` isn't actually a valid manifest or
     /// if some other transient error happens.
-    fn find_root(&mut self, manifest_path: &Path) -> CargoResult<Option<PathBuf>> {
+    fn find_root(&mut self, manifest_path: &Path) -> CorgiResult<Option<PathBuf>> {
         let current = self.packages.load(manifest_path)?;
         match current
             .workspace_config()
@@ -642,7 +642,7 @@ impl<'cfg> Workspace<'cfg> {
     /// verifies that those are all valid packages to point to. Otherwise, this
     /// will transitively follow all `path` dependencies looking for members of
     /// the workspace.
-    fn find_members(&mut self) -> CargoResult<()> {
+    fn find_members(&mut self) -> CorgiResult<()> {
         let workspace_config = match self.load_workspace_config()? {
             Some(workspace_config) => workspace_config,
             None => {
@@ -722,7 +722,7 @@ impl<'cfg> Workspace<'cfg> {
         manifest_path: &Path,
         root_manifest: &Path,
         is_path_dep: bool,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         let manifest_path = paths::normalize_path(manifest_path);
         if self.members.contains(&manifest_path) {
             return Ok(());
@@ -801,7 +801,7 @@ impl<'cfg> Workspace<'cfg> {
     /// 1. A workspace only has one root.
     /// 2. All workspace members agree on this one root as the root.
     /// 3. The current crate is a member of this workspace.
-    fn validate(&mut self) -> CargoResult<()> {
+    fn validate(&mut self) -> CorgiResult<()> {
         // The rest of the checks require a VirtualManifest or multiple members.
         if self.root_manifest.is_none() {
             return Ok(());
@@ -814,7 +814,7 @@ impl<'cfg> Workspace<'cfg> {
         self.validate_manifest()
     }
 
-    fn validate_unique_names(&self) -> CargoResult<()> {
+    fn validate_unique_names(&self) -> CorgiResult<()> {
         let mut names = BTreeMap::new();
         for member in self.members.iter() {
             let package = self.packages.get(member);
@@ -836,7 +836,7 @@ impl<'cfg> Workspace<'cfg> {
         Ok(())
     }
 
-    fn validate_workspace_roots(&self) -> CargoResult<()> {
+    fn validate_workspace_roots(&self) -> CorgiResult<()> {
         let roots: Vec<PathBuf> = self
             .members
             .iter()
@@ -869,7 +869,7 @@ impl<'cfg> Workspace<'cfg> {
         }
     }
 
-    fn validate_members(&mut self) -> CargoResult<()> {
+    fn validate_members(&mut self) -> CorgiResult<()> {
         for member in self.members.clone() {
             let root = self.find_root(&member)?;
             if root == self.root_manifest {
@@ -900,7 +900,7 @@ impl<'cfg> Workspace<'cfg> {
         Ok(())
     }
 
-    fn error_if_manifest_not_in_members(&mut self) -> CargoResult<()> {
+    fn error_if_manifest_not_in_members(&mut self) -> CorgiResult<()> {
         if self.members.contains(&self.current_manifest) {
             return Ok(());
         }
@@ -958,14 +958,14 @@ impl<'cfg> Workspace<'cfg> {
         );
     }
 
-    fn validate_manifest(&mut self) -> CargoResult<()> {
+    fn validate_manifest(&mut self) -> CorgiResult<()> {
         if let Some(ref root_manifest) = self.root_manifest {
             for pkg in self
                 .members()
                 .filter(|p| p.manifest_path() != root_manifest)
             {
                 let manifest = pkg.manifest();
-                let emit_warning = |what| -> CargoResult<()> {
+                let emit_warning = |what| -> CorgiResult<()> {
                     let msg = format!(
                         "{} for the non root package will be ignored, \
                          specify {} at the workspace root:\n\
@@ -998,7 +998,7 @@ impl<'cfg> Workspace<'cfg> {
         Ok(())
     }
 
-    pub fn load(&self, manifest_path: &Path) -> CargoResult<Package> {
+    pub fn load(&self, manifest_path: &Path) -> CorgiResult<Package> {
         match self.packages.maybe_get(manifest_path) {
             Some(&MaybePackage::Package(ref p)) => return Ok(p.clone()),
             Some(&MaybePackage::Virtual(_)) => bail!("cannot load workspace root"),
@@ -1042,7 +1042,7 @@ impl<'cfg> Workspace<'cfg> {
         }
     }
 
-    pub fn emit_warnings(&self) -> CargoResult<()> {
+    pub fn emit_warnings(&self) -> CorgiResult<()> {
         for (path, maybe_pkg) in &self.packages.packages {
             let warnings = match maybe_pkg {
                 MaybePackage::Package(pkg) => pkg.manifest().warnings().warnings(),
@@ -1085,7 +1085,7 @@ impl<'cfg> Workspace<'cfg> {
         &self,
         specs: &[PackageIdSpec],
         cli_features: &CliFeatures,
-    ) -> CargoResult<Vec<(&Package, CliFeatures)>> {
+    ) -> CorgiResult<Vec<(&Package, CliFeatures)>> {
         assert!(
             !specs.is_empty() || cli_features.all_features,
             "no specs requires all_features"
@@ -1190,7 +1190,7 @@ impl<'cfg> Workspace<'cfg> {
         specs: &[PackageIdSpec],
         cli_features: &CliFeatures,
         found_features: &BTreeSet<FeatureValue>,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         // Keeps track of which features were contained in summary of `member` to suggest similar features in errors
         let mut summary_features: Vec<InternedString> = Default::default();
 
@@ -1372,7 +1372,7 @@ impl<'cfg> Workspace<'cfg> {
         &self,
         specs: &[PackageIdSpec],
         cli_features: &CliFeatures,
-    ) -> CargoResult<Vec<(&Package, CliFeatures)>> {
+    ) -> CorgiResult<Vec<(&Package, CliFeatures)>> {
         // Keeps track of which features matched `member` to produce an error
         // if any of them did not match anywhere.
         let mut found_features = Default::default();
@@ -1536,7 +1536,7 @@ impl<'cfg> Packages<'cfg> {
         self.packages.get_mut(manifest_path.parent().unwrap())
     }
 
-    fn load(&mut self, manifest_path: &Path) -> CargoResult<&MaybePackage> {
+    fn load(&mut self, manifest_path: &Path) -> CorgiResult<&MaybePackage> {
         let key = manifest_path.parent().unwrap();
         match self.packages.entry(key.to_path_buf()) {
             Entry::Occupied(e) => Ok(e.into_mut()),
@@ -1606,7 +1606,7 @@ impl WorkspaceRootConfig {
         self.members.is_some()
     }
 
-    fn members_paths(&self, globs: &[String]) -> CargoResult<Vec<PathBuf>> {
+    fn members_paths(&self, globs: &[String]) -> CorgiResult<Vec<PathBuf>> {
         let mut expanded_list = Vec::new();
 
         for glob in globs {
@@ -1634,7 +1634,7 @@ impl WorkspaceRootConfig {
         Ok(expanded_list)
     }
 
-    fn expand_member_path(path: &Path) -> CargoResult<Vec<PathBuf>> {
+    fn expand_member_path(path: &Path) -> CorgiResult<Vec<PathBuf>> {
         let path = match path.to_str() {
             Some(p) => p,
             None => return Ok(Vec::new()),
@@ -1656,7 +1656,7 @@ pub fn resolve_relative_path(
     old_root: &Path,
     new_root: &Path,
     rel_path: &str,
-) -> CargoResult<String> {
+) -> CorgiResult<String> {
     let joined_path = normalize_path(&old_root.join(rel_path));
     match diff_paths(joined_path, new_root) {
         None => Err(anyhow!(
@@ -1679,7 +1679,7 @@ pub fn resolve_relative_path(
 }
 
 /// Finds the path of the root of the workspace.
-pub fn find_workspace_root(manifest_path: &Path, config: &Config) -> CargoResult<Option<PathBuf>> {
+pub fn find_workspace_root(manifest_path: &Path, config: &Config) -> CorgiResult<Option<PathBuf>> {
     find_workspace_root_with_loader(manifest_path, config, |self_path| {
         let key = self_path.parent().unwrap();
         let source_id = SourceId::for_path(key)?;
@@ -1697,8 +1697,8 @@ pub fn find_workspace_root(manifest_path: &Path, config: &Config) -> CargoResult
 fn find_workspace_root_with_loader(
     manifest_path: &Path,
     config: &Config,
-    mut loader: impl FnMut(&Path) -> CargoResult<Option<PathBuf>>,
-) -> CargoResult<Option<PathBuf>> {
+    mut loader: impl FnMut(&Path) -> CorgiResult<Option<PathBuf>>,
+) -> CorgiResult<Option<PathBuf>> {
     // Check if there are any workspace roots that have already been found that would work
     {
         let roots = config.ws_roots.borrow();

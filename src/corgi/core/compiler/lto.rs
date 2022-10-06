@@ -2,7 +2,7 @@ use crate::core::compiler::{BuildContext, CompileMode, CrateType, Unit};
 use crate::core::profiles;
 use crate::util::interning::InternedString;
 
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use std::collections::hash_map::{Entry, HashMap};
 
 /// Possible ways to run rustc and request various parts of LTO.
@@ -40,7 +40,7 @@ pub enum Lto {
     OnlyObject,
 }
 
-pub fn generate(bcx: &BuildContext<'_, '_>) -> CargoResult<HashMap<Unit, Lto>> {
+pub fn generate(bcx: &BuildContext<'_, '_>) -> CorgiResult<HashMap<Unit, Lto>> {
     let mut map = HashMap::new();
     for unit in bcx.roots.iter() {
         let root_lto = match unit.profile.lto {
@@ -91,7 +91,7 @@ fn calculate(
     map: &mut HashMap<Unit, Lto>,
     unit: &Unit,
     parent_lto: Lto,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let crate_types = match unit.mode {
         // Note: Doctest ignores LTO, but for now we'll compute it as-if it is
         // a Bin, in case it is ever supported in the future.

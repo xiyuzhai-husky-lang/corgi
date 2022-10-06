@@ -10,7 +10,7 @@ pub struct Index {
 }
 
 impl Index {
-    pub fn clone(url: Url, local: impl AsRef<Path>) -> anyhow::Result<Self> {
+    pub fn clone(url: Url, local: impl AsRef<Path>) -> crate::error::Result<Self> {
         let local = local.as_ref().to_path_buf();
         let repository = Repository::clone(&url.to_string(), &local)?;
         Ok(Self {

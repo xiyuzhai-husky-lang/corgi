@@ -2,7 +2,7 @@ use crate::core::compiler::Unit;
 use crate::core::manifest::TargetSourcePath;
 use crate::core::{Target, Workspace};
 use crate::ops::CompileOptions;
-use crate::util::CargoResult;
+use crate::util::CorgiResult;
 use anyhow::bail;
 use cargo_util::ProcessBuilder;
 use std::fmt::Write;
@@ -12,7 +12,7 @@ fn get_available_targets<'a>(
     filter_fn: fn(&Target) -> bool,
     ws: &'a Workspace<'_>,
     options: &'a CompileOptions,
-) -> CargoResult<Vec<&'a str>> {
+) -> CorgiResult<Vec<&'a str>> {
     let packages = options.spec.get_packages(ws)?;
 
     let mut targets: Vec<_> = packages
@@ -37,7 +37,7 @@ fn print_available_targets(
     options: &CompileOptions,
     option_name: &str,
     plural_name: &str,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let targets = get_available_targets(filter_fn, ws, options)?;
 
     let mut output = String::new();
@@ -54,7 +54,7 @@ fn print_available_targets(
     bail!("{}", output)
 }
 
-pub fn print_available_packages(ws: &Workspace<'_>) -> CargoResult<()> {
+pub fn print_available_packages(ws: &Workspace<'_>) -> CorgiResult<()> {
     let packages = ws
         .members()
         .map(|pkg| pkg.name().as_str())
@@ -78,19 +78,19 @@ pub fn print_available_packages(ws: &Workspace<'_>) -> CargoResult<()> {
     bail!("{}", output)
 }
 
-pub fn print_available_examples(ws: &Workspace<'_>, options: &CompileOptions) -> CargoResult<()> {
+pub fn print_available_examples(ws: &Workspace<'_>, options: &CompileOptions) -> CorgiResult<()> {
     print_available_targets(Target::is_example, ws, options, "--example", "examples")
 }
 
-pub fn print_available_binaries(ws: &Workspace<'_>, options: &CompileOptions) -> CargoResult<()> {
+pub fn print_available_binaries(ws: &Workspace<'_>, options: &CompileOptions) -> CorgiResult<()> {
     print_available_targets(Target::is_bin, ws, options, "--bin", "binaries")
 }
 
-pub fn print_available_benches(ws: &Workspace<'_>, options: &CompileOptions) -> CargoResult<()> {
+pub fn print_available_benches(ws: &Workspace<'_>, options: &CompileOptions) -> CorgiResult<()> {
     print_available_targets(Target::is_bench, ws, options, "--bench", "benches")
 }
 
-pub fn print_available_tests(ws: &Workspace<'_>, options: &CompileOptions) -> CargoResult<()> {
+pub fn print_available_tests(ws: &Workspace<'_>, options: &CompileOptions) -> CorgiResult<()> {
     print_available_targets(Target::is_test, ws, options, "--test", "tests")
 }
 

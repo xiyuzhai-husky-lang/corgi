@@ -103,7 +103,7 @@ use cargo_util::ProcessBuilder;
 use serde::{Deserialize, Serialize};
 
 use crate::core::resolver::ResolveBehavior;
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::{indented_lines, iter_join};
 use crate::Config;
 
@@ -442,7 +442,7 @@ impl Features {
         config: &Config,
         warnings: &mut Vec<String>,
         is_local: bool,
-    ) -> CargoResult<Features> {
+    ) -> CorgiResult<Features> {
         let mut ret = Features::default();
         ret.nightly_features_allowed = config.nightly_features_allowed;
         ret.is_local = is_local;
@@ -458,7 +458,7 @@ impl Features {
         feature_name: &str,
         config: &Config,
         warnings: &mut Vec<String>,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         let nightly_features_allowed = self.nightly_features_allowed;
         let is_local = self.is_local;
         let (slot, feature) = match self.status(feature_name) {
@@ -554,7 +554,7 @@ impl Features {
         &self.activated
     }
 
-    pub fn require(&self, feature: &Feature) -> CargoResult<()> {
+    pub fn require(&self, feature: &Feature) -> CorgiResult<()> {
         if feature.is_enabled(self) {
             return Ok(());
         }
@@ -764,7 +764,7 @@ where
 
 fn parse_check_cfg(
     it: impl Iterator<Item = impl AsRef<str>>,
-) -> CargoResult<Option<(bool, bool, bool, bool)>> {
+) -> CorgiResult<Option<(bool, bool, bool, bool)>> {
     let mut features = false;
     let mut well_known_names = false;
     let mut well_known_values = false;
@@ -793,7 +793,7 @@ impl CliUnstable {
         &mut self,
         flags: &[String],
         nightly_features_allowed: bool,
-    ) -> CargoResult<Vec<String>> {
+    ) -> CorgiResult<Vec<String>> {
         if !flags.is_empty() && !nightly_features_allowed {
             bail!(
                 "the `-Z` flag is only accepted on the nightly channel of Cargo, \
@@ -817,12 +817,12 @@ impl CliUnstable {
         Ok(warnings)
     }
 
-    fn add(&mut self, flag: &str, warnings: &mut Vec<String>) -> CargoResult<()> {
+    fn add(&mut self, flag: &str, warnings: &mut Vec<String>) -> CorgiResult<()> {
         let mut parts = flag.splitn(2, '=');
         let k = parts.next().unwrap();
         let v = parts.next();
 
-        fn parse_bool(key: &str, value: Option<&str>) -> CargoResult<bool> {
+        fn parse_bool(key: &str, value: Option<&str>) -> CorgiResult<bool> {
             match value {
                 None | Some("yes") => Ok(true),
                 Some("no") => Ok(false),
@@ -839,14 +839,14 @@ impl CliUnstable {
         }
 
         // Asserts that there is no argument to the flag.
-        fn parse_empty(key: &str, value: Option<&str>) -> CargoResult<bool> {
+        fn parse_empty(key: &str, value: Option<&str>) -> CorgiResult<bool> {
             if let Some(v) = value {
                 bail!("flag -Z{} does not take a value, found: `{}`", key, v);
             }
             Ok(true)
         }
 
-        fn parse_usize_opt(value: Option<&str>) -> CargoResult<Option<usize>> {
+        fn parse_usize_opt(value: Option<&str>) -> CorgiResult<Option<usize>> {
             Ok(match value {
                 Some(value) => match value.parse::<usize>() {
                     Ok(value) => Some(value),
@@ -972,7 +972,7 @@ impl CliUnstable {
 
     /// Generates an error if `-Z unstable-options` was not used for a new,
     /// unstable command-line flag.
-    pub fn fail_if_stable_opt(&self, flag: &str, issue: u32) -> CargoResult<()> {
+    pub fn fail_if_stable_opt(&self, flag: &str, issue: u32) -> CorgiResult<()> {
         if !self.unstable_options {
             let see = format!(
                 "See https://github.com/rust-lang/cargo/issues/{} for more \
@@ -1011,7 +1011,7 @@ impl CliUnstable {
         config: &Config,
         command: &str,
         issue: u32,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         if self.unstable_options {
             return Ok(());
         }

@@ -3,7 +3,7 @@
 use crate::core::compiler::BuildContext;
 use crate::core::{Dependency, PackageId, QueryKind, Workspace};
 use crate::sources::SourceConfigMap;
-use crate::util::{iter_join, CargoResult, Config};
+use crate::util::{iter_join, Config, CorgiResult};
 use anyhow::{bail, format_err, Context};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
@@ -141,7 +141,7 @@ impl OnDiskReports {
     }
 
     /// Loads the on-disk reports.
-    pub fn load(ws: &Workspace<'_>) -> CargoResult<OnDiskReports> {
+    pub fn load(ws: &Workspace<'_>) -> CorgiResult<OnDiskReports> {
         let report_file = match ws.target_dir().open_ro(
             FUTURE_INCOMPAT_FILE,
             ws.config(),
@@ -181,7 +181,7 @@ impl OnDiskReports {
         id: u32,
         config: &Config,
         package: Option<&str>,
-    ) -> CargoResult<String> {
+    ) -> CorgiResult<String> {
         let report = self.reports.iter().find(|r| r.id == id).ok_or_else(|| {
             let available = iter_join(self.reports.iter().map(|r| r.id.to_string()), ", ");
             format_err!(

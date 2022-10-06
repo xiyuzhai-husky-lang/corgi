@@ -2,7 +2,7 @@ use crate::core::PackageId;
 use crate::sources::registry::CRATES_IO_HTTP_INDEX;
 use crate::sources::{DirectorySource, CRATES_IO_DOMAIN, CRATES_IO_INDEX, CRATES_IO_REGISTRY};
 use crate::sources::{GitSource, PathSource, RegistrySource};
-use crate::util::{CanonicalUrl, CargoResult, Config, IntoUrl};
+use crate::util::{CanonicalUrl, Config, CorgiResult, IntoUrl};
 use log::trace;
 use serde::de;
 use serde::ser;
@@ -74,7 +74,7 @@ impl SourceId {
     /// Creates a `SourceId` object from the kind and URL.
     ///
     /// The canonical url will be calculated, but the precise field will not
-    fn new(kind: SourceKind, url: Url, name: Option<&str>) -> CargoResult<SourceId> {
+    fn new(kind: SourceKind, url: Url, name: Option<&str>) -> CorgiResult<SourceId> {
         let source_id = SourceId::wrap(SourceIdInner {
             kind,
             canonical_url: CanonicalUrl::new(&url)?,
@@ -105,7 +105,7 @@ impl SourceId {
     ///                     libssh2-static-sys#80e71a3021618eb05\
     ///                     656c58fb7c5ef5f12bc747f");
     /// ```
-    pub fn from_url(string: &str) -> CargoResult<SourceId> {
+    pub fn from_url(string: &str) -> CorgiResult<SourceId> {
         let mut parts = string.splitn(2, '+');
         let kind = parts.next().unwrap();
         let url = parts
@@ -159,13 +159,13 @@ impl SourceId {
     /// Creates a `SourceId` from a filesystem path.
     ///
     /// `path`: an absolute path.
-    pub fn for_path(path: &Path) -> CargoResult<SourceId> {
+    pub fn for_path(path: &Path) -> CorgiResult<SourceId> {
         let url = path.into_url()?;
         SourceId::new(SourceKind::Path, url, None)
     }
 
     /// Creates a `SourceId` from a Git reference.
-    pub fn for_git(url: &Url, reference: GitReference) -> CargoResult<SourceId> {
+    pub fn for_git(url: &Url, reference: GitReference) -> CorgiResult<SourceId> {
         SourceId::new(SourceKind::Git(reference), url.clone(), None)
     }
 
@@ -174,23 +174,23 @@ impl SourceId {
     ///
     /// Use [`SourceId::for_alt_registry`] if a name can provided, which
     /// generates better messages for cargo.
-    pub fn for_registry(url: &Url) -> CargoResult<SourceId> {
+    pub fn for_registry(url: &Url) -> CorgiResult<SourceId> {
         SourceId::new(SourceKind::Registry, url.clone(), None)
     }
 
     /// Creates a `SourceId` from a remote registry URL with given name.
-    pub fn for_alt_registry(url: &Url, name: &str) -> CargoResult<SourceId> {
+    pub fn for_alt_registry(url: &Url, name: &str) -> CorgiResult<SourceId> {
         SourceId::new(SourceKind::Registry, url.clone(), Some(name))
     }
 
     /// Creates a SourceId from a local registry path.
-    pub fn for_local_registry(path: &Path) -> CargoResult<SourceId> {
+    pub fn for_local_registry(path: &Path) -> CorgiResult<SourceId> {
         let url = path.into_url()?;
         SourceId::new(SourceKind::LocalRegistry, url, None)
     }
 
     /// Creates a `SourceId` from a directory path.
-    pub fn for_directory(path: &Path) -> CargoResult<SourceId> {
+    pub fn for_directory(path: &Path) -> CorgiResult<SourceId> {
         let url = path.into_url()?;
         SourceId::new(SourceKind::Directory, url, None)
     }
@@ -199,7 +199,7 @@ impl SourceId {
     ///
     /// This is the main cargo registry by default, but it can be overridden in
     /// a `.cargo/config.toml`.
-    pub fn crates_io(config: &Config) -> CargoResult<SourceId> {
+    pub fn crates_io(config: &Config) -> CorgiResult<SourceId> {
         config.crates_io_source_id(|| {
             config.check_registry_index_not_set()?;
             let url = CRATES_IO_INDEX.into_url().unwrap();
@@ -209,7 +209,7 @@ impl SourceId {
 
     /// Returns the `SourceId` corresponding to the main repository, using the
     /// sparse HTTP index if allowed.
-    pub fn crates_io_maybe_sparse_http(config: &Config) -> CargoResult<SourceId> {
+    pub fn crates_io_maybe_sparse_http(config: &Config) -> CorgiResult<SourceId> {
         if config.cli_unstable().sparse_registry {
             config.check_registry_index_not_set()?;
             let url = CRATES_IO_HTTP_INDEX.into_url().unwrap();
@@ -220,7 +220,7 @@ impl SourceId {
     }
 
     /// Gets the `SourceId` associated with given name of the remote registry.
-    pub fn alt_registry(config: &Config, key: &str) -> CargoResult<SourceId> {
+    pub fn alt_registry(config: &Config, key: &str) -> CorgiResult<SourceId> {
         let url = config.get_registry_index(key)?;
         Ok(SourceId::wrap(SourceIdInner {
             kind: SourceKind::Registry,
@@ -304,7 +304,7 @@ impl SourceId {
         self,
         config: &'a Config,
         yanked_whitelist: &HashSet<PackageId>,
-    ) -> CargoResult<Box<dyn super::Source + 'a>> {
+    ) -> CorgiResult<Box<dyn super::Source + 'a>> {
         trace!("loading SourceId; {}", self);
         match self.inner.kind {
             SourceKind::Git(..) => Ok(Box::new(GitSource::new(self, config)?)),

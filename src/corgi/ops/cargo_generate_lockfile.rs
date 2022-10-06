@@ -4,7 +4,7 @@ use crate::core::{PackageId, PackageIdSpec};
 use crate::core::{Resolve, SourceId, Workspace};
 use crate::ops;
 use crate::util::config::Config;
-use crate::util::CargoResult;
+use crate::util::CorgiResult;
 use anyhow::Context;
 use log::debug;
 use std::collections::{BTreeMap, HashSet};
@@ -19,7 +19,7 @@ pub struct UpdateOptions<'a> {
     pub workspace: bool,
 }
 
-pub fn generate_lockfile(ws: &Workspace<'_>) -> CargoResult<()> {
+pub fn generate_lockfile(ws: &Workspace<'_>) -> CorgiResult<()> {
     let mut registry = PackageRegistry::new(ws.config())?;
     let mut resolve = ops::resolve_with_previous(
         &mut registry,
@@ -35,7 +35,7 @@ pub fn generate_lockfile(ws: &Workspace<'_>) -> CargoResult<()> {
     Ok(())
 }
 
-pub fn update_lockfile(ws: &Workspace<'_>, opts: &UpdateOptions<'_>) -> CargoResult<()> {
+pub fn update_lockfile(ws: &Workspace<'_>, opts: &UpdateOptions<'_>) -> CorgiResult<()> {
     // Currently this is only a warning, but after a transition period this will become
     // a hard error.
     // See https://github.com/rust-lang/cargo/issues/10919#issuecomment-1214464756.

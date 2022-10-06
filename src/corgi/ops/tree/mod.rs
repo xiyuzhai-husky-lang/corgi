@@ -6,7 +6,7 @@ use crate::core::dependency::DepKind;
 use crate::core::resolver::{features::CliFeatures, ForceAllTargets, HasDevUnits};
 use crate::core::{Package, PackageId, PackageIdSpec, Workspace};
 use crate::ops::{self, Packages};
-use crate::util::{CargoResult, Config};
+use crate::util::{Config, CorgiResult};
 use crate::{drop_print, drop_println};
 use anyhow::Context;
 use graph::Graph;
@@ -127,7 +127,7 @@ static ASCII_SYMBOLS: Symbols = Symbols {
 };
 
 /// Entry point for the `cargo tree` command.
-pub fn build_and_print(ws: &Workspace<'_>, opts: &TreeOptions) -> CargoResult<()> {
+pub fn build_and_print(ws: &Workspace<'_>, opts: &TreeOptions) -> CorgiResult<()> {
     let requested_targets = match &opts.target {
         Target::All | Target::Host => Vec::new(),
         Target::Specific(t) => t.clone(),
@@ -184,7 +184,7 @@ pub fn build_and_print(ws: &Workspace<'_>, opts: &TreeOptions) -> CargoResult<()
         opts.invert
             .iter()
             .map(|p| PackageIdSpec::parse(p))
-            .collect::<CargoResult<Vec<PackageIdSpec>>>()?
+            .collect::<CorgiResult<Vec<PackageIdSpec>>>()?
     };
     let root_ids = ws_resolve.targeted_resolve.specs_to_ids(&root_specs)?;
     let root_indexes = graph.indexes_from_ids(&root_ids);
@@ -211,7 +211,7 @@ pub fn build_and_print(ws: &Workspace<'_>, opts: &TreeOptions) -> CargoResult<()
             // dependencies graph.
             r.and_then(|spec| spec.query(ws_resolve.targeted_resolve.iter()).and(Ok(spec)))
         })
-        .collect::<CargoResult<Vec<PackageIdSpec>>>()?;
+        .collect::<CorgiResult<Vec<PackageIdSpec>>>()?;
 
     print(ws.config(), opts, root_indexes, &pkgs_to_prune, &graph)?;
     Ok(())
@@ -224,7 +224,7 @@ fn print(
     roots: Vec<usize>,
     pkgs_to_prune: &[PackageIdSpec],
     graph: &Graph<'_>,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let format = Pattern::new(&opts.format)
         .with_context(|| format!("tree format `{}` not valid", opts.format))?;
 

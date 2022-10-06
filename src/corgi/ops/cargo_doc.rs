@@ -1,7 +1,7 @@
 use crate::core::{Shell, Workspace};
 use crate::ops;
 use crate::util::config::PathAndArgs;
-use crate::util::CargoResult;
+use crate::util::CorgiResult;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
@@ -16,7 +16,7 @@ pub struct DocOptions {
 }
 
 /// Main method for `cargo doc`.
-pub fn doc(ws: &Workspace<'_>, options: &DocOptions) -> CargoResult<()> {
+pub fn doc(ws: &Workspace<'_>, options: &DocOptions) -> CorgiResult<()> {
     let compilation = ops::compile(ws, &options.compile_opts)?;
 
     if options.open_result {
@@ -48,7 +48,7 @@ fn open_docs(
     path: &Path,
     shell: &mut Shell,
     config_browser: Option<(PathBuf, Vec<String>)>,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let browser =
         config_browser.or_else(|| Some((PathBuf::from(std::env::var_os("BROWSER")?), Vec::new())));
 

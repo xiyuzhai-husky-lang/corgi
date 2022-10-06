@@ -4,7 +4,7 @@ use anyhow::Error;
 use std::fmt;
 use std::path::PathBuf;
 
-pub type CargoResult<T> = anyhow::Result<T>;
+pub type CorgiResult<T> = anyhow::Result<T>;
 
 #[derive(Debug)]
 pub struct HttpNot200 {

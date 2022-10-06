@@ -7,7 +7,7 @@
 use crate::core::{GitReference, PackageId, Source, SourceId};
 use crate::sources::{ReplacedSource, CRATES_IO_REGISTRY};
 use crate::util::config::{self, ConfigRelativePath, OptValue};
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::{Config, IntoUrl};
 use anyhow::{bail, Context as _};
 use log::debug;
@@ -67,7 +67,7 @@ struct SourceConfig {
 }
 
 impl<'cfg> SourceConfigMap<'cfg> {
-    pub fn new(config: &'cfg Config) -> CargoResult<SourceConfigMap<'cfg>> {
+    pub fn new(config: &'cfg Config) -> CorgiResult<SourceConfigMap<'cfg>> {
         let mut base = SourceConfigMap::empty(config)?;
         let sources: Option<HashMap<String, SourceConfigDef>> = config.get("source")?;
         if let Some(sources) = sources {
@@ -78,7 +78,7 @@ impl<'cfg> SourceConfigMap<'cfg> {
         Ok(base)
     }
 
-    pub fn empty(config: &'cfg Config) -> CargoResult<SourceConfigMap<'cfg>> {
+    pub fn empty(config: &'cfg Config) -> CorgiResult<SourceConfigMap<'cfg>> {
         let mut base = SourceConfigMap {
             cfgs: HashMap::new(),
             id2name: HashMap::new(),
@@ -112,7 +112,7 @@ impl<'cfg> SourceConfigMap<'cfg> {
         &self,
         id: SourceId,
         yanked_whitelist: &HashSet<PackageId>,
-    ) -> CargoResult<Box<dyn Source + 'cfg>> {
+    ) -> CorgiResult<Box<dyn Source + 'cfg>> {
         debug!("loading: {}", id);
 
         let mut name = match self.id2name.get(&id) {
@@ -194,7 +194,7 @@ restore the source replacement configuration to continue the build
         Ok(Box::new(ReplacedSource::new(id, new_id, new_src)))
     }
 
-    fn add(&mut self, name: &str, cfg: SourceConfig) -> CargoResult<()> {
+    fn add(&mut self, name: &str, cfg: SourceConfig) -> CorgiResult<()> {
         if let Some(old_name) = self.id2name.insert(cfg.id, name.to_string()) {
             // The user is allowed to redefine the built-in crates-io
             // definition from `empty()`.
@@ -212,7 +212,7 @@ restore the source replacement configuration to continue the build
         Ok(())
     }
 
-    fn add_config(&mut self, name: String, def: SourceConfigDef) -> CargoResult<()> {
+    fn add_config(&mut self, name: String, def: SourceConfigDef) -> CorgiResult<()> {
         let mut srcs = Vec::new();
         if let Some(registry) = def.registry {
             let url = url(&registry, &format!("source.{}.registry", name))?;
@@ -288,7 +288,7 @@ restore the source replacement configuration to continue the build
 
         return Ok(());
 
-        fn url(val: &config::Value<String>, key: &str) -> CargoResult<Url> {
+        fn url(val: &config::Value<String>, key: &str) -> CorgiResult<Url> {
             let url = val.val.into_url().with_context(|| {
                 format!(
                     "configuration key `{}` specified an invalid \

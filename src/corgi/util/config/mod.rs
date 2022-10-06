@@ -70,7 +70,7 @@ use crate::core::compiler::rustdoc::RustdocExternMap;
 use crate::core::shell::Verbosity;
 use crate::core::{features, CliUnstable, Shell, SourceId, Workspace, WorkspaceRootConfig};
 use crate::ops;
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::toml as corgi_toml;
 use crate::util::validate_package_name;
 use crate::util::{FileLock, Filesystem, IntoUrl, IntoUrlWithBase, Rustc};
@@ -295,7 +295,7 @@ impl Config {
     ///
     /// This does only minimal initialization. In particular, it does not load
     /// any config files from disk. Those will be loaded lazily as-needed.
-    pub fn default() -> CargoResult<Config> {
+    pub fn default() -> CorgiResult<Config> {
         let shell = Shell::new();
         let cwd = env::current_dir()
             .with_context(|| "couldn't get the current directory of the process")?;
@@ -339,7 +339,7 @@ impl Config {
     }
 
     /// Gets the default Cargo registry.
-    pub fn default_registry(&self) -> CargoResult<Option<String>> {
+    pub fn default_registry(&self) -> CorgiResult<Option<String>> {
         Ok(self
             .get_string("registry.default")?
             .map(|registry| registry.val))
@@ -351,14 +351,14 @@ impl Config {
     }
 
     /// Gets the path to the `rustdoc` executable.
-    pub fn rustdoc(&self) -> CargoResult<&Path> {
+    pub fn rustdoc(&self) -> CorgiResult<&Path> {
         self.rustdoc
             .try_borrow_with(|| Ok(self.get_tool("rustdoc", &self.build_config()?.rustdoc)))
             .map(AsRef::as_ref)
     }
 
     /// Gets the path to the `rustc` executable.
-    pub fn load_global_rustc(&self, ws: Option<&Workspace<'_>>) -> CargoResult<Rustc> {
+    pub fn load_global_rustc(&self, ws: Option<&Workspace<'_>>) -> CorgiResult<Rustc> {
         let cache_location = ws.map(|ws| {
             ws.target_dir()
                 .join(".rustc_info.json")
@@ -389,10 +389,10 @@ impl Config {
     }
 
     /// Gets the path to the `cargo` executable.
-    pub fn cargo_exe(&self) -> CargoResult<&Path> {
+    pub fn cargo_exe(&self) -> CorgiResult<&Path> {
         self.cargo_exe
             .try_borrow_with(|| {
-                fn from_current_exe() -> CargoResult<PathBuf> {
+                fn from_current_exe() -> CorgiResult<PathBuf> {
                     // Try fetching the path to `cargo` using `env::current_exe()`.
                     // The method varies per operating system and might fail; in particular,
                     // it depends on `/proc` being mounted on Linux, and some environments
@@ -401,7 +401,7 @@ impl Config {
                     Ok(exe)
                 }
 
-                fn from_argv() -> CargoResult<PathBuf> {
+                fn from_argv() -> CorgiResult<PathBuf> {
                     // Grab `argv[0]` and attempt to resolve it to an absolute path.
                     // If `argv[0]` has one component, it must have come from a `PATH` lookup,
                     // so probe `PATH` in that case.
@@ -437,7 +437,7 @@ impl Config {
     /// This will lazy-load the values as necessary. Callers are responsible
     /// for checking environment variables. Callers outside of the `config`
     /// module should avoid using this.
-    pub fn values(&self) -> CargoResult<&HashMap<String, ConfigValue>> {
+    pub fn values(&self) -> CorgiResult<&HashMap<String, ConfigValue>> {
         self.values.try_borrow_with(|| self.load_values())
     }
 
@@ -447,7 +447,7 @@ impl Config {
     /// currently only exists for `cargo vendor` to remove the `source`
     /// entries. This doesn't respect environment variables. You should avoid
     /// using this if possible.
-    pub fn values_mut(&mut self) -> CargoResult<&mut HashMap<String, ConfigValue>> {
+    pub fn values_mut(&mut self) -> CorgiResult<&mut HashMap<String, ConfigValue>> {
         match self.values.borrow_mut() {
             Some(map) => Ok(map),
             None => bail!("config values not loaded yet"),
@@ -455,7 +455,7 @@ impl Config {
     }
 
     // Note: this is used by RLS, not Cargo.
-    pub fn set_values(&self, values: HashMap<String, ConfigValue>) -> CargoResult<()> {
+    pub fn set_values(&self, values: HashMap<String, ConfigValue>) -> CorgiResult<()> {
         if self.values.borrow().is_some() {
             bail!("config values already found")
         }
@@ -475,7 +475,7 @@ impl Config {
 
     /// Reloads on-disk configuration values, starting at the given path and
     /// walking up its ancestors.
-    pub fn reload_rooted_at<P: AsRef<Path>>(&mut self, path: P) -> CargoResult<()> {
+    pub fn reload_rooted_at<P: AsRef<Path>>(&mut self, path: P) -> CorgiResult<()> {
         let values = self.load_values_from(path.as_ref())?;
         self.values.replace(values);
         self.merge_cli_args()?;
@@ -493,7 +493,7 @@ impl Config {
     /// Returns `None` if the user has not chosen an explicit directory.
     ///
     /// Callers should prefer `Workspace::target_dir` instead.
-    pub fn target_dir(&self) -> CargoResult<Option<Filesystem>> {
+    pub fn target_dir(&self) -> CorgiResult<Option<Filesystem>> {
         if let Some(dir) = &self.target_dir {
             Ok(Some(dir.clone()))
         } else if let Some(dir) = self.env.get("CARGO_TARGET_DIR") {
@@ -527,7 +527,7 @@ impl Config {
     ///
     /// This does NOT look at environment variables. See `get_cv_with_env` for
     /// a variant that supports environment variables.
-    fn get_cv(&self, key: &ConfigKey) -> CargoResult<Option<ConfigValue>> {
+    fn get_cv(&self, key: &ConfigKey) -> CorgiResult<Option<ConfigValue>> {
         log::trace!("get cv {:?}", key);
         let vals = self.values()?;
         if key.is_root() {
@@ -573,7 +573,7 @@ impl Config {
     }
 
     /// This is a helper for getting a CV from a file or env var.
-    pub(crate) fn get_cv_with_env(&self, key: &ConfigKey) -> CargoResult<Option<CV>> {
+    pub(crate) fn get_cv_with_env(&self, key: &ConfigKey) -> CorgiResult<Option<CV>> {
         // Determine if value comes from env, cli, or file, and merge env if
         // possible.
         let cv = self.get_cv(key)?;
@@ -685,7 +685,7 @@ impl Config {
     /// Check if the [`Config`] contains a given [`ConfigKey`].
     ///
     /// See `ConfigMapAccess` for a description of `env_prefix_ok`.
-    fn has_key(&self, key: &ConfigKey, env_prefix_ok: bool) -> CargoResult<bool> {
+    fn has_key(&self, key: &ConfigKey, env_prefix_ok: bool) -> CorgiResult<bool> {
         if self.env.contains_key(key.as_env_key()) {
             return Ok(true);
         }
@@ -716,7 +716,7 @@ impl Config {
     /// Get a string config value.
     ///
     /// See `get` for more details.
-    pub fn get_string(&self, key: &str) -> CargoResult<OptValue<String>> {
+    pub fn get_string(&self, key: &str) -> CorgiResult<OptValue<String>> {
         self.get::<Option<Value<String>>>(key)
     }
 
@@ -725,7 +725,7 @@ impl Config {
     /// This returns a relative path if the value does not contain any
     /// directory separators. See `ConfigRelativePath::resolve_program` for
     /// more details.
-    pub fn get_path(&self, key: &str) -> CargoResult<OptValue<PathBuf>> {
+    pub fn get_path(&self, key: &str) -> CorgiResult<OptValue<PathBuf>> {
         self.get::<Option<Value<ConfigRelativePath>>>(key).map(|v| {
             v.map(|v| Value {
                 val: v.val.resolve_program(self),
@@ -751,12 +751,12 @@ impl Config {
     ///
     /// NOTE: this does **not** support environment variables. Use `get` instead
     /// if you want that.
-    pub fn get_list(&self, key: &str) -> CargoResult<OptValue<Vec<(String, Definition)>>> {
+    pub fn get_list(&self, key: &str) -> CorgiResult<OptValue<Vec<(String, Definition)>>> {
         let key = ConfigKey::from_str(key);
         self._get_list(&key)
     }
 
-    fn _get_list(&self, key: &ConfigKey) -> CargoResult<OptValue<Vec<(String, Definition)>>> {
+    fn _get_list(&self, key: &ConfigKey) -> CorgiResult<OptValue<Vec<(String, Definition)>>> {
         match self.get_cv(key)? {
             Some(CV::List(val, definition)) => Ok(Some(Value { val, definition })),
             Some(val) => self.expected("list", key, &val),
@@ -769,7 +769,7 @@ impl Config {
         &self,
         key: &ConfigKey,
         merge: bool,
-    ) -> CargoResult<Vec<(String, Definition)>> {
+    ) -> CorgiResult<Vec<(String, Definition)>> {
         let mut res = Vec::new();
 
         if !merge {
@@ -802,7 +802,7 @@ impl Config {
         &self,
         key: &ConfigKey,
         output: &mut Vec<(String, Definition)>,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         let env_val = match self.env.get(key.as_env_key()) {
             Some(v) => v,
             None => {
@@ -848,7 +848,7 @@ impl Config {
     /// Low-level method for getting a config value as an `OptValue<HashMap<String, CV>>`.
     ///
     /// NOTE: This does not read from env. The caller is responsible for that.
-    fn get_table(&self, key: &ConfigKey) -> CargoResult<OptValue<HashMap<String, CV>>> {
+    fn get_table(&self, key: &ConfigKey) -> CorgiResult<OptValue<HashMap<String, CV>>> {
         match self.get_cv(key)? {
             Some(CV::Table(val, definition)) => Ok(Some(Value { val, definition })),
             Some(val) => self.expected("table", key, &val),
@@ -861,7 +861,7 @@ impl Config {
     get_value_typed! {get_string_priv, String, String, "a string"}
 
     /// Generate an error when the given value is the wrong type.
-    fn expected<T>(&self, ty: &str, key: &ConfigKey, val: &CV) -> CargoResult<T> {
+    fn expected<T>(&self, ty: &str, key: &ConfigKey, val: &CV) -> CorgiResult<T> {
         val.expected(ty, &key.to_string())
             .map_err(|e| anyhow!("invalid configuration for key `{}`\n{}", key, e))
     }
@@ -882,7 +882,7 @@ impl Config {
         target_dir: &Option<PathBuf>,
         unstable_flags: &[String],
         cli_config: &[String],
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         for warning in self
             .unstable_flags
             .parse(unstable_flags, self.nightly_features_allowed)?
@@ -953,7 +953,7 @@ impl Config {
         Ok(())
     }
 
-    fn load_unstable_flags_from_config(&mut self) -> CargoResult<()> {
+    fn load_unstable_flags_from_config(&mut self) -> CorgiResult<()> {
         // If nightly features are enabled, allow setting Z-flags from config
         // using the `unstable` table. Ignore that block otherwise.
         if self.nightly_features_allowed {
@@ -1001,11 +1001,11 @@ impl Config {
     }
 
     /// Loads configuration from the filesystem.
-    pub fn load_values(&self) -> CargoResult<HashMap<String, ConfigValue>> {
+    pub fn load_values(&self) -> CorgiResult<HashMap<String, ConfigValue>> {
         self.load_values_from(&self.cwd)
     }
 
-    pub(crate) fn load_values_unmerged(&self) -> CargoResult<Vec<ConfigValue>> {
+    pub(crate) fn load_values_unmerged(&self) -> CorgiResult<Vec<ConfigValue>> {
         let mut result = Vec::new();
         let mut seen = HashSet::new();
         let home = self.home_path.clone().into_path_unlocked();
@@ -1026,7 +1026,7 @@ impl Config {
         cv: &mut CV,
         seen: &mut HashSet<PathBuf>,
         output: &mut Vec<CV>,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         let includes = self.include_paths(cv, false)?;
         for (path, abs_path, def) in includes {
             let mut cv = self._load_file(&abs_path, seen, false).with_context(|| {
@@ -1038,7 +1038,7 @@ impl Config {
         Ok(())
     }
 
-    fn load_values_from(&self, path: &Path) -> CargoResult<HashMap<String, ConfigValue>> {
+    fn load_values_from(&self, path: &Path) -> CorgiResult<HashMap<String, ConfigValue>> {
         // This definition path is ignored, this is just a temporary container
         // representing the entire file.
         let mut cfg = CV::Table(HashMap::new(), Definition::Path(PathBuf::from(".")));
@@ -1059,7 +1059,7 @@ impl Config {
         }
     }
 
-    fn load_file(&self, path: &Path, includes: bool) -> CargoResult<ConfigValue> {
+    fn load_file(&self, path: &Path, includes: bool) -> CorgiResult<ConfigValue> {
         self._load_file(path, &mut HashSet::new(), includes)
     }
 
@@ -1068,7 +1068,7 @@ impl Config {
         path: &Path,
         seen: &mut HashSet<PathBuf>,
         includes: bool,
-    ) -> CargoResult<ConfigValue> {
+    ) -> CorgiResult<ConfigValue> {
         if !seen.insert(path.to_path_buf()) {
             bail!(
                 "config `include` cycle detected with path `{}`",
@@ -1099,7 +1099,7 @@ impl Config {
     /// Returns `value` with the given include files merged into it.
     ///
     /// `seen` is used to check for cyclic includes.
-    fn load_includes(&self, mut value: CV, seen: &mut HashSet<PathBuf>) -> CargoResult<CV> {
+    fn load_includes(&self, mut value: CV, seen: &mut HashSet<PathBuf>) -> CorgiResult<CV> {
         // Get the list of files to load.
         let includes = self.include_paths(&mut value, true)?;
         // Check unstable.
@@ -1124,7 +1124,7 @@ impl Config {
         &self,
         cv: &mut CV,
         remove: bool,
-    ) -> CargoResult<Vec<(String, PathBuf, Definition)>> {
+    ) -> CorgiResult<Vec<(String, PathBuf, Definition)>> {
         let abs = |path: &str, def: &Definition| -> (String, PathBuf, Definition) {
             let abs_path = match def {
                 Definition::Path(p) => p.parent().unwrap().join(&path),
@@ -1161,7 +1161,7 @@ impl Config {
     }
 
     /// Parses the CLI config args and returns them as a table.
-    pub(crate) fn cli_args_as_table(&self) -> CargoResult<ConfigValue> {
+    pub(crate) fn cli_args_as_table(&self) -> CorgiResult<ConfigValue> {
         let mut loaded_args = CV::Table(HashMap::new(), Definition::Cli);
         let cli_args = match &self.cli_config {
             Some(cli_args) => cli_args,
@@ -1287,7 +1287,7 @@ impl Config {
     }
 
     /// Add config arguments passed on the command line.
-    fn merge_cli_args(&mut self) -> CargoResult<()> {
+    fn merge_cli_args(&mut self) -> CorgiResult<()> {
         let loaded_map = match self.cli_args_as_table()? {
             CV::Table(table, _def) => table,
             _ => unreachable!(),
@@ -1322,7 +1322,7 @@ impl Config {
         dir: &Path,
         filename_without_extension: &str,
         warn: bool,
-    ) -> CargoResult<Option<PathBuf>> {
+    ) -> CorgiResult<Option<PathBuf>> {
         let possible = dir.join(filename_without_extension);
         let possible_with_extension = dir.join(format!("{}.toml", filename_without_extension));
 
@@ -1357,9 +1357,9 @@ impl Config {
         }
     }
 
-    fn walk_tree<F>(&self, pwd: &Path, home: &Path, mut walk: F) -> CargoResult<()>
+    fn walk_tree<F>(&self, pwd: &Path, home: &Path, mut walk: F) -> CorgiResult<()>
     where
-        F: FnMut(&Path) -> CargoResult<()>,
+        F: FnMut(&Path) -> CorgiResult<()>,
     {
         let mut stash: HashSet<PathBuf> = HashSet::new();
 
@@ -1383,7 +1383,7 @@ impl Config {
     }
 
     /// Gets the index for a registry.
-    pub fn get_registry_index(&self, registry: &str) -> CargoResult<Url> {
+    pub fn get_registry_index(&self, registry: &str) -> CorgiResult<Url> {
         validate_package_name(registry, "registry name", "")?;
         if let Some(index) = self.get_string(&format!("registries.{}.index", registry))? {
             self.resolve_registry_index(&index).with_context(|| {
@@ -1398,7 +1398,7 @@ impl Config {
     }
 
     /// Returns an error if `registry.index` is set.
-    pub fn check_registry_index_not_set(&self) -> CargoResult<()> {
+    pub fn check_registry_index_not_set(&self) -> CorgiResult<()> {
         if self.get_string("registry.index")?.is_some() {
             bail!(
                 "the `registry.index` config value is no longer supported\n\
@@ -1408,7 +1408,7 @@ impl Config {
         Ok(())
     }
 
-    fn resolve_registry_index(&self, index: &Value<String>) -> CargoResult<Url> {
+    fn resolve_registry_index(&self, index: &Value<String>) -> CorgiResult<Url> {
         // This handles relative file: URLs, relative to the config definition.
         let base = index
             .definition
@@ -1424,7 +1424,7 @@ impl Config {
     }
 
     /// Loads credentials config from the credentials file, if present.
-    pub fn load_credentials(&mut self) -> CargoResult<()> {
+    pub fn load_credentials(&mut self) -> CorgiResult<()> {
         let home_path = self.home_path.clone().into_path_unlocked();
         let credentials = match self.get_file_path(&home_path, "credentials", true)? {
             Some(credentials) => credentials,
@@ -1503,7 +1503,7 @@ impl Config {
         self.jobserver.as_ref()
     }
 
-    pub fn http(&self) -> CargoResult<&RefCell<Easy>> {
+    pub fn http(&self) -> CorgiResult<&RefCell<Easy>> {
         let http = self
             .easy
             .try_borrow_with(|| ops::http_handle(self).map(RefCell::new))?;
@@ -1516,22 +1516,22 @@ impl Config {
         Ok(http)
     }
 
-    pub fn http_config(&self) -> CargoResult<&CargoHttpConfig> {
+    pub fn http_config(&self) -> CorgiResult<&CargoHttpConfig> {
         self.http_config
             .try_borrow_with(|| self.get::<CargoHttpConfig>("http"))
     }
 
-    pub fn future_incompat_config(&self) -> CargoResult<&CargoFutureIncompatConfig> {
+    pub fn future_incompat_config(&self) -> CorgiResult<&CargoFutureIncompatConfig> {
         self.future_incompat_config
             .try_borrow_with(|| self.get::<CargoFutureIncompatConfig>("future-incompat-report"))
     }
 
-    pub fn net_config(&self) -> CargoResult<&CargoNetConfig> {
+    pub fn net_config(&self) -> CorgiResult<&CargoNetConfig> {
         self.net_config
             .try_borrow_with(|| self.get::<CargoNetConfig>("net"))
     }
 
-    pub fn build_config(&self) -> CargoResult<&CargoBuildConfig> {
+    pub fn build_config(&self) -> CorgiResult<&CargoBuildConfig> {
         self.build_config
             .try_borrow_with(|| self.get::<CargoBuildConfig>("build"))
     }
@@ -1540,7 +1540,7 @@ impl Config {
         &self.progress_config
     }
 
-    pub fn env_config(&self) -> CargoResult<&EnvConfig> {
+    pub fn env_config(&self) -> CorgiResult<&EnvConfig> {
         self.env_config
             .try_borrow_with(|| self.get::<EnvConfig>("env"))
     }
@@ -1550,7 +1550,7 @@ impl Config {
     /// This is necessary because loading the term settings happens very
     /// early, and in some situations (like `cargo version`) we don't want to
     /// fail if there are problems with the config file.
-    pub fn validate_term_config(&self) -> CargoResult<()> {
+    pub fn validate_term_config(&self) -> CorgiResult<()> {
         drop(self.get::<TermConfig>("term")?);
         Ok(())
     }
@@ -1558,12 +1558,12 @@ impl Config {
     /// Returns a list of [target.'cfg()'] tables.
     ///
     /// The list is sorted by the table name.
-    pub fn target_cfgs(&self) -> CargoResult<&Vec<(String, TargetCfgConfig)>> {
+    pub fn target_cfgs(&self) -> CorgiResult<&Vec<(String, TargetCfgConfig)>> {
         self.target_cfgs
             .try_borrow_with(|| target::load_target_cfgs(self))
     }
 
-    pub fn doc_extern_map(&self) -> CargoResult<&RustdocExternMap> {
+    pub fn doc_extern_map(&self) -> CorgiResult<&RustdocExternMap> {
         // Note: This does not support environment variables. The `Unit`
         // fundamentally does not have access to the registry name, so there is
         // nothing to query. Plumbing the name into SourceId is quite challenging.
@@ -1572,23 +1572,23 @@ impl Config {
     }
 
     /// Returns true if the `[target]` table should be applied to host targets.
-    pub fn target_applies_to_host(&self) -> CargoResult<bool> {
+    pub fn target_applies_to_host(&self) -> CorgiResult<bool> {
         target::get_target_applies_to_host(self)
     }
 
     /// Returns the `[host]` table definition for the given target triple.
-    pub fn host_cfg_triple(&self, target: &str) -> CargoResult<TargetConfig> {
+    pub fn host_cfg_triple(&self, target: &str) -> CorgiResult<TargetConfig> {
         target::load_host_triple(self, target)
     }
 
     /// Returns the `[target]` table definition for the given target triple.
-    pub fn target_cfg_triple(&self, target: &str) -> CargoResult<TargetConfig> {
+    pub fn target_cfg_triple(&self, target: &str) -> CorgiResult<TargetConfig> {
         target::load_target_triple(self, target)
     }
 
-    pub fn crates_io_source_id<F>(&self, f: F) -> CargoResult<SourceId>
+    pub fn crates_io_source_id<F>(&self, f: F) -> CorgiResult<SourceId>
     where
-        F: FnMut() -> CargoResult<SourceId>,
+        F: FnMut() -> CorgiResult<SourceId>,
     {
         Ok(*(self.crates_io_source_id.try_borrow_with(f)?))
     }
@@ -1611,7 +1611,7 @@ impl Config {
     /// quoting. Avoid key components that may have dots. For example,
     /// `foo.'a.b'.bar" does not work if you try to fetch `foo.'a.b'". You can
     /// fetch `foo` if it is a map, though.
-    pub fn get<'de, T: serde::de::Deserialize<'de>>(&self, key: &str) -> CargoResult<T> {
+    pub fn get<'de, T: serde::de::Deserialize<'de>>(&self, key: &str) -> CorgiResult<T> {
         let d = Deserializer {
             config: self,
             key: ConfigKey::from_str(key),
@@ -1636,7 +1636,7 @@ impl Config {
     /// This lock is global per-process and can be acquired recursively. An RAII
     /// structure is returned to release the lock, and if this process
     /// abnormally terminates the lock is also released.
-    pub fn acquire_package_cache_lock(&self) -> CargoResult<PackageCacheLock<'_>> {
+    pub fn acquire_package_cache_lock(&self) -> CorgiResult<PackageCacheLock<'_>> {
         let mut slot = self.package_cache_lock.borrow_mut();
         match *slot {
             // We've already acquired the lock in this process, so simply bump
@@ -1807,7 +1807,7 @@ impl fmt::Debug for ConfigValue {
 }
 
 impl ConfigValue {
-    fn from_toml(def: Definition, toml: toml::Value) -> CargoResult<ConfigValue> {
+    fn from_toml(def: Definition, toml: toml::Value) -> CorgiResult<ConfigValue> {
         match toml {
             toml::Value::String(val) => Ok(CV::String(val, def)),
             toml::Value::Boolean(b) => Ok(CV::Boolean(b, def)),
@@ -1818,7 +1818,7 @@ impl ConfigValue {
                         toml::Value::String(val) => Ok((val, def.clone())),
                         v => bail!("expected string but found {} in list", v.type_str()),
                     })
-                    .collect::<CargoResult<_>>()?,
+                    .collect::<CorgiResult<_>>()?,
                 def,
             )),
             toml::Value::Table(val) => Ok(CV::Table(
@@ -1828,7 +1828,7 @@ impl ConfigValue {
                             .with_context(|| format!("failed to parse key `{}`", key))?;
                         Ok((key, value))
                     })
-                    .collect::<CargoResult<_>>()?,
+                    .collect::<CorgiResult<_>>()?,
                 def,
             )),
             v => bail!(
@@ -1860,7 +1860,7 @@ impl ConfigValue {
     /// Container types (tables and arrays) are merged with existing values.
     ///
     /// Container and non-container types cannot be mixed.
-    fn merge(&mut self, from: ConfigValue, force: bool) -> CargoResult<()> {
+    fn merge(&mut self, from: ConfigValue, force: bool) -> CorgiResult<()> {
         match (self, from) {
             (&mut CV::List(ref mut old, _), CV::List(ref mut new, _)) => {
                 old.extend(mem::take(new).into_iter());
@@ -1910,35 +1910,35 @@ impl ConfigValue {
         Ok(())
     }
 
-    pub fn i64(&self, key: &str) -> CargoResult<(i64, &Definition)> {
+    pub fn i64(&self, key: &str) -> CorgiResult<(i64, &Definition)> {
         match self {
             CV::Integer(i, def) => Ok((*i, def)),
             _ => self.expected("integer", key),
         }
     }
 
-    pub fn string(&self, key: &str) -> CargoResult<(&str, &Definition)> {
+    pub fn string(&self, key: &str) -> CorgiResult<(&str, &Definition)> {
         match self {
             CV::String(s, def) => Ok((s, def)),
             _ => self.expected("string", key),
         }
     }
 
-    pub fn table(&self, key: &str) -> CargoResult<(&HashMap<String, ConfigValue>, &Definition)> {
+    pub fn table(&self, key: &str) -> CorgiResult<(&HashMap<String, ConfigValue>, &Definition)> {
         match self {
             CV::Table(table, def) => Ok((table, def)),
             _ => self.expected("table", key),
         }
     }
 
-    pub fn list(&self, key: &str) -> CargoResult<&[(String, Definition)]> {
+    pub fn list(&self, key: &str) -> CorgiResult<&[(String, Definition)]> {
         match self {
             CV::List(list, _) => Ok(list),
             _ => self.expected("list", key),
         }
     }
 
-    pub fn boolean(&self, key: &str) -> CargoResult<(bool, &Definition)> {
+    pub fn boolean(&self, key: &str) -> CorgiResult<(bool, &Definition)> {
         match self {
             CV::Boolean(b, def) => Ok((*b, def)),
             _ => self.expected("bool", key),
@@ -1965,7 +1965,7 @@ impl ConfigValue {
         }
     }
 
-    fn expected<T>(&self, wanted: &str, key: &str) -> CargoResult<T> {
+    fn expected<T>(&self, wanted: &str, key: &str) -> CorgiResult<T> {
         bail!(
             "expected a {}, but found a {} for `{}` in {}",
             wanted,
@@ -1984,7 +1984,7 @@ pub fn save_credentials(
     cfg: &Config,
     token: Option<String>,
     registry: Option<&str>,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     // If 'credentials.toml' exists, we should write to that, otherwise
     // use the legacy 'credentials'. There's no need to print the warning
     // here, because it would already be printed at load time.
@@ -2078,7 +2078,7 @@ pub fn save_credentials(
     return Ok(());
 
     #[cfg(unix)]
-    fn set_permissions(file: &File, mode: u32) -> CargoResult<()> {
+    fn set_permissions(file: &File, mode: u32) -> CorgiResult<()> {
         use std::os::unix::fs::PermissionsExt;
 
         let mut perms = file.metadata()?.permissions();
@@ -2089,7 +2089,7 @@ pub fn save_credentials(
 
     #[cfg(not(unix))]
     #[allow(unused)]
-    fn set_permissions(file: &File, mode: u32) -> CargoResult<()> {
+    fn set_permissions(file: &File, mode: u32) -> CorgiResult<()> {
         Ok(())
     }
 }
@@ -2229,7 +2229,7 @@ enum BuildTargetConfigInner {
 
 impl BuildTargetConfig {
     /// Gets values of `build.target` as a list of strings.
-    pub fn values(&self, config: &Config) -> CargoResult<Vec<String>> {
+    pub fn values(&self, config: &Config) -> CorgiResult<Vec<String>> {
         let map = |s: &String| {
             if s.ends_with(".json") {
                 // Path to a target specification file (in JSON).

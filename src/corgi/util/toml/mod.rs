@@ -27,7 +27,7 @@ use crate::core::{
 use crate::core::{Edition, EitherManifest, Feature, Features, VirtualManifest, Workspace};
 use crate::core::{GitReference, PackageIdSpec, SourceId, WorkspaceConfig, WorkspaceRootConfig};
 use crate::sources::{CRATES_IO_INDEX, CRATES_IO_REGISTRY};
-use crate::util::errors::{CargoResult, ManifestError};
+use crate::util::errors::{CorgiResult, ManifestError};
 use crate::util::interning::InternedString;
 use crate::util::{
     self, config::ConfigRelativePath, validate_package_name, Config, IntoUrl, VersionReqExt,
@@ -77,7 +77,7 @@ pub fn read_manifest_from_str(
     manifest_file: &Path,
     source_id: SourceId,
     config: &Config,
-) -> CargoResult<(EitherManifest, Vec<PathBuf>)> {
+) -> CorgiResult<(EitherManifest, Vec<PathBuf>)> {
     let package_root = manifest_file.parent().unwrap();
 
     let toml = {
@@ -192,7 +192,7 @@ pub fn read_manifest_from_str(
 /// The purpose of this wrapper is to detect invalid TOML which was previously
 /// accepted and display a warning to the user in that case. The `file` and `config`
 /// parameters are only used by this fallback path.
-pub fn parse(toml: &str, _file: &Path, _config: &Config) -> CargoResult<toml::Value> {
+pub fn parse(toml: &str, _file: &Path, _config: &Config) -> CorgiResult<toml::Value> {
     // At the moment, no compatibility checks are needed.
     toml.parse()
         .map_err(|e| anyhow::Error::from(e).context("could not parse input as TOML"))
@@ -202,7 +202,7 @@ pub fn parse_document(
     toml: &str,
     _file: &Path,
     _config: &Config,
-) -> CargoResult<toml_edit::Document> {
+) -> CorgiResult<toml_edit::Document> {
     // At the moment, no compatibility checks are needed.
     toml.parse()
         .map_err(|e| anyhow::Error::from(e).context("could not parse input as TOML"))
@@ -454,7 +454,7 @@ impl TomlProfiles {
         self.0.get(name)
     }
 
-    pub fn validate(&self, features: &Features, warnings: &mut Vec<String>) -> CargoResult<()> {
+    pub fn validate(&self, features: &Features, warnings: &mut Vec<String>) -> CorgiResult<()> {
         for (name, profile) in &self.0 {
             profile.validate(name, features, warnings)?;
         }
@@ -596,7 +596,7 @@ impl TomlProfile {
         name: &str,
         features: &Features,
         warnings: &mut Vec<String>,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         self.validate_profile(name, features)?;
         if let Some(ref profile) = self.build_override {
             profile.validate_override("build-override")?;
@@ -669,7 +669,7 @@ impl TomlProfile {
     }
 
     /// Validate dir-names and profile names according to RFC 2678.
-    pub fn validate_name(name: &str) -> CargoResult<()> {
+    pub fn validate_name(name: &str) -> CorgiResult<()> {
         if let Some(ch) = name
             .chars()
             .find(|ch| !ch.is_alphanumeric() && *ch != '_' && *ch != '-')
@@ -750,7 +750,7 @@ impl TomlProfile {
     /// Validates a profile.
     ///
     /// This is a shallow check, which is reused for the profile itself and any overrides.
-    fn validate_profile(&self, name: &str, features: &Features) -> CargoResult<()> {
+    fn validate_profile(&self, name: &str, features: &Features) -> CorgiResult<()> {
         if let Some(codegen_backend) = &self.codegen_backend {
             features.require(Feature::codegen_backend())?;
             if codegen_backend.contains(|c: char| !c.is_ascii_alphanumeric() && c != '_') {
@@ -768,7 +768,7 @@ impl TomlProfile {
     }
 
     /// Validation that is specific to an override.
-    fn validate_override(&self, which: &str) -> CargoResult<()> {
+    fn validate_override(&self, which: &str) -> CorgiResult<()> {
         if self.package.is_some() {
             bail!("package-specific profiles cannot be nested");
         }
@@ -1035,8 +1035,8 @@ impl<T> MaybeWorkspace<T> {
     fn resolve<'a>(
         self,
         label: &str,
-        get_ws_field: impl FnOnce() -> CargoResult<T>,
-    ) -> CargoResult<T> {
+        get_ws_field: impl FnOnce() -> CorgiResult<T>,
+    ) -> CorgiResult<T> {
         match self {
             MaybeWorkspace::Defined(value) => Ok(value),
             MaybeWorkspace::Workspace(TomlWorkspaceField { workspace: true }) => get_ws_field()
@@ -1171,14 +1171,14 @@ impl InheritableFields {
         self.ws_root = ws_root;
     }
 
-    pub fn dependencies(&self) -> CargoResult<BTreeMap<String, TomlDependency>> {
+    pub fn dependencies(&self) -> CorgiResult<BTreeMap<String, TomlDependency>> {
         self.dependencies.clone().map_or(
             Err(anyhow!("`workspace.dependencies` was not defined")),
             |d| Ok(d),
         )
     }
 
-    pub fn get_dependency(&self, name: &str) -> CargoResult<TomlDependency> {
+    pub fn get_dependency(&self, name: &str) -> CorgiResult<TomlDependency> {
         self.dependencies.clone().map_or(
             Err(anyhow!("`workspace.dependencies` was not defined")),
             |deps| {
@@ -1193,42 +1193,42 @@ impl InheritableFields {
         )
     }
 
-    pub fn version(&self) -> CargoResult<semver::Version> {
+    pub fn version(&self) -> CorgiResult<semver::Version> {
         self.version.clone().map_or(
             Err(anyhow!("`workspace.package.version` was not defined")),
             |d| Ok(d),
         )
     }
 
-    pub fn authors(&self) -> CargoResult<Vec<String>> {
+    pub fn authors(&self) -> CorgiResult<Vec<String>> {
         self.authors.clone().map_or(
             Err(anyhow!("`workspace.package.authors` was not defined")),
             |d| Ok(d),
         )
     }
 
-    pub fn description(&self) -> CargoResult<String> {
+    pub fn description(&self) -> CorgiResult<String> {
         self.description.clone().map_or(
             Err(anyhow!("`workspace.package.description` was not defined")),
             |d| Ok(d),
         )
     }
 
-    pub fn homepage(&self) -> CargoResult<String> {
+    pub fn homepage(&self) -> CorgiResult<String> {
         self.homepage.clone().map_or(
             Err(anyhow!("`workspace.package.homepage` was not defined")),
             |d| Ok(d),
         )
     }
 
-    pub fn documentation(&self) -> CargoResult<String> {
+    pub fn documentation(&self) -> CorgiResult<String> {
         self.documentation.clone().map_or(
             Err(anyhow!("`workspace.package.documentation` was not defined")),
             |d| Ok(d),
         )
     }
 
-    pub fn readme(&self, package_root: &Path) -> CargoResult<StringOrBool> {
+    pub fn readme(&self, package_root: &Path) -> CorgiResult<StringOrBool> {
         readme_for_project(self.ws_root.as_path(), self.readme.clone()).map_or(
             Err(anyhow!("`workspace.package.readme` was not defined")),
             |readme| {
@@ -1239,77 +1239,77 @@ impl InheritableFields {
         )
     }
 
-    pub fn keywords(&self) -> CargoResult<Vec<String>> {
+    pub fn keywords(&self) -> CorgiResult<Vec<String>> {
         self.keywords.clone().map_or(
             Err(anyhow!("`workspace.package.keywords` was not defined")),
             |d| Ok(d),
         )
     }
 
-    pub fn categories(&self) -> CargoResult<Vec<String>> {
+    pub fn categories(&self) -> CorgiResult<Vec<String>> {
         self.categories.clone().map_or(
             Err(anyhow!("`workspace.package.categories` was not defined")),
             |d| Ok(d),
         )
     }
 
-    pub fn license(&self) -> CargoResult<String> {
+    pub fn license(&self) -> CorgiResult<String> {
         self.license.clone().map_or(
             Err(anyhow!("`workspace.package.license` was not defined")),
             |d| Ok(d),
         )
     }
 
-    pub fn license_file(&self, package_root: &Path) -> CargoResult<String> {
+    pub fn license_file(&self, package_root: &Path) -> CorgiResult<String> {
         self.license_file.clone().map_or(
             Err(anyhow!("`workspace.package.license_file` was not defined")),
             |d| resolve_relative_path("license-file", &self.ws_root, package_root, &d),
         )
     }
 
-    pub fn repository(&self) -> CargoResult<String> {
+    pub fn repository(&self) -> CorgiResult<String> {
         self.repository.clone().map_or(
             Err(anyhow!("`workspace.package.repository` was not defined")),
             |d| Ok(d),
         )
     }
 
-    pub fn publish(&self) -> CargoResult<VecStringOrBool> {
+    pub fn publish(&self) -> CorgiResult<VecStringOrBool> {
         self.publish.clone().map_or(
             Err(anyhow!("`workspace.package.publish` was not defined")),
             |d| Ok(d),
         )
     }
 
-    pub fn edition(&self) -> CargoResult<String> {
+    pub fn edition(&self) -> CorgiResult<String> {
         self.edition.clone().map_or(
             Err(anyhow!("`workspace.package.edition` was not defined")),
             |d| Ok(d),
         )
     }
 
-    pub fn rust_version(&self) -> CargoResult<String> {
+    pub fn rust_version(&self) -> CorgiResult<String> {
         self.rust_version.clone().map_or(
             Err(anyhow!("`workspace.package.rust-version` was not defined")),
             |d| Ok(d),
         )
     }
 
-    pub fn badges(&self) -> CargoResult<BTreeMap<String, BTreeMap<String, String>>> {
+    pub fn badges(&self) -> CorgiResult<BTreeMap<String, BTreeMap<String, String>>> {
         self.badges.clone().map_or(
             Err(anyhow!("`workspace.package.badges` was not defined")),
             |d| Ok(d),
         )
     }
 
-    pub fn exclude(&self) -> CargoResult<Vec<String>> {
+    pub fn exclude(&self) -> CorgiResult<Vec<String>> {
         self.exclude.clone().map_or(
             Err(anyhow!("`workspace.package.exclude` was not defined")),
             |d| Ok(d),
         )
     }
 
-    pub fn include(&self) -> CargoResult<Vec<String>> {
+    pub fn include(&self) -> CorgiResult<Vec<String>> {
         self.include.clone().map_or(
             Err(anyhow!("`workspace.package.include` was not defined")),
             |d| Ok(d),
@@ -1326,7 +1326,7 @@ impl TomlProject {
         &self,
         source_id: SourceId,
         version: semver::Version,
-    ) -> CargoResult<PackageId> {
+    ) -> CorgiResult<PackageId> {
         PackageId::new(self.name, version, source_id)
     }
 }
@@ -1350,7 +1350,7 @@ impl TomlManifest {
         &self,
         ws: &Workspace<'_>,
         package_root: &Path,
-    ) -> CargoResult<TomlManifest> {
+    ) -> CorgiResult<TomlManifest> {
         let config = ws.config();
         let mut package = self
             .package
@@ -1495,7 +1495,7 @@ impl TomlManifest {
             config: &Config,
             deps: Option<&BTreeMap<String, TomlDependency>>,
             filter: impl Fn(&TomlDependency) -> bool,
-        ) -> CargoResult<Option<BTreeMap<String, TomlDependency>>> {
+        ) -> CorgiResult<Option<BTreeMap<String, TomlDependency>>> {
             let deps = match deps {
                 Some(deps) => deps,
                 None => return Ok(None),
@@ -1504,11 +1504,11 @@ impl TomlManifest {
                 .iter()
                 .filter(|(_k, v)| filter(v))
                 .map(|(k, v)| Ok((k.clone(), map_dependency(config, v)?)))
-                .collect::<CargoResult<BTreeMap<_, _>>>()?;
+                .collect::<CorgiResult<BTreeMap<_, _>>>()?;
             Ok(Some(deps))
         }
 
-        fn map_dependency(config: &Config, dep: &TomlDependency) -> CargoResult<TomlDependency> {
+        fn map_dependency(config: &Config, dep: &TomlDependency) -> CorgiResult<TomlDependency> {
             match dep {
                 TomlDependency::Detailed(d) => {
                     let mut d = d.clone();
@@ -1541,12 +1541,12 @@ impl TomlManifest {
         source_id: SourceId,
         package_root: &Path,
         config: &Config,
-    ) -> CargoResult<(Manifest, Vec<PathBuf>)> {
+    ) -> CorgiResult<(Manifest, Vec<PathBuf>)> {
         fn get_ws(
             config: &Config,
             resolved_path: &Path,
             workspace_config: &WorkspaceConfig,
-        ) -> CargoResult<InheritableFields> {
+        ) -> CorgiResult<InheritableFields> {
             match workspace_config {
                 WorkspaceConfig::Root(root) => Ok(root.inheritable().clone()),
                 WorkspaceConfig::Member {
@@ -1754,7 +1754,7 @@ impl TomlManifest {
             kind: Option<DepKind>,
             workspace_config: &WorkspaceConfig,
             inherit_cell: &LazyCell<InheritableFields>,
-        ) -> CargoResult<Option<BTreeMap<String, TomlDependency>>> {
+        ) -> CorgiResult<Option<BTreeMap<String, TomlDependency>>> {
             let dependencies = match new_deps {
                 Some(dependencies) => dependencies,
                 None => return Ok(None),
@@ -2160,7 +2160,7 @@ impl TomlManifest {
         source_id: SourceId,
         root: &Path,
         config: &Config,
-    ) -> CargoResult<(VirtualManifest, Vec<PathBuf>)> {
+    ) -> CorgiResult<(VirtualManifest, Vec<PathBuf>)> {
         if me.project.is_some() {
             bail!("this virtual manifest specifies a [project] section, which is not allowed");
         }
@@ -2267,7 +2267,7 @@ impl TomlManifest {
         ))
     }
 
-    fn replace(&self, cx: &mut Context<'_, '_>) -> CargoResult<Vec<(PackageIdSpec, Dependency)>> {
+    fn replace(&self, cx: &mut Context<'_, '_>) -> CorgiResult<Vec<(PackageIdSpec, Dependency)>> {
         if self.patch.is_some() && self.replace.is_some() {
             bail!("cannot specify both [replace] and [patch]");
         }
@@ -2307,7 +2307,7 @@ impl TomlManifest {
         Ok(replace)
     }
 
-    fn patch(&self, cx: &mut Context<'_, '_>) -> CargoResult<HashMap<Url, Vec<Dependency>>> {
+    fn patch(&self, cx: &mut Context<'_, '_>) -> CorgiResult<HashMap<Url, Vec<Dependency>>> {
         let mut patch = HashMap::new();
         for (url, deps) in self.patch.iter().flatten() {
             let url = match &url[..] {
@@ -2324,7 +2324,7 @@ impl TomlManifest {
                 url,
                 deps.iter()
                     .map(|(name, dep)| dep.to_dependency(name, cx, None))
-                    .collect::<CargoResult<Vec<_>>>()?,
+                    .collect::<CorgiResult<Vec<_>>>()?,
             );
         }
         Ok(patch)
@@ -2366,7 +2366,7 @@ impl TomlManifest {
 fn inheritable_from_path(
     config: &Config,
     workspace_path: PathBuf,
-) -> CargoResult<InheritableFields> {
+) -> CorgiResult<InheritableFields> {
     // Workspace path should have Cargo.toml at the end
     let workspace_path_root = workspace_path.parent().unwrap();
 
@@ -2446,7 +2446,7 @@ impl<P: ResolveToPath + Clone> TomlDependency<P> {
         root: &Path,
         features: &Features,
         kind: Option<DepKind>,
-    ) -> CargoResult<Dependency> {
+    ) -> CorgiResult<Dependency> {
         self.to_dependency(
             name,
             &mut Context {
@@ -2468,7 +2468,7 @@ impl<P: ResolveToPath + Clone> TomlDependency<P> {
         name: &str,
         cx: &mut Context<'_, '_>,
         kind: Option<DepKind>,
-    ) -> CargoResult<Dependency> {
+    ) -> CorgiResult<Dependency> {
         match *self {
             TomlDependency::Simple(ref version) => DetailedTomlDependency::<P> {
                 version: Some(version.clone()),
@@ -2502,8 +2502,8 @@ impl TomlDependency {
         self,
         label: &str,
         cx: &mut Context<'_, '_>,
-        get_inheritable: impl FnOnce() -> CargoResult<&'a InheritableFields>,
-    ) -> CargoResult<TomlDependency> {
+        get_inheritable: impl FnOnce() -> CorgiResult<&'a InheritableFields>,
+    ) -> CorgiResult<TomlDependency> {
         match self {
             TomlDependency::Detailed(d) => Ok(TomlDependency::Detailed(d)),
             TomlDependency::Simple(s) => Ok(TomlDependency::Simple(s)),
@@ -2564,7 +2564,7 @@ impl<P: ResolveToPath + Clone> DetailedTomlDependency<P> {
         name_in_toml: &str,
         cx: &mut Context<'_, '_>,
         kind: Option<DepKind>,
-    ) -> CargoResult<Dependency> {
+    ) -> CorgiResult<Dependency> {
         if self.version.is_none() && self.path.is_none() && self.git.is_none() {
             let msg = format!(
                 "dependency ({}) specified without \
@@ -2827,7 +2827,7 @@ impl DetailedTomlDependency {
         name: &str,
         root_path: &Path,
         package_root: &Path,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         if let Some(rel_path) = &self.path {
             self.path = Some(resolve_relative_path(
                 name,

@@ -1,6 +1,6 @@
 use crate::core::source::MaybePackage;
 use crate::core::{Dependency, Package, PackageId, QueryKind, Source, SourceId, Summary};
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use std::task::Poll;
 
 use anyhow::Context as _;
@@ -47,7 +47,7 @@ impl<'cfg> Source for ReplacedSource<'cfg> {
         dep: &Dependency,
         kind: QueryKind,
         f: &mut dyn FnMut(Summary),
-    ) -> Poll<CargoResult<()>> {
+    ) -> Poll<CorgiResult<()>> {
         let (replace_with, to_replace) = (self.replace_with, self.to_replace);
         let dep = dep.clone().map_source(to_replace, replace_with);
 
@@ -67,7 +67,7 @@ impl<'cfg> Source for ReplacedSource<'cfg> {
         self.inner.invalidate_cache()
     }
 
-    fn download(&mut self, id: PackageId) -> CargoResult<MaybePackage> {
+    fn download(&mut self, id: PackageId) -> CorgiResult<MaybePackage> {
         let id = id.with_source_id(self.replace_with);
         let pkg = self
             .inner
@@ -81,7 +81,7 @@ impl<'cfg> Source for ReplacedSource<'cfg> {
         })
     }
 
-    fn finish_download(&mut self, id: PackageId, data: Vec<u8>) -> CargoResult<Package> {
+    fn finish_download(&mut self, id: PackageId, data: Vec<u8>) -> CorgiResult<Package> {
         let id = id.with_source_id(self.replace_with);
         let pkg = self
             .inner
@@ -90,11 +90,11 @@ impl<'cfg> Source for ReplacedSource<'cfg> {
         Ok(pkg.map_source(self.replace_with, self.to_replace))
     }
 
-    fn fingerprint(&self, id: &Package) -> CargoResult<String> {
+    fn fingerprint(&self, id: &Package) -> CorgiResult<String> {
         self.inner.fingerprint(id)
     }
 
-    fn verify(&self, id: PackageId) -> CargoResult<()> {
+    fn verify(&self, id: PackageId) -> CorgiResult<()> {
         let id = id.with_source_id(self.replace_with);
         self.inner.verify(id)
     }
@@ -119,11 +119,11 @@ impl<'cfg> Source for ReplacedSource<'cfg> {
         self.inner.add_to_yanked_whitelist(&pkgs);
     }
 
-    fn is_yanked(&mut self, pkg: PackageId) -> Poll<CargoResult<bool>> {
+    fn is_yanked(&mut self, pkg: PackageId) -> Poll<CorgiResult<bool>> {
         self.inner.is_yanked(pkg)
     }
 
-    fn block_until_ready(&mut self) -> CargoResult<()> {
+    fn block_until_ready(&mut self) -> CorgiResult<()> {
         self.inner
             .block_until_ready()
             .with_context(|| format!("failed to update replaced source {}", self.to_replace))

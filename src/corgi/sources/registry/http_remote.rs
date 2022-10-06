@@ -7,7 +7,7 @@ use crate::ops;
 use crate::sources::registry::download;
 use crate::sources::registry::MaybeLock;
 use crate::sources::registry::{LoadResponse, RegistryConfig, RegistryData};
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::{Config, Filesystem, IntoUrl, Progress, ProgressStyle};
 use anyhow::Context;
 use cargo_util::paths;
@@ -129,7 +129,7 @@ impl<'cfg> HttpRegistry<'cfg> {
         source_id: SourceId,
         config: &'cfg Config,
         name: &str,
-    ) -> CargoResult<HttpRegistry<'cfg>> {
+    ) -> CorgiResult<HttpRegistry<'cfg>> {
         if !config.cli_unstable().sparse_registry {
             anyhow::bail!("usage of sparse registries requires `-Z sparse-registry`");
         }
@@ -185,7 +185,7 @@ impl<'cfg> HttpRegistry<'cfg> {
         Some((tag, value))
     }
 
-    fn start_fetch(&mut self) -> CargoResult<()> {
+    fn start_fetch(&mut self) -> CorgiResult<()> {
         if self.fetch_started {
             // We only need to run the setup code once.
             return Ok(());
@@ -210,7 +210,7 @@ impl<'cfg> HttpRegistry<'cfg> {
         Ok(())
     }
 
-    fn handle_completed_downloads(&mut self) -> CargoResult<()> {
+    fn handle_completed_downloads(&mut self) -> CorgiResult<()> {
         assert_eq!(
             self.downloads.pending.len(),
             self.downloads.pending_ids.len()
@@ -282,7 +282,7 @@ impl<'cfg> HttpRegistry<'cfg> {
 }
 
 impl<'cfg> RegistryData for HttpRegistry<'cfg> {
-    fn prepare(&self) -> CargoResult<()> {
+    fn prepare(&self) -> CorgiResult<()> {
         Ok(())
     }
 
@@ -303,7 +303,7 @@ impl<'cfg> RegistryData for HttpRegistry<'cfg> {
         _root: &Path,
         path: &Path,
         index_version: Option<&str>,
-    ) -> Poll<CargoResult<LoadResponse>> {
+    ) -> Poll<CorgiResult<LoadResponse>> {
         trace!("load: {}", path.display());
         if let Some(_token) = self.downloads.pending_ids.get(path) {
             debug!("dependency is still pending: {}", path.display());
@@ -492,7 +492,7 @@ impl<'cfg> RegistryData for HttpRegistry<'cfg> {
         Poll::Pending
     }
 
-    fn config(&mut self) -> Poll<CargoResult<Option<RegistryConfig>>> {
+    fn config(&mut self) -> Poll<CorgiResult<Option<RegistryConfig>>> {
         if self.registry_config.is_some() {
             return Poll::Ready(Ok(self.registry_config.clone()));
         }
@@ -543,7 +543,7 @@ impl<'cfg> RegistryData for HttpRegistry<'cfg> {
         self.requested_update = true;
     }
 
-    fn download(&mut self, pkg: PackageId, checksum: &str) -> CargoResult<MaybeLock> {
+    fn download(&mut self, pkg: PackageId, checksum: &str) -> CorgiResult<MaybeLock> {
         let registry_config = loop {
             match self.config()? {
                 Poll::Pending => self.block_until_ready()?,
@@ -564,7 +564,7 @@ impl<'cfg> RegistryData for HttpRegistry<'cfg> {
         pkg: PackageId,
         checksum: &str,
         data: &[u8],
-    ) -> CargoResult<File> {
+    ) -> CorgiResult<File> {
         download::finish_download(&self.cache_path, &self.config, pkg, checksum, data)
     }
 
@@ -572,7 +572,7 @@ impl<'cfg> RegistryData for HttpRegistry<'cfg> {
         download::is_crate_downloaded(&self.cache_path, &self.config, pkg)
     }
 
-    fn block_until_ready(&mut self) -> CargoResult<()> {
+    fn block_until_ready(&mut self) -> CorgiResult<()> {
         trace!(
             "block_until_ready: {} transfers pending",
             self.downloads.pending.len()
@@ -607,7 +607,7 @@ impl<'cfg> RegistryData for HttpRegistry<'cfg> {
 }
 
 impl<'cfg> Downloads<'cfg> {
-    fn tick(&self) -> CargoResult<()> {
+    fn tick(&self) -> CorgiResult<()> {
         let mut progress = self.progress.borrow_mut();
         let progress = progress.as_mut().unwrap();
 

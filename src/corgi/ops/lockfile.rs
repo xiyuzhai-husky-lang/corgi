@@ -1,14 +1,14 @@
 use std::io::prelude::*;
 
 use crate::core::{resolver, Resolve, ResolveVersion, Workspace};
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::toml as corgi_toml;
 use crate::util::Filesystem;
 
 use anyhow::Context as _;
 use toml_edit::easy as toml;
 
-pub fn load_pkg_lockfile(ws: &Workspace<'_>) -> CargoResult<Option<Resolve>> {
+pub fn load_pkg_lockfile(ws: &Workspace<'_>) -> CorgiResult<Option<Resolve>> {
     if !ws.root().join("Cargo.lock").exists() {
         return Ok(None);
     }
@@ -20,7 +20,7 @@ pub fn load_pkg_lockfile(ws: &Workspace<'_>) -> CargoResult<Option<Resolve>> {
     f.read_to_string(&mut s)
         .with_context(|| format!("failed to read file: {}", f.path().display()))?;
 
-    let resolve = (|| -> CargoResult<Option<Resolve>> {
+    let resolve = (|| -> CorgiResult<Option<Resolve>> {
         let resolve: toml::Value = corgi_toml::parse(&s, f.path(), ws.config())?;
         let v: resolver::EncodableResolve = resolve.try_into()?;
         Ok(Some(v.into_resolve(&s, ws)?))
@@ -30,12 +30,12 @@ pub fn load_pkg_lockfile(ws: &Workspace<'_>) -> CargoResult<Option<Resolve>> {
 }
 
 /// Generate a toml String of Cargo.lock from a Resolve.
-pub fn resolve_to_string(ws: &Workspace<'_>, resolve: &mut Resolve) -> CargoResult<String> {
+pub fn resolve_to_string(ws: &Workspace<'_>, resolve: &mut Resolve) -> CorgiResult<String> {
     let (_orig, out, _ws_root) = resolve_to_string_orig(ws, resolve);
     Ok(out)
 }
 
-pub fn write_pkg_lockfile(ws: &Workspace<'_>, resolve: &mut Resolve) -> CargoResult<()> {
+pub fn write_pkg_lockfile(ws: &Workspace<'_>, resolve: &mut Resolve) -> CorgiResult<()> {
     let (orig, mut out, ws_root) = resolve_to_string_orig(ws, resolve);
 
     // If the lock file contents haven't changed so don't rewrite it. This is
@@ -187,7 +187,7 @@ fn are_equal_lockfiles(orig: &str, current: &str, ws: &Workspace<'_>) -> bool {
     // compare them; since this is somewhat expensive, don't do it in the
     // common case where we can update lock files.
     if !ws.config().lock_update_allowed() {
-        let res: CargoResult<bool> = (|| {
+        let res: CorgiResult<bool> = (|| {
             let old: resolver::EncodableResolve = toml::from_str(orig)?;
             let new: resolver::EncodableResolve = toml::from_str(current)?;
             Ok(old.into_resolve(orig, ws)? == new.into_resolve(current, ws)?)

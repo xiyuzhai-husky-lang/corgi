@@ -23,7 +23,7 @@ use crate::core::Feature;
 use crate::core::{GitReference, PackageId, PackageIdSpec, PackageSet, SourceId, Workspace};
 use crate::ops;
 use crate::sources::PathSource;
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::{profile, CanonicalUrl};
 use anyhow::Context as _;
 use log::{debug, trace};
@@ -60,7 +60,7 @@ version. This may also occur with an optional dependency that is not enabled.";
 ///
 /// This is a simple interface used by commands like `clean`, `fetch`, and
 /// `package`, which don't specify any options or features.
-pub fn resolve_ws<'a>(ws: &Workspace<'a>) -> CargoResult<(PackageSet<'a>, Resolve)> {
+pub fn resolve_ws<'a>(ws: &Workspace<'a>) -> CorgiResult<(PackageSet<'a>, Resolve)> {
     let mut registry = PackageRegistry::new(ws.config())?;
     let resolve = resolve_with_registry(ws, &mut registry)?;
     let packages = get_resolved_packages(&resolve, registry)?;
@@ -85,7 +85,7 @@ pub fn resolve_ws_with_opts<'cfg>(
     specs: &[PackageIdSpec],
     has_dev_units: HasDevUnits,
     force_all_targets: ForceAllTargets,
-) -> CargoResult<WorkspaceResolve<'cfg>> {
+) -> CorgiResult<WorkspaceResolve<'cfg>> {
     let mut registry = PackageRegistry::new(ws.config())?;
     let mut add_patches = true;
     let resolve = if ws.ignore_lock() {
@@ -190,7 +190,7 @@ pub fn resolve_ws_with_opts<'cfg>(
 fn resolve_with_registry<'cfg>(
     ws: &Workspace<'cfg>,
     registry: &mut PackageRegistry<'cfg>,
-) -> CargoResult<Resolve> {
+) -> CorgiResult<Resolve> {
     let prev = ops::load_pkg_lockfile(ws)?;
     let mut resolve = resolve_with_previous(
         registry,
@@ -233,7 +233,7 @@ pub fn resolve_with_previous<'cfg>(
     to_avoid: Option<&HashSet<PackageId>>,
     specs: &[PackageIdSpec],
     register_patches: bool,
-) -> CargoResult<Resolve> {
+) -> CorgiResult<Resolve> {
     // We only want one Cargo at a time resolving a crate graph since this can
     // involve a lot of frobbing of the global caches.
     let _lock = ws.config().acquire_package_cache_lock()?;
@@ -483,7 +483,7 @@ pub fn resolve_with_previous<'cfg>(
 pub fn add_overrides<'a>(
     registry: &mut PackageRegistry<'a>,
     ws: &Workspace<'a>,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let config = ws.config();
     let paths = match config.get_list("paths")? {
         Some(list) => list,
@@ -516,7 +516,7 @@ pub fn add_overrides<'a>(
 pub fn get_resolved_packages<'cfg>(
     resolve: &Resolve,
     registry: PackageRegistry<'cfg>,
-) -> CargoResult<PackageSet<'cfg>> {
+) -> CorgiResult<PackageSet<'cfg>> {
     let ids: Vec<PackageId> = resolve.iter().collect();
     registry.get(&ids)
 }
@@ -753,7 +753,7 @@ fn emit_warnings_of_unused_patches(
     ws: &Workspace<'_>,
     resolve: &Resolve,
     registry: &PackageRegistry<'_>,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     const MESSAGE: &str = "was not used in the crate graph.";
 
     // Patch package with the source URLs being patch

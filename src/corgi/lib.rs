@@ -81,7 +81,7 @@ use anyhow::Error;
 use log::debug;
 
 pub use crate::util::errors::{AlreadyPrintedError, InternalError, VerboseError};
-pub use crate::util::{indented_lines, CargoResult, CliError, CliResult, Config};
+pub use crate::util::{indented_lines, CliError, CliResult, Config, CorgiResult};
 pub use crate::version::version;
 
 pub const CARGO_ENV: &str = "CARGO";

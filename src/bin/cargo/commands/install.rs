@@ -105,7 +105,7 @@ pub fn exec(config: &mut Config, args: &ArgMatches) -> CliResult {
         .get_many::<String>("crate")
         .unwrap_or_default()
         .map(|k| resolve_crate(k, version))
-        .collect::<crate::CargoResult<Vec<_>>>()?;
+        .collect::<crate::CorgiResult<Vec<_>>>()?;
 
     let mut from_cwd = false;
 
@@ -181,7 +181,7 @@ pub fn exec(config: &mut Config, args: &ArgMatches) -> CliResult {
 fn resolve_crate<'k>(
     mut krate: &'k str,
     mut version: Option<&'k str>,
-) -> crate::CargoResult<(&'k str, Option<&'k str>)> {
+) -> crate::CorgiResult<(&'k str, Option<&'k str>)> {
     if let Some((k, v)) = krate.split_once('@') {
         if version.is_some() {
             anyhow::bail!("cannot specify both `@{v}` and `--version`");

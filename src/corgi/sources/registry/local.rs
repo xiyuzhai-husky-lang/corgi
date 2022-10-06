@@ -1,6 +1,6 @@
 use crate::core::PackageId;
 use crate::sources::registry::{LoadResponse, MaybeLock, RegistryConfig, RegistryData};
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::{Config, Filesystem};
 use cargo_util::{paths, Sha256};
 use std::fs::File;
@@ -33,7 +33,7 @@ impl<'cfg> LocalRegistry<'cfg> {
 }
 
 impl<'cfg> RegistryData for LocalRegistry<'cfg> {
-    fn prepare(&self) -> CargoResult<()> {
+    fn prepare(&self) -> CorgiResult<()> {
         Ok(())
     }
 
@@ -52,7 +52,7 @@ impl<'cfg> RegistryData for LocalRegistry<'cfg> {
         root: &Path,
         path: &Path,
         _index_version: Option<&str>,
-    ) -> Poll<CargoResult<LoadResponse>> {
+    ) -> Poll<CorgiResult<LoadResponse>> {
         if self.updated {
             let raw_data = match paths::read_bytes(&root.join(path)) {
                 Err(e)
@@ -72,13 +72,13 @@ impl<'cfg> RegistryData for LocalRegistry<'cfg> {
         }
     }
 
-    fn config(&mut self) -> Poll<CargoResult<Option<RegistryConfig>>> {
+    fn config(&mut self) -> Poll<CorgiResult<Option<RegistryConfig>>> {
         // Local registries don't have configuration for remote APIs or anything
         // like that
         Poll::Ready(Ok(None))
     }
 
-    fn block_until_ready(&mut self) -> CargoResult<()> {
+    fn block_until_ready(&mut self) -> CorgiResult<()> {
         if self.updated {
             return Ok(());
         }
@@ -108,7 +108,7 @@ impl<'cfg> RegistryData for LocalRegistry<'cfg> {
         self.updated
     }
 
-    fn download(&mut self, pkg: PackageId, checksum: &str) -> CargoResult<MaybeLock> {
+    fn download(&mut self, pkg: PackageId, checksum: &str) -> CorgiResult<MaybeLock> {
         let crate_file = format!("{}-{}.crate", pkg.name(), pkg.version());
 
         // Note that the usage of `into_path_unlocked` here is because the local
@@ -143,7 +143,7 @@ impl<'cfg> RegistryData for LocalRegistry<'cfg> {
         _pkg: PackageId,
         _checksum: &str,
         _data: &[u8],
-    ) -> CargoResult<File> {
+    ) -> CorgiResult<File> {
         panic!("this source doesn't download")
     }
 }

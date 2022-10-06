@@ -1,7 +1,7 @@
 use crate::aliased_command;
 use crate::command_prelude::*;
 use cargo_util::paths::resolve_executable;
-use corgi::util::errors::CargoResult;
+use corgi::util::errors::CorgiResult;
 use corgi::{drop_println, Config};
 use flate2::read::GzDecoder;
 use std::ffi::OsStr;
@@ -35,7 +35,7 @@ pub fn exec(config: &mut Config, args: &ArgMatches) -> CliResult {
     Ok(())
 }
 
-fn try_help(config: &Config, subcommand: &str) -> CargoResult<bool> {
+fn try_help(config: &Config, subcommand: &str) -> CorgiResult<bool> {
     let subcommand = match check_alias(config, subcommand) {
         // If this alias is more than a simple subcommand pass-through, show the alias.
         Some(argv) if argv.len() > 1 => {
@@ -117,7 +117,7 @@ fn extract_man(subcommand: &str, extension: &str) -> Option<Vec<u8>> {
 
 /// Write the contents of a man page to disk and spawn the given command to
 /// display it.
-fn write_and_spawn(name: &str, contents: &[u8], command: &str) -> CargoResult<()> {
+fn write_and_spawn(name: &str, contents: &[u8], command: &str) -> CorgiResult<()> {
     let prefix = format!("cargo-{}.", name);
     let mut tmp = tempfile::Builder::new().prefix(&prefix).tempfile()?;
     let f = tmp.as_file_mut();

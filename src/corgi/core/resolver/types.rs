@@ -1,6 +1,6 @@
 use super::features::{CliFeatures, RequestedFeatures};
 use crate::core::{Dependency, PackageId, Summary};
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::interning::InternedString;
 use crate::util::Config;
 use std::cmp::Ordering;
@@ -37,7 +37,7 @@ impl ResolverProgress {
                 .unwrap_or(1),
         }
     }
-    pub fn shell_status(&mut self, config: Option<&Config>) -> CargoResult<()> {
+    pub fn shell_status(&mut self, config: Option<&Config>) -> CorgiResult<()> {
         // If we spend a lot of time here (we shouldn't in most cases) then give
         // a bit of a visual indicator as to what we're doing. Only enable this
         // when stderr is a tty (a human is likely to be watching) to ensure we
@@ -108,7 +108,7 @@ pub enum ResolveBehavior {
 }
 
 impl ResolveBehavior {
-    pub fn from_manifest(resolver: &str) -> CargoResult<ResolveBehavior> {
+    pub fn from_manifest(resolver: &str) -> CorgiResult<ResolveBehavior> {
         match resolver {
             "1" => Ok(ResolveBehavior::V1),
             "2" => Ok(ResolveBehavior::V2),

@@ -767,7 +767,7 @@ impl HttpServer {
             let (len, remaining) = body.split_at(4);
             let json_len = u32::from_le_bytes(len.try_into().unwrap());
             let (json, remaining) = remaining.split_at(json_len as usize);
-            let new_crate = serde_json::from_slice::<crates_io::NewCrate>(json).unwrap();
+            let new_crate = serde_json::from_slice::<crates_io::NewPackage>(json).unwrap();
             // Get the `.crate` file
             let (len, remaining) = remaining.split_at(4);
             let file_len = u32::from_le_bytes(len.try_into().unwrap());

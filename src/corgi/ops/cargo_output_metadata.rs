@@ -5,7 +5,7 @@ use crate::core::resolver::{features::CliFeatures, HasDevUnits, Resolve};
 use crate::core::{Dependency, Package, PackageId, Workspace};
 use crate::ops::{self, Packages};
 use crate::util::interning::InternedString;
-use crate::util::CargoResult;
+use crate::util::CorgiResult;
 use cargo_platform::Platform;
 use serde::Serialize;
 use std::collections::BTreeMap;
@@ -24,7 +24,7 @@ pub struct OutputMetadataOptions {
 /// Loads the manifest, resolves the dependencies of the package to the concrete
 /// used versions - considering overrides - and writes all dependencies in a JSON
 /// format to stdout.
-pub fn output_metadata(ws: &Workspace<'_>, opt: &OutputMetadataOptions) -> CargoResult<ExportInfo> {
+pub fn output_metadata(ws: &Workspace<'_>, opt: &OutputMetadataOptions) -> CorgiResult<ExportInfo> {
     if opt.version != VERSION {
         anyhow::bail!(
             "metadata version {} not supported, only {} is currently supported",
@@ -105,7 +105,7 @@ impl From<&Dependency> for DepKindInfo {
 fn build_resolve_graph(
     ws: &Workspace<'_>,
     metadata_opts: &OutputMetadataOptions,
-) -> CargoResult<(Vec<SerializedPackage>, MetadataResolve)> {
+) -> CorgiResult<(Vec<SerializedPackage>, MetadataResolve)> {
     // TODO: Without --filter-platform, features are being resolved for `host` only.
     // How should this work?
     let requested_kinds =

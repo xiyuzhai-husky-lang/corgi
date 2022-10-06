@@ -70,7 +70,7 @@ use crate::core::dependency::Dependency;
 use crate::core::{PackageId, SourceId, Summary};
 use crate::sources::registry::{LoadResponse, RegistryData, RegistryPackage, INDEX_V_MAX};
 use crate::util::interning::InternedString;
-use crate::util::{internal, CargoResult, Config, Filesystem, OptVersionReq, ToSemver};
+use crate::util::{internal, Config, CorgiResult, Filesystem, OptVersionReq, ToSemver};
 use anyhow::bail;
 use cargo_util::{paths, registry::make_dep_path};
 use log::{debug, info};
@@ -265,7 +265,7 @@ impl<'cfg> RegistryIndex<'cfg> {
     }
 
     /// Returns the hash listed for a specified `PackageId`.
-    pub fn hash(&mut self, pkg: PackageId, load: &mut dyn RegistryData) -> Poll<CargoResult<&str>> {
+    pub fn hash(&mut self, pkg: PackageId, load: &mut dyn RegistryData) -> Poll<CorgiResult<&str>> {
         let req = OptVersionReq::exact(pkg.version());
         let summary = self.summaries(pkg.name(), &req, load)?;
         let summary = ready!(summary).next();
@@ -288,7 +288,7 @@ impl<'cfg> RegistryIndex<'cfg> {
         name: InternedString,
         req: &'b OptVersionReq,
         load: &mut dyn RegistryData,
-    ) -> Poll<CargoResult<impl Iterator<Item = &'a IndexSummary> + 'b>>
+    ) -> Poll<CorgiResult<impl Iterator<Item = &'a IndexSummary> + 'b>>
     where
         'a: 'b,
     {
@@ -340,7 +340,7 @@ impl<'cfg> RegistryIndex<'cfg> {
         &mut self,
         name: InternedString,
         load: &mut dyn RegistryData,
-    ) -> Poll<CargoResult<&mut Summaries>> {
+    ) -> Poll<CorgiResult<&mut Summaries>> {
         // If we've previously loaded what versions are present for `name`, just
         // return that since our cache should still be valid.
         if self.summaries_cache.contains_key(&name) {
@@ -414,7 +414,7 @@ impl<'cfg> RegistryIndex<'cfg> {
         load: &mut dyn RegistryData,
         yanked_whitelist: &HashSet<PackageId>,
         f: &mut dyn FnMut(Summary),
-    ) -> Poll<CargoResult<()>> {
+    ) -> Poll<CorgiResult<()>> {
         if self.config.offline() {
             // This should only return `Poll::Ready(Ok(()))` if there is at least 1 match.
             //
@@ -441,7 +441,7 @@ impl<'cfg> RegistryIndex<'cfg> {
         yanked_whitelist: &HashSet<PackageId>,
         f: &mut dyn FnMut(Summary),
         online: bool,
-    ) -> Poll<CargoResult<usize>> {
+    ) -> Poll<CorgiResult<usize>> {
         let source_id = self.source_id;
 
         let summaries = ready!(self.summaries(dep.package_name(), dep.version_req(), load))?;
@@ -518,7 +518,7 @@ impl<'cfg> RegistryIndex<'cfg> {
         &mut self,
         pkg: PackageId,
         load: &mut dyn RegistryData,
-    ) -> Poll<CargoResult<bool>> {
+    ) -> Poll<CorgiResult<bool>> {
         let req = OptVersionReq::exact(pkg.version());
         let found = self
             .summaries(pkg.name(), &req, load)
@@ -553,7 +553,7 @@ impl Summaries {
         source_id: SourceId,
         load: &mut dyn RegistryData,
         config: &Config,
-    ) -> Poll<CargoResult<Option<Summaries>>> {
+    ) -> Poll<CorgiResult<Option<Summaries>>> {
         // First up, attempt to load the cache. This could fail for all manner
         // of reasons, but consider all of them non-fatal and just log their
         // occurrence in case anyone is debugging anything.
@@ -662,7 +662,7 @@ impl Summaries {
 
     /// Parses an open `File` which represents information previously cached by
     /// Cargo.
-    pub fn parse_cache(contents: Vec<u8>) -> CargoResult<(Summaries, InternedString)> {
+    pub fn parse_cache(contents: Vec<u8>) -> CorgiResult<(Summaries, InternedString)> {
         let cache = SummariesCache::parse(&contents)?;
         let index_version = InternedString::new(cache.index_version);
         let mut ret = Summaries::default();
@@ -728,7 +728,7 @@ impl Summaries {
 const CURRENT_CACHE_VERSION: u8 = 3;
 
 impl<'a> SummariesCache<'a> {
-    fn parse(data: &'a [u8]) -> CargoResult<SummariesCache<'a>> {
+    fn parse(data: &'a [u8]) -> CorgiResult<SummariesCache<'a>> {
         // NB: keep this method in sync with `serialize` below
         let (first_byte, rest) = data
             .split_first()
@@ -799,7 +799,7 @@ impl MaybeIndexSummary {
         config: &Config,
         raw_data: &[u8],
         source_id: SourceId,
-    ) -> CargoResult<&IndexSummary> {
+    ) -> CorgiResult<&IndexSummary> {
         let (start, end) = match self {
             MaybeIndexSummary::Unparsed { start, end } => (*start, *end),
             MaybeIndexSummary::Parsed(summary) => return Ok(summary),
@@ -824,7 +824,7 @@ impl IndexSummary {
     /// a package.
     ///
     /// The `line` provided is expected to be valid JSON.
-    fn parse(config: &Config, line: &[u8], source_id: SourceId) -> CargoResult<IndexSummary> {
+    fn parse(config: &Config, line: &[u8], source_id: SourceId) -> CorgiResult<IndexSummary> {
         // ****CAUTION**** Please be extremely careful with returning errors
         // from this function. Entries that error are not included in the
         // index cache, and can cause cargo to get confused when switching
@@ -848,7 +848,7 @@ impl IndexSummary {
         let deps = deps
             .into_iter()
             .map(|dep| dep.into_dep(source_id))
-            .collect::<CargoResult<Vec<_>>>()?;
+            .collect::<CorgiResult<Vec<_>>>()?;
         if let Some(features2) = features2 {
             for (name, values) in features2 {
                 features.entry(name).or_default().extend(values);

@@ -19,7 +19,7 @@ use crate::core::resolver::{
 use crate::core::{
     Dependency, FeatureValue, PackageId, PackageIdSpec, QueryKind, Registry, Summary,
 };
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::interning::InternedString;
 
 use anyhow::Context as _;
@@ -96,7 +96,7 @@ impl<'a> RegistryQueryer<'a> {
     /// any candidates are returned which match an override then the override is
     /// applied by performing a second query for what the override should
     /// return.
-    pub fn query(&mut self, dep: &Dependency) -> Poll<CargoResult<Rc<Vec<Summary>>>> {
+    pub fn query(&mut self, dep: &Dependency) -> Poll<CorgiResult<Rc<Vec<Summary>>>> {
         if let Some(out) = self.registry_cache.get(dep).cloned() {
             return out.map(Result::Ok);
         }
@@ -253,7 +253,7 @@ impl<'a> RegistryQueryer<'a> {
                     )
                 })),
             })
-            .collect::<CargoResult<Vec<DepInfo>>>()?;
+            .collect::<CorgiResult<Vec<DepInfo>>>()?;
 
         // Attempt to resolve dependencies with fewer candidates before trying
         // dependencies with more candidates. This way if the dependency with

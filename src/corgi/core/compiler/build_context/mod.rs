@@ -4,7 +4,7 @@ use crate::core::profiles::Profiles;
 use crate::core::PackageSet;
 use crate::core::Workspace;
 use crate::util::config::Config;
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::interning::InternedString;
 use crate::util::Rustc;
 use std::collections::{HashMap, HashSet};
@@ -65,7 +65,7 @@ impl<'a, 'cfg> BuildContext<'a, 'cfg> {
         roots: Vec<Unit>,
         unit_graph: UnitGraph,
         scrape_units: Vec<Unit>,
-    ) -> CargoResult<BuildContext<'a, 'cfg>> {
+    ) -> CorgiResult<BuildContext<'a, 'cfg>> {
         let all_kinds = unit_graph
             .keys()
             .map(|u| u.kind)

@@ -1,6 +1,6 @@
 //! Helpers for validating and checking names like package and crate names.
 
-use crate::util::CargoResult;
+use crate::util::CorgiResult;
 use anyhow::bail;
 use std::path::Path;
 
@@ -42,7 +42,7 @@ pub fn is_conflicting_artifact_name(name: &str) -> bool {
 /// level of sanity. Note that package names have other restrictions
 /// elsewhere. `cargo new` has a few restrictions, such as checking for
 /// reserved names. crates.io has even more restrictions.
-pub fn validate_package_name(name: &str, what: &str, help: &str) -> CargoResult<()> {
+pub fn validate_package_name(name: &str, what: &str, help: &str) -> CorgiResult<()> {
     let mut chars = name.chars();
     if let Some(ch) = chars.next() {
         if ch.is_digit(10) {

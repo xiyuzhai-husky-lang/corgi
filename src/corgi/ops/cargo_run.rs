@@ -5,13 +5,13 @@ use std::path::Path;
 use crate::core::compiler::UnitOutput;
 use crate::core::{TargetKind, Workspace};
 use crate::ops;
-use crate::util::CargoResult;
+use crate::util::CorgiResult;
 
 pub fn run(
     ws: &Workspace<'_>,
     options: &ops::CompileOptions,
     args: &[OsString],
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let config = ws.config();
 
     if options.filter.contains_glob_patterns() {

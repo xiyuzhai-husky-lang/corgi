@@ -1,6 +1,6 @@
 use crate::command_prelude::*;
 use anyhow::bail;
-use corgi::{drop_println, CargoResult};
+use corgi::{drop_println, CorgiResult};
 use serde::Serialize;
 
 pub fn cli() -> Command {
@@ -79,7 +79,7 @@ enum MessageFormat {
 }
 
 impl MessageFormat {
-    fn parse(args: &ArgMatches) -> CargoResult<Self> {
+    fn parse(args: &ArgMatches) -> CorgiResult<Self> {
         let fmt = match args.get_one::<String>("message-format") {
             Some(fmt) => fmt,
             None => return Ok(MessageFormat::Json),

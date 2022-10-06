@@ -10,7 +10,7 @@ use std::rc::Rc;
 
 use crate::core::compiler::{CompileKind, CompileTarget};
 use crate::core::{PackageId, SourceId, Summary};
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::interning::InternedString;
 use crate::util::toml::StringOrVec;
 use crate::util::OptVersionReq;
@@ -126,7 +126,7 @@ impl Dependency {
         name: impl Into<InternedString>,
         version: Option<&str>,
         source_id: SourceId,
-    ) -> CargoResult<Dependency> {
+    ) -> CorgiResult<Dependency> {
         let name = name.into();
         let (specified_req, version_req) = match version {
             Some(v) => match VersionReq::parse(v) {
@@ -472,7 +472,7 @@ impl Artifact {
         artifacts: &StringOrVec,
         is_lib: bool,
         target: Option<&str>,
-    ) -> CargoResult<Self> {
+    ) -> CorgiResult<Self> {
         let kinds = ArtifactKind::validate(
             artifacts
                 .iter()
@@ -512,7 +512,7 @@ pub enum ArtifactTarget {
 }
 
 impl ArtifactTarget {
-    pub fn parse(target: &str) -> CargoResult<ArtifactTarget> {
+    pub fn parse(target: &str) -> CorgiResult<ArtifactTarget> {
         Ok(match target {
             "target" => ArtifactTarget::BuildDependencyAssumeTarget,
             name => ArtifactTarget::Force(CompileTarget::new(name)?),
@@ -587,7 +587,7 @@ impl fmt::Display for ArtifactKind {
 }
 
 impl ArtifactKind {
-    fn parse(kind: &str) -> CargoResult<Self> {
+    fn parse(kind: &str) -> CorgiResult<Self> {
         Ok(match kind {
             "bin" => ArtifactKind::AllBinaries,
             "cdylib" => ArtifactKind::Cdylib,
@@ -601,7 +601,7 @@ impl ArtifactKind {
         })
     }
 
-    fn validate(kinds: Vec<ArtifactKind>) -> CargoResult<Vec<ArtifactKind>> {
+    fn validate(kinds: Vec<ArtifactKind>) -> CorgiResult<Vec<ArtifactKind>> {
         if kinds.iter().any(|k| matches!(k, ArtifactKind::AllBinaries))
             && kinds
                 .iter()

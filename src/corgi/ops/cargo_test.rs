@@ -2,7 +2,7 @@ use crate::core::compiler::{Compilation, CompileKind, Doctest, Metadata, Unit, U
 use crate::core::shell::Verbosity;
 use crate::core::{TargetKind, Workspace};
 use crate::ops;
-use crate::util::errors::CargoResult;
+use crate::util::errors::CorgiResult;
 use crate::util::{add_path_args, CliError, CliResult, Config};
 use anyhow::format_err;
 use cargo_util::{ProcessBuilder, ProcessError};
@@ -99,7 +99,7 @@ pub fn run_benches(ws: &Workspace<'_>, options: &TestOptions, args: &[&str]) -> 
     no_fail_fast_err(ws, &options.compile_opts, &errors)
 }
 
-fn compile_tests<'a>(ws: &Workspace<'a>, options: &TestOptions) -> CargoResult<Compilation<'a>> {
+fn compile_tests<'a>(ws: &Workspace<'a>, options: &TestOptions) -> CorgiResult<Compilation<'a>> {
     let mut compilation = ops::compile(ws, &options.compile_opts)?;
     compilation.tests.sort();
     Ok(compilation)
@@ -300,7 +300,7 @@ fn display_no_run_information(
     test_args: &[&str],
     compilation: &Compilation<'_>,
     exec_type: &str,
-) -> CargoResult<()> {
+) -> CorgiResult<()> {
     let config = ws.config();
     let cwd = config.cwd();
     for UnitOutput {
@@ -344,7 +344,7 @@ fn cmd_builds(
     test_args: &[&str],
     compilation: &Compilation<'_>,
     exec_type: &str,
-) -> CargoResult<(String, ProcessBuilder)> {
+) -> CorgiResult<(String, ProcessBuilder)> {
     let test_path = unit.target.src_path().path().unwrap();
     let short_test_path = test_path
         .strip_prefix(unit.pkg.root())

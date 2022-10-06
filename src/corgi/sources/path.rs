@@ -6,7 +6,7 @@ use std::task::Poll;
 use crate::core::source::MaybePackage;
 use crate::core::{Dependency, Package, PackageId, QueryKind, Source, SourceId, Summary};
 use crate::ops;
-use crate::util::{internal, CargoResult, Config};
+use crate::util::{internal, Config, CorgiResult};
 use anyhow::Context as _;
 use cargo_util::paths;
 use filetime::FileTime;
@@ -62,7 +62,7 @@ impl<'cfg> PathSource<'cfg> {
         self.packages.push(pkg);
     }
 
-    pub fn root_package(&mut self) -> CargoResult<Package> {
+    pub fn root_package(&mut self) -> CorgiResult<Package> {
         trace!("root_package; source={:?}", self);
 
         self.update()?;
@@ -76,7 +76,7 @@ impl<'cfg> PathSource<'cfg> {
         }
     }
 
-    pub fn read_packages(&self) -> CargoResult<Vec<Package>> {
+    pub fn read_packages(&self) -> CorgiResult<Vec<Package>> {
         if self.updated {
             Ok(self.packages.clone())
         } else if self.recursive {
@@ -97,7 +97,7 @@ impl<'cfg> PathSource<'cfg> {
     /// The basic assumption of this method is that all files in the directory
     /// are relevant for building this package, but it also contains logic to
     /// use other methods like .gitignore to filter the list of files.
-    pub fn list_files(&self, pkg: &Package) -> CargoResult<Vec<PathBuf>> {
+    pub fn list_files(&self, pkg: &Package) -> CorgiResult<Vec<PathBuf>> {
         self._list_files(pkg).with_context(|| {
             format!(
                 "failed to determine list of files in {}",
@@ -106,7 +106,7 @@ impl<'cfg> PathSource<'cfg> {
         })
     }
 
-    fn _list_files(&self, pkg: &Package) -> CargoResult<Vec<PathBuf>> {
+    fn _list_files(&self, pkg: &Package) -> CorgiResult<Vec<PathBuf>> {
         let root = pkg.root();
         let no_include_option = pkg.manifest().include().is_empty();
         let git_repo = if no_include_option {
@@ -177,7 +177,7 @@ impl<'cfg> PathSource<'cfg> {
 
     /// Returns `Some(git2::Repository)` if found sibling `Cargo.toml` and `.git`
     /// directory; otherwise, caller should fall back on full file list.
-    fn discover_git_repo(&self, root: &Path) -> CargoResult<Option<git2::Repository>> {
+    fn discover_git_repo(&self, root: &Path) -> CorgiResult<Option<git2::Repository>> {
         let repo = match git2::Repository::discover(root) {
             Ok(repo) => repo,
             Err(e) => {
@@ -223,7 +223,7 @@ impl<'cfg> PathSource<'cfg> {
         pkg: &Package,
         repo: &git2::Repository,
         filter: &dyn Fn(&Path, bool) -> bool,
-    ) -> CargoResult<Vec<PathBuf>> {
+    ) -> CorgiResult<Vec<PathBuf>> {
         warn!("list_files_git {}", pkg.package_id());
         let index = repo.index()?;
         let root = repo
@@ -280,7 +280,7 @@ impl<'cfg> PathSource<'cfg> {
                     _ => None,
                 }
             })
-            .collect::<CargoResult<_>>()?;
+            .collect::<CorgiResult<_>>()?;
 
         let mut subpackages_found = Vec::new();
 
@@ -354,13 +354,13 @@ impl<'cfg> PathSource<'cfg> {
         return Ok(ret);
 
         #[cfg(unix)]
-        fn join(path: &Path, data: &[u8]) -> CargoResult<PathBuf> {
+        fn join(path: &Path, data: &[u8]) -> CorgiResult<PathBuf> {
             use std::ffi::OsStr;
             use std::os::unix::prelude::*;
             Ok(path.join(<OsStr as OsStrExt>::from_bytes(data)))
         }
         #[cfg(windows)]
-        fn join(path: &Path, data: &[u8]) -> CargoResult<PathBuf> {
+        fn join(path: &Path, data: &[u8]) -> CorgiResult<PathBuf> {
             use std::str;
             match str::from_utf8(data) {
                 Ok(s) => Ok(path.join(s)),
@@ -377,7 +377,7 @@ impl<'cfg> PathSource<'cfg> {
         &self,
         pkg: &Package,
         filter: &dyn Fn(&Path, bool) -> bool,
-    ) -> CargoResult<Vec<PathBuf>> {
+    ) -> CorgiResult<Vec<PathBuf>> {
         let mut ret = Vec::new();
         self.walk(pkg.root(), &mut ret, true, filter)?;
         Ok(ret)
@@ -389,7 +389,7 @@ impl<'cfg> PathSource<'cfg> {
         ret: &mut Vec<PathBuf>,
         is_root: bool,
         filter: &dyn Fn(&Path, bool) -> bool,
-    ) -> CargoResult<()> {
+    ) -> CorgiResult<()> {
         let walkdir = WalkDir::new(path)
             .follow_links(true)
             .into_iter()
@@ -448,7 +448,7 @@ impl<'cfg> PathSource<'cfg> {
         Ok(())
     }
 
-    pub fn last_modified_file(&self, pkg: &Package) -> CargoResult<(FileTime, PathBuf)> {
+    pub fn last_modified_file(&self, pkg: &Package) -> CorgiResult<(FileTime, PathBuf)> {
         if !self.updated {
             return Err(internal(format!(
                 "BUG: source `{:?}` was not updated",
@@ -483,7 +483,7 @@ impl<'cfg> PathSource<'cfg> {
         &self.path
     }
 
-    pub fn update(&mut self) -> CargoResult<()> {
+    pub fn update(&mut self) -> CorgiResult<()> {
         if !self.updated {
             let packages = self.read_packages()?;
             self.packages.extend(packages.into_iter());
@@ -506,7 +506,7 @@ impl<'cfg> Source for PathSource<'cfg> {
         dep: &Dependency,
         kind: QueryKind,
         f: &mut dyn FnMut(Summary),
-    ) -> Poll<CargoResult<()>> {
+    ) -> Poll<CorgiResult<()>> {
         self.update()?;
         for s in self.packages.iter().map(|p| p.summary()) {
             let matched = match kind {
@@ -532,7 +532,7 @@ impl<'cfg> Source for PathSource<'cfg> {
         self.source_id
     }
 
-    fn download(&mut self, id: PackageId) -> CargoResult<MaybePackage> {
+    fn download(&mut self, id: PackageId) -> CorgiResult<MaybePackage> {
         trace!("getting packages; id={}", id);
         self.update()?;
         let pkg = self.packages.iter().find(|pkg| pkg.package_id() == id);
@@ -541,11 +541,11 @@ impl<'cfg> Source for PathSource<'cfg> {
             .ok_or_else(|| internal(format!("failed to find {} in path source", id)))
     }
 
-    fn finish_download(&mut self, _id: PackageId, _data: Vec<u8>) -> CargoResult<Package> {
+    fn finish_download(&mut self, _id: PackageId, _data: Vec<u8>) -> CorgiResult<Package> {
         panic!("no download should have started")
     }
 
-    fn fingerprint(&self, pkg: &Package) -> CargoResult<String> {
+    fn fingerprint(&self, pkg: &Package) -> CorgiResult<String> {
         let (max, max_path) = self.last_modified_file(pkg)?;
         // Note that we try to strip the prefix of this package to get a
         // relative path to ensure that the fingerprint remains consistent
@@ -563,11 +563,11 @@ impl<'cfg> Source for PathSource<'cfg> {
 
     fn add_to_yanked_whitelist(&mut self, _pkgs: &[PackageId]) {}
 
-    fn is_yanked(&mut self, _pkg: PackageId) -> Poll<CargoResult<bool>> {
+    fn is_yanked(&mut self, _pkg: PackageId) -> Poll<CorgiResult<bool>> {
         Poll::Ready(Ok(false))
     }
 
-    fn block_until_ready(&mut self) -> CargoResult<()> {
+    fn block_until_ready(&mut self) -> CorgiResult<()> {
         self.update()
     }
 
