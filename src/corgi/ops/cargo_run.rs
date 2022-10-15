@@ -15,7 +15,7 @@ pub fn run(
     let config = ws.config();
 
     if options.filter.contains_glob_patterns() {
-        anyhow::bail!("`cargo run` does not support glob patterns on target selection")
+        anyhow::bail!("`corgi run` does not support glob patterns on target selection")
     }
 
     // We compute the `bins` here *just for diagnosis*. The actual set of
@@ -38,7 +38,7 @@ pub fn run(
 
     if bins.is_empty() {
         if !options.filter.is_specific() {
-            anyhow::bail!("a bin target must be available for `cargo run`")
+            anyhow::bail!("a bin target must be available for `corgi run`")
         } else {
             // This will be verified in `cargo_compile`.
         }
@@ -62,7 +62,7 @@ pub fn run(
                 .collect();
             names.sort();
             anyhow::bail!(
-                "`cargo run` could not determine which binary to run. \
+                "`corgi run` could not determine which binary to run. \
                  Use the `--bin` option to specify a binary, \
                  or the `default-run` manifest key.\n\
                  available binaries: {}",
@@ -70,13 +70,13 @@ pub fn run(
             )
         } else {
             anyhow::bail!(
-                "`cargo run` can run at most one executable, but \
+                "`corgi run` can run at most one executable, but \
                  multiple were specified"
             )
         }
     }
 
-    // `cargo run` is only compatible with one `--target` flag at most
+    // `corgi run` is only compatible with one `--target` flag at most
     options.build_config.single_requested_kind()?;
 
     let compile = ops::compile(ws, options)?;

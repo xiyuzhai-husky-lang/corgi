@@ -16,9 +16,9 @@ use crate::util::{self, CorgiResult, StableHasher};
 /// This is a generic version number that can be changed to make
 /// backwards-incompatible changes to any file structures in the output
 /// directory. For example, the fingerprint files or the build-script
-/// output files. Normally cargo updates ship with rustc updates which will
+/// output files. Normally corgi updates ship with rustc updates which will
 /// cause a new hash due to the rustc version changing, but this allows
-/// cargo to be extra careful to deal with different versions of cargo that
+/// corgi to be extra careful to deal with different versions of corgi that
 /// use the same rustc version.
 const METADATA_VERSION: u8 = 2;
 
@@ -40,7 +40,7 @@ const METADATA_VERSION: u8 = 2;
 /// that all the inputs can be converted to a valid path.
 ///
 /// This also acts as the main layer of caching provided by Cargo.
-/// For example, we want to cache `cargo build` and `cargo doc` separately, so that running one
+/// For example, we want to cache `corgi build` and `corgi doc` separately, so that running one
 /// does not invalidate the artifacts for the other. We do this by including `CompileMode` in the
 /// hash, thus the artifacts go in different folders and do not override each other.
 /// If we don't add something that we should have, for this reason, we get the
@@ -389,7 +389,7 @@ impl<'a, 'cfg: 'a> CompilationFiles<'a, 'cfg> {
         // - Binaries: The user always wants to see these, even if they are
         //   implicitly built (for example for integration tests).
         // - dylibs: This ensures that the dynamic linker pulls in all the
-        //   latest copies (even if the dylib was built from a previous cargo
+        //   latest copies (even if the dylib was built from a previous corgi
         //   build). There are complex reasons for this, see #8139, #6167, #6162.
         // - Things directly requested from the command-line (the "roots").
         //   This one is a little questionable for rlibs (see #6131), but is

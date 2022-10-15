@@ -11,8 +11,8 @@ from urllib.error import HTTPError
 
 
 TO_PUBLISH = [
-    'crates/cargo-platform',
-    'crates/cargo-util',
+    'crates/corgi-platform',
+    'crates/corgi-util',
     'crates/crates-io',
     '.',
 ]
@@ -35,7 +35,7 @@ def maybe_publish(path):
     if already_published(name, version):
         print('%s %s is already published, skipping' % (name, version))
         return False
-    subprocess.check_call(['cargo', 'publish', '--no-verify'], cwd=path)
+    subprocess.check_call(['corgi', 'publish', '--no-verify'], cwd=path)
     return True
 
 

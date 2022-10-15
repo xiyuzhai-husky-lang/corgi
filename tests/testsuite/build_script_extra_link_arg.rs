@@ -108,7 +108,7 @@ fn link_arg_missing_target() {
 
     // TODO: Uncomment this if cdylib restriction is re-added (see
     // cdylib_link_arg_transitive below).
-    //     p.cargo("check")
+    //     p.corgi("check")
     //         .with_status(101)
     //         .with_stderr("\
     // [COMPILING] foo [..]
@@ -208,7 +208,7 @@ warning: cargo:rustc-link-arg-cdylib was specified in the build script of bar v1
 ([ROOT]/foo/bar), but that package does not contain a cdylib target
 
 Allowing this was an unintended change in the 1.50 release, and may become an error in \
-the future. For more information, see <https://github.com/rust-lang/cargo/issues/9562>.
+the future. For more information, see <https://github.com/rust-lang/corgi/issues/9562>.
 [RUNNING] `rustc --crate-name bar bar/src/lib.rs [..]
 [COMPILING] foo v0.1.0 [..]
 [RUNNING] `rustc --crate-name foo src/lib.rs [..]-C link-arg=--bogus[..]`

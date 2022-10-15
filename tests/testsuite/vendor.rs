@@ -1,4 +1,4 @@
-//! Tests for the `cargo vendor` command.
+//! Tests for the `corgi vendor` command.
 //!
 //! Note that every test here uses `--respect-source-config` so that the
 //! "fake" crates.io is used. Otherwise `vendor` would download the crates.io
@@ -118,7 +118,7 @@ directory = "deps/.vendor"
 
 fn add_vendor_config(p: &Project) {
     p.change_file(
-        ".cargo/config",
+        ".corgi/config",
         r#"
             [source.crates-io]
             replace-with = 'vendor'
@@ -164,7 +164,7 @@ fn package_exclude() {
         .publish();
 
     p.cargo("vendor --respect-source-config").run();
-    let csum = p.read_file("vendor/bar/.cargo-checksum.json");
+    let csum = p.read_file("vendor/bar/.corgi-checksum.json");
     assert!(csum.contains(".include"));
     assert!(!csum.contains(".exclude"));
     assert!(!csum.contains(".dotdir/exclude"));
@@ -406,7 +406,7 @@ fn test_sync_argument() {
 error: Found argument 'test_vendor' which wasn't expected, or isn't valid in this context
 
 USAGE:
-    cargo[EXE] vendor [OPTIONS] [path]
+    corgi[EXE] vendor [OPTIONS] [path]
 
 For more information try --help",
         )
@@ -489,11 +489,11 @@ fn ignore_files() {
         .publish();
 
     p.cargo("vendor --respect-source-config").run();
-    let csum = p.read_file("vendor/url/.cargo-checksum.json");
+    let csum = p.read_file("vendor/url/.corgi-checksum.json");
     assert!(!csum.contains("foo.orig"));
     assert!(!csum.contains(".gitignore"));
     assert!(!csum.contains(".gitattributes"));
-    assert!(!csum.contains(".cargo-ok"));
+    assert!(!csum.contains(".corgi-ok"));
     assert!(!csum.contains("foo.rej"));
 }
 
@@ -525,7 +525,7 @@ fn included_files_only() {
         .build();
 
     p.cargo("vendor --respect-source-config").run();
-    let csum = p.read_file("vendor/a/.cargo-checksum.json");
+    let csum = p.read_file("vendor/a/.corgi-checksum.json");
     assert!(!csum.contains("a/b.md"));
 }
 
@@ -566,8 +566,8 @@ fn dependent_crates_in_crates() {
         .build();
 
     p.cargo("vendor --respect-source-config").run();
-    p.read_file("vendor/a/.cargo-checksum.json");
-    p.read_file("vendor/b/.cargo-checksum.json");
+    p.read_file("vendor/a/.corgi-checksum.json");
+    p.read_file("vendor/b/.corgi-checksum.json");
 }
 
 #[cargo_test]
@@ -639,7 +639,7 @@ fn git_simple() {
         .build();
 
     p.cargo("vendor --respect-source-config").run();
-    let csum = p.read_file("vendor/a/.cargo-checksum.json");
+    let csum = p.read_file("vendor/a/.corgi-checksum.json");
     assert!(csum.contains("\"package\":null"));
 }
 
@@ -815,7 +815,7 @@ fn config_instructions_works() {
         .exec_with_output()
         .unwrap();
     let output = String::from_utf8(output.stdout).unwrap();
-    p.change_file(".cargo/config", &output);
+    p.change_file(".corgi/config", &output);
 
     p.cargo("check -v")
         .with_stderr_contains("[..]foo/vendor/dep/src/lib.rs[..]")

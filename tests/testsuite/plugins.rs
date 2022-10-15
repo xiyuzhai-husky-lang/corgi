@@ -302,7 +302,7 @@ fn native_plugin_dependency_with_custom_linker() {
         )
         .file("src/lib.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [target.{}]

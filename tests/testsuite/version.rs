@@ -1,4 +1,4 @@
-//! Tests for displaying the cargo version.
+//! Tests for displaying the corgi version.
 
 use cargo_test_support::{cargo_process, project};
 
@@ -7,11 +7,11 @@ fn simple() {
     let p = project().build();
 
     p.cargo("version")
-        .with_stdout(&format!("cargo {}\n", corgi::version()))
+        .with_stdout(&format!("corgi {}\n", corgi::version()))
         .run();
 
     p.cargo("--version")
-        .with_stdout(&format!("cargo {}\n", corgi::version()))
+        .with_stdout(&format!("corgi {}\n", corgi::version()))
         .run();
 }
 
@@ -23,7 +23,7 @@ fn version_works_without_rustc() {
 
 #[cargo_test]
 fn version_works_with_bad_config() {
-    let p = project().file(".cargo/config", "this is not toml").build();
+    let p = project().file(".corgi/config", "this is not toml").build();
     p.cargo("version").run();
 }
 
@@ -31,7 +31,7 @@ fn version_works_with_bad_config() {
 fn version_works_with_bad_target_dir() {
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [build]
                 target-dir = 4
@@ -45,7 +45,7 @@ fn version_works_with_bad_target_dir() {
 fn verbose() {
     // This is mainly to check that it doesn't explode.
     cargo_process("-vV")
-        .with_stdout_contains(&format!("cargo {}", corgi::version()))
+        .with_stdout_contains(&format!("corgi {}", corgi::version()))
         .with_stdout_contains("host: [..]")
         .with_stdout_contains("libgit2: [..]")
         .with_stdout_contains("libcurl: [..]")

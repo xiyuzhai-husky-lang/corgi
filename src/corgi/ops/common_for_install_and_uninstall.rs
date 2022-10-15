@@ -197,7 +197,7 @@ impl InstallTracker {
             // Determine if it is dirty or fresh.
             let source_id = pkg.package_id().source_id();
             if source_id.is_path() {
-                // `cargo install --path ...` is always rebuilt.
+                // `corgi install --path ...` is always rebuilt.
                 return Ok((Freshness::Dirty, duplicates));
             }
             let is_up_to_date = |dupe_pkg_id| {
@@ -367,7 +367,7 @@ impl CrateListingV2 {
     /// Incorporate any changes from v1 into self.
     /// This handles the initial upgrade to v2, *and* handles the case
     /// where v2 is in use, and a v1 update is made, then v2 is used again.
-    /// i.e., `cargo +new install foo ; cargo +old install bar ; cargo +new install bar`
+    /// i.e., `corgi +new install foo ; corgi +old install bar ; corgi +new install bar`
     /// For now, v1 is the source of truth, so its values are trusted over v2.
     fn sync_v1(&mut self, v1: &CrateListingV1) {
         // Make the `bins` entries the same.
@@ -632,7 +632,7 @@ where
         pkgs.sort_unstable_by_key(|a| a.name());
         format!(
             "multiple packages with {} found: {}. When installing a git repository, \
-            cargo will always search the entire repo for any Cargo.toml. \
+            corgi will always search the entire repo for any Cargo.toml. \
             Please specify which to install.",
             kind,
             pkgs.iter()

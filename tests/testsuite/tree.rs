@@ -1,4 +1,4 @@
-//! Tests for the `cargo tree` command.
+//! Tests for the `corgi tree` command.
 
 use super::features2::switch_to_resolver_2;
 use cargo_test_support::cross_compile::{self, alternate};
@@ -1079,7 +1079,7 @@ fn format() {
             name = "foo"
             version = "0.1.0"
             license = "MIT"
-            repository = "https://github.com/rust-lang/cargo"
+            repository = "https://github.com/rust-lang/corgi"
 
             [dependencies]
             dep = {version="1.0", optional=true}
@@ -1579,7 +1579,7 @@ Please re-run this command with `-p <spec>` where `<spec>` is one of the followi
 
 #[cargo_test]
 fn workspace_features_are_local() {
-    // The features for workspace packages should be the same as `cargo build`
+    // The features for workspace packages should be the same as `corgi build`
     // (i.e., the features selected depend on the "current" package).
     Package::new("optdep", "1.0.0").publish();
     Package::new("somedep", "1.0.0")

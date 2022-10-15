@@ -1,8 +1,8 @@
-//! Code for representing cargo's release version number.
+//! Code for representing corgi's release version number.
 
 use std::fmt;
 
-/// Information about the git repository where cargo was built from.
+/// Information about the git repository where corgi was built from.
 pub struct CommitInfo {
     pub short_commit_hash: String,
     pub commit_hash: String,
@@ -34,7 +34,7 @@ impl fmt::Display for VersionInfo {
     }
 }
 
-/// Returns information about cargo's version.
+/// Returns information about corgi's version.
 pub fn version() -> VersionInfo {
     macro_rules! option_env_str {
         ($name:expr) => {
@@ -44,21 +44,21 @@ pub fn version() -> VersionInfo {
 
     // This is the version set in rustbuild, which we use to match rustc.
     let version = option_env_str!("CFG_RELEASE").unwrap_or_else(|| {
-        // If cargo is not being built by rustbuild, then we just use the
-        // version from cargo's own `Cargo.toml`.
+        // If corgi is not being built by rustbuild, then we just use the
+        // version from corgi's own `Cargo.toml`.
         //
         // There are two versions at play here:
-        //   - version of cargo-the-binary, which you see when you type `cargo --version`
-        //   - version of cargo-the-library, which you download from crates.io for use
+        //   - version of corgi-the-binary, which you see when you type `corgi --version`
+        //   - version of corgi-the-library, which you download from crates.io for use
         //     in your packages.
         //
         // The library is permanently unstable, so it always has a 0 major
         // version. However, the CLI now reports a stable 1.x version
         // (starting in 1.26) which stays in sync with rustc's version.
         //
-        // Coincidentally, the minor version for cargo-the-library is always
+        // Coincidentally, the minor version for corgi-the-library is always
         // +1 of rustc's minor version (that is, `rustc 1.11.0` corresponds to
-        // `cargo `0.12.0`). The versions always get bumped in lockstep, so
+        // `corgi `0.12.0`). The versions always get bumped in lockstep, so
         // this should continue to hold.
         let minor = env!("CARGO_PKG_VERSION_MINOR").parse::<u8>().unwrap() - 1;
         let patch = env!("CARGO_PKG_VERSION_PATCH").parse::<u8>().unwrap();

@@ -266,7 +266,7 @@ fn cannot_publish_to_crates_io_with_registry_dependency() {
         )
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [registries.fakeio]
@@ -419,14 +419,14 @@ fn block_publish_due_to_no_token() {
     registry::alt_init();
     let p = project().file("src/lib.rs", "").build();
 
-    fs::remove_file(paths::home().join(".cargo/credentials")).unwrap();
+    fs::remove_file(paths::home().join(".corgi/credentials")).unwrap();
 
     // Now perform the actual publish
     p.cargo("publish --registry alternative")
         .with_status(101)
         .with_stderr_contains(
             "error: no upload token found, \
-            please run `cargo login` or pass `--token`",
+            please run `corgi login` or pass `--token`",
         )
         .run();
 }
@@ -542,7 +542,7 @@ fn publish_with_crates_io_dep() {
 fn passwords_in_registries_index_url_forbidden() {
     registry::alt_init();
 
-    let config = paths::home().join(".cargo/config");
+    let config = paths::home().join(".corgi/config");
 
     fs::write(
         config,
@@ -559,7 +559,7 @@ fn passwords_in_registries_index_url_forbidden() {
         .with_status(101)
         .with_stderr(
             "\
-error: invalid index URL for registry `alternative` defined in [..]/home/.cargo/config
+error: invalid index URL for registry `alternative` defined in [..]/home/.corgi/config
 
 Caused by:
   registry URLs may not contain passwords
@@ -729,7 +729,7 @@ fn no_api() {
 
 #[cargo_test]
 fn alt_reg_metadata() {
-    // Check for "registry" entries in `cargo metadata` with alternative registries.
+    // Check for "registry" entries in `corgi metadata` with alternative registries.
     registry::alt_init();
     let p = project()
         .file(
@@ -1060,7 +1060,7 @@ fn unknown_registry() {
         .publish();
 
     // Remove "alternative" from config.
-    let cfg_path = paths::home().join(".cargo/config");
+    let cfg_path = paths::home().join(".corgi/config");
     let mut config = fs::read_to_string(&cfg_path).unwrap();
     let start = config.find("[registries.alternative]").unwrap();
     config.insert(start, '#');
@@ -1200,7 +1200,7 @@ fn unknown_registry() {
 #[cargo_test]
 fn registries_index_relative_url() {
     registry::alt_init();
-    let config = paths::root().join(".cargo/config");
+    let config = paths::root().join(".corgi/config");
     fs::create_dir_all(config.parent().unwrap()).unwrap();
     fs::write(
         &config,
@@ -1247,7 +1247,7 @@ fn registries_index_relative_url() {
 #[cargo_test]
 fn registries_index_relative_path_not_allowed() {
     registry::alt_init();
-    let config = paths::root().join(".cargo/config");
+    let config = paths::root().join(".corgi/config");
     fs::create_dir_all(config.parent().unwrap()).unwrap();
     fs::write(
         &config,
@@ -1283,7 +1283,7 @@ fn registries_index_relative_path_not_allowed() {
 error: failed to parse manifest at `{root}/foo/Cargo.toml`
 
 Caused by:
-  invalid index URL for registry `relative` defined in [..]/.cargo/config
+  invalid index URL for registry `relative` defined in [..]/.corgi/config
 
 Caused by:
   invalid url `alternative-registry`: relative URL without a base

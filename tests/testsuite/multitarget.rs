@@ -36,7 +36,7 @@ fn simple_build_with_config() {
         .file("Cargo.toml", &basic_manifest("foo", "1.0.0"))
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config.toml",
+            ".corgi/config.toml",
             &format!(
                 r#"
                     [build]
@@ -161,7 +161,7 @@ fn same_value_twice_with_config() {
         .file("Cargo.toml", &basic_manifest("foo", "1.0.0"))
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config.toml",
+            ".corgi/config.toml",
             &format!(
                 r#"
                     [build]
@@ -186,7 +186,7 @@ fn works_with_config_in_both_string_or_list() {
         .file("Cargo.toml", &basic_manifest("foo", "1.0.0"))
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config.toml",
+            ".corgi/config.toml",
             &format!(
                 r#"
                     [build]
@@ -203,7 +203,7 @@ fn works_with_config_in_both_string_or_list() {
     p.cargo("clean").run();
 
     p.change_file(
-        ".cargo/config.toml",
+        ".corgi/config.toml",
         &format!(
             r#"
                 [build]

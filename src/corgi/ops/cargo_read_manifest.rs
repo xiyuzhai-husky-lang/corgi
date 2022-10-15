@@ -89,9 +89,9 @@ pub fn read_packages(
         match errors.pop() {
             Some(err) => Err(err),
             None => {
-                if find_project_manifest_exact(path, "cargo.toml").is_ok() {
+                if find_project_manifest_exact(path, "corgi.toml").is_ok() {
                     Err(anyhow::format_err!(
-                "Could not find Cargo.toml in `{}`, but found cargo.toml please try to rename it to Cargo.toml",
+                "Could not find Cargo.toml in `{}`, but found corgi.toml please try to rename it to Cargo.toml",
                 path.display()
             ))
                 } else {

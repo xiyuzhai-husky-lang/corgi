@@ -445,7 +445,7 @@ fn decouple_dev_deps() {
 
             #[test]
             fn test_main() {
-                // Features are unified for main when run with `cargo test`,
+                // Features are unified for main when run with `corgi test`,
                 // even with the new resolver.
                 let s = std::process::Command::new("target/debug/foo")
                     .arg("3")
@@ -614,7 +614,7 @@ fn build_script_runtime_features() {
 
             #[test]
             fn test_main() {
-                // Features are unified for main when run with `cargo test`,
+                // Features are unified for main when run with `corgi test`,
                 // even with the new resolver.
                 let s = std::process::Command::new("target/debug/foo")
                     .status().unwrap();
@@ -634,7 +634,7 @@ fn build_script_runtime_features() {
     // normal + build unify
     p.cargo("run").env("CARGO_FEATURE_EXPECT", "1").run();
 
-    // dev_deps are still unified with `cargo test`
+    // dev_deps are still unified with `corgi test`
     p.cargo("test").env("CARGO_FEATURE_EXPECT", "3").run();
 }
 
@@ -1031,7 +1031,7 @@ fn decouple_proc_macro() {
         .build_dir()
         .join("doc/common/constant.FEAT_ONLY_CONST.html")
         .exists());
-    // cargo doc should clean in-between runs, but it doesn't, and leaves stale files.
+    // corgi doc should clean in-between runs, but it doesn't, and leaves stale files.
     // https://github.com/rust-lang/cargo/issues/6783 (same for removed items)
     p.build_dir().join("doc").rm_rf();
 
@@ -1594,7 +1594,7 @@ fn install_resolve_behavior() {
 
 #[cargo_test]
 fn package_includes_resolve_behavior() {
-    // `cargo package` will inherit the correct resolve behavior.
+    // `corgi package` will inherit the correct resolve behavior.
     let p = project()
         .file(
             "Cargo.toml",
@@ -1646,7 +1646,7 @@ resolver = "2"
 
 #[cargo_test]
 fn tree_all() {
-    // `cargo tree` with the new feature resolver.
+    // `corgi tree` with the new feature resolver.
     Package::new("log", "0.4.8").feature("serde", &[]).publish();
     let p = project()
         .file(
@@ -1748,8 +1748,8 @@ fn shared_dep_same_but_dependencies() {
             "subdep/src/lib.rs",
             r#"
                 pub fn feat_func() {
-                    #[cfg(feature = "feat")] println!("cargo:warning=feat: enabled");
-                    #[cfg(not(feature = "feat"))] println!("cargo:warning=feat: not enabled");
+                    #[cfg(feature = "feat")] println!("corgi:warning=feat: enabled");
+                    #[cfg(not(feature = "feat"))] println!("corgi:warning=feat: not enabled");
                 }
             "#,
         )
@@ -1769,7 +1769,7 @@ warning: feat: enabled
         )
         .run();
     p.process(p.bin("bin1"))
-        .with_stdout("cargo:warning=feat: not enabled")
+        .with_stdout("corgi:warning=feat: not enabled")
         .run();
 
     // Make sure everything stays cached.
@@ -1789,7 +1789,7 @@ warning: feat: enabled
 
 #[cargo_test]
 fn test_proc_macro() {
-    // Running `cargo test` on a proc-macro, with a shared dependency that has
+    // Running `corgi test` on a proc-macro, with a shared dependency that has
     // different features.
     //
     // There was a bug where `shared` was built twice (once with feature "B"
@@ -1871,7 +1871,7 @@ fn test_proc_macro() {
 
 #[cargo_test]
 fn doc_optional() {
-    // Checks for a bug where `cargo doc` was failing with an inactive target
+    // Checks for a bug where `corgi doc` was failing with an inactive target
     // that enables a shared optional dependency.
     Package::new("spin", "1.0.0").publish();
     Package::new("bar", "1.0.0")
@@ -1927,11 +1927,11 @@ fn minimal_download() {
     // independently. However, there are some cases where they do behave
     // independently. Specifically:
     //
-    // * `cargo test` forces dev_dep decoupling to be disabled.
-    // * `cargo tree --target=all` forces ignore_inactive_targets off and decouple_dev_deps off.
-    // * `cargo tree --target=all -e normal` forces ignore_inactive_targets off.
+    // * `corgi test` forces dev_dep decoupling to be disabled.
+    // * `corgi tree --target=all` forces ignore_inactive_targets off and decouple_dev_deps off.
+    // * `corgi tree --target=all -e normal` forces ignore_inactive_targets off.
     //
-    // However, `cargo tree` is a little weird because it downloads everything
+    // However, `corgi tree` is a little weird because it downloads everything
     // anyways.
     //
     // So to summarize the different permutations:
@@ -1940,14 +1940,14 @@ fn minimal_download() {
     // --------|----------|---------|----------------------------
     //         |          |         | -Zfeatures=compare (new resolver should behave same as old)
     //         |          |    ✓    | This scenario should not happen.
-    //         |     ✓    |         | `cargo tree --target=all -Zfeatures=all`†
-    //         |     ✓    |    ✓    | `cargo test`
+    //         |     ✓    |         | `corgi tree --target=all -Zfeatures=all`†
+    //         |     ✓    |    ✓    | `corgi test`
     //    ✓    |          |         | This scenario should not happen.
     //    ✓    |          |    ✓    | This scenario should not happen.
-    //    ✓    |     ✓    |         | `cargo tree --target=all -e normal -Z features=all`†
+    //    ✓    |     ✓    |         | `corgi tree --target=all -e normal -Z features=all`†
     //    ✓    |     ✓    |    ✓    | A normal build.
     //
-    // † — However, `cargo tree` downloads everything.
+    // † — However, `corgi tree` downloads everything.
     Package::new("normal", "1.0.0").publish();
     Package::new("normal_pm", "1.0.0").publish();
     Package::new("normal_opt", "1.0.0").publish();
@@ -2373,7 +2373,7 @@ foo v0.1.0 [..]
     p.change_file(
         "Cargo.toml",
         r#"
-            cargo-features = ["edition2021"]
+            corgi-features = ["edition2021"]
 
             [package]
             name = "foo"

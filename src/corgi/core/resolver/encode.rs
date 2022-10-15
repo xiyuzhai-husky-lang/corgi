@@ -107,7 +107,7 @@
 //!   really recommended to use this.
 //!
 //! * The actual literal on-disk serialiation is found in
-//!   `src/cargo/ops/lockfile.rs` which basically renders a `toml::Value` in a
+//!   `src/corgi/ops/lockfile.rs` which basically renders a `toml::Value` in a
 //!   special fashion to make sure we have strict control over the on-disk
 //!   format.
 
@@ -372,10 +372,10 @@ impl EncodableResolve {
         // Cargo is trying to write new lockfies in the "v2 format" but if you
         // have no dependencies, for example, then the lockfile encoded won't
         // really have any indicator that it's in the new format (no
-        // dependencies or checksums listed). This means that if you type `cargo
-        // new` followed by `cargo build` it will generate a "v2 format" lock
+        // dependencies or checksums listed). This means that if you type `corgi
+        // new` followed by `corgi build` it will generate a "v2 format" lock
         // file since none previously existed. When reading this on the next
-        // `cargo build`, however, it generates a new lock file because when
+        // `corgi build`, however, it generates a new lock file because when
         // reading in that lockfile we think it's the v1 format.
         //
         // To help fix this issue we special case here. If our lockfile only has
@@ -404,7 +404,7 @@ impl EncodableResolve {
 
 fn build_path_deps(ws: &Workspace<'_>) -> CorgiResult<HashMap<String, SourceId>> {
     // If a crate is **not** a path source, then we're probably in a situation
-    // such as `cargo install` with a lock file from a remote dependency. In
+    // such as `corgi install` with a lock file from a remote dependency. In
     // that case we don't need to fixup any path dependencies (as they're not
     // actually path dependencies any more), so we ignore them.
     let members = ws

@@ -21,7 +21,7 @@ fn gated() {
 
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [registry]
                 credential-process = "false"
@@ -37,13 +37,13 @@ fn gated() {
         .with_stderr(
             "\
 [UPDATING] [..]
-[ERROR] no upload token found, please run `cargo login` or pass `--token`
+[ERROR] no upload token found, please run `corgi login` or pass `--token`
 ",
         )
         .run();
 
     p.change_file(
-        ".cargo/config",
+        ".corgi/config",
         r#"
             [registry.alternative]
             credential-process = "false"
@@ -56,7 +56,7 @@ fn gated() {
         .with_stderr(
             "\
 [UPDATING] [..]
-[ERROR] no upload token found, please run `cargo login` or pass `--token`
+[ERROR] no upload token found, please run `corgi login` or pass `--token`
 ",
         )
         .run();
@@ -71,7 +71,7 @@ fn warn_both_token_and_process() {
         .build();
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [registries.alternative]
                 token = "sekrit"
@@ -108,7 +108,7 @@ Only one of these values may be set, remove one or the other to proceed.
     // Try with global credential-process, and registry-specific `token`.
     // This should silently use the config token, and not run the "false" exe.
     p.change_file(
-        ".cargo/config",
+        ".corgi/config",
         r#"
             [registry]
             credential-process = "false"
@@ -158,7 +158,7 @@ fn get_token_test() -> (Project, TestRegistry) {
 
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [registries.alternative]
@@ -188,7 +188,7 @@ fn get_token_test() -> (Project, TestRegistry) {
 
 #[cargo_test]
 fn publish() {
-    // Checks that credential-process is used for `cargo publish`.
+    // Checks that credential-process is used for `corgi publish`.
     let (p, _t) = get_token_test();
 
     p.cargo("publish --no-verify --registry alternative -Z credential-process")
@@ -210,7 +210,7 @@ fn basic_unsupported() {
         .no_configure_token()
         .build();
     cargo_util::paths::append(
-        &paths::home().join(".cargo/config"),
+        &paths::home().join(".corgi/config"),
         br#"
             [registry]
             credential-process = "false"
@@ -232,7 +232,7 @@ the credential-process configuration value must pass the \
         .run();
 
     cargo_process("logout -Z credential-process")
-        .masquerade_as_nightly_cargo(&["credential-process", "cargo-logout"])
+        .masquerade_as_nightly_cargo(&["credential-process", "corgi-logout"])
         .with_status(101)
         .with_stderr(
             "\
@@ -274,7 +274,7 @@ fn login() {
     cred_proj.cargo("build").run();
 
     cargo_util::paths::append(
-        &paths::home().join(".cargo/config"),
+        &paths::home().join(".corgi/config"),
         format!(
             r#"
                 [registry]
@@ -328,7 +328,7 @@ fn logout() {
     cred_proj.cargo("build").run();
 
     cargo_util::paths::append(
-        &paths::home().join(".cargo/config"),
+        &paths::home().join(".corgi/config"),
         format!(
             r#"
                 [registry]
@@ -341,7 +341,7 @@ fn logout() {
     .unwrap();
 
     cargo_process("logout -Z credential-process")
-        .masquerade_as_nightly_cargo(&["credential-process", "cargo-logout"])
+        .masquerade_as_nightly_cargo(&["credential-process", "corgi-logout"])
         .with_stderr(
             "\
 [UPDATING] [..]
@@ -388,15 +388,15 @@ fn owner() {
 
 #[cargo_test]
 fn libexec_path() {
-    // cargo: prefixed names use the sysroot
+    // corgi: prefixed names use the sysroot
     let _server = registry::RegistryBuilder::new()
         .no_configure_token()
         .build();
     cargo_util::paths::append(
-        &paths::home().join(".cargo/config"),
+        &paths::home().join(".corgi/config"),
         br#"
             [registry]
-            credential-process = "cargo:doesnotexist"
+            credential-process = "corgi:doesnotexist"
         "#,
     )
     .unwrap();
@@ -410,7 +410,7 @@ fn libexec_path() {
             // error messages.
             &format!("\
 [UPDATING] [..]
-[ERROR] failed to execute `[..]libexec/cargo-credential-doesnotexist[EXE]` to store authentication token for registry `crates-io`
+[ERROR] failed to execute `[..]libexec/corgi-credential-doesnotexist[EXE]` to store authentication token for registry `crates-io`
 
 Caused by:
   [..]
@@ -434,7 +434,7 @@ fn invalid_token_output() {
     cred_proj.cargo("build").run();
 
     cargo_util::paths::append(
-        &paths::home().join(".cargo/config"),
+        &paths::home().join(".corgi/config"),
         format!(
             r#"
                 [registry]

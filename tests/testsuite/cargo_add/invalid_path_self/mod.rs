@@ -14,7 +14,7 @@ fn invalid_path_self() {
 
     snapbox::cmd::Command::cargo_ui()
         .arg("add")
-        .arg_line("cargo-list-test-fixture --path .")
+        .arg_line("corgi-list-test-fixture --path .")
         .current_dir(cwd)
         .assert()
         .code(101)

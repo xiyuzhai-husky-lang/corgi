@@ -69,8 +69,8 @@ impl<'cfg, 'a> InstallablePackage<'cfg, 'a> {
             if name == "." {
                 bail!(
                     "To install the binaries for the package in current working \
-                     directory use `cargo install --path .`. \
-                     Use `cargo build` if you want to simply build the package."
+                     directory use `corgi install --path .`. \
+                     Use `corgi build` if you want to simply build the package."
                 )
             }
         }
@@ -121,7 +121,7 @@ impl<'cfg, 'a> InstallablePackage<'cfg, 'a> {
                         );
                     } else if src.path().join("cargo.toml").exists() {
                         bail!(
-                            "`{}` does not contain a Cargo.toml file, but found cargo.toml please try to rename it to Cargo.toml. \
+                            "`{}` does not contain a Cargo.toml file, but found corgi.toml please try to rename it to Cargo.toml. \
                      --path must point to a directory containing a Cargo.toml file.",
                             src.path().display()
                         )
@@ -187,28 +187,28 @@ impl<'cfg, 'a> InstallablePackage<'cfg, 'a> {
         if from_cwd {
             if pkg.manifest().edition() == Edition::Edition2015 {
                 config.shell().warn(
-                    "Using `cargo install` to install the binaries for the \
+                    "Using `corgi install` to install the binaries for the \
                      package in current working directory is deprecated, \
-                     use `cargo install --path .` instead. \
-                     Use `cargo build` if you want to simply build the package.",
+                     use `corgi install --path .` instead. \
+                     Use `corgi build` if you want to simply build the package.",
                 )?
             } else {
                 bail!(
-                    "Using `cargo install` to install the binaries for the \
+                    "Using `corgi install` to install the binaries for the \
                      package in current working directory is no longer supported, \
-                     use `cargo install --path .` instead. \
-                     Use `cargo build` if you want to simply build the package."
+                     use `corgi install --path .` instead. \
+                     Use `corgi build` if you want to simply build the package."
                 )
             }
         };
 
-        // For bare `cargo install` (no `--bin` or `--example`), check if there is
+        // For bare `corgi install` (no `--bin` or `--example`), check if there is
         // *something* to install. Explicit `--bin` or `--example` flags will be
         // checked at the start of `compile_ws`.
         if !opts.filter.is_specific() && !pkg.targets().iter().any(|t| t.is_bin()) {
             bail!(
                 "there is nothing to install in `{}`, because it has no binaries\n\
-                 `cargo install` is only for installing programs, and can't be used with libraries.\n\
+                 `corgi install` is only for installing programs, and can't be used with libraries.\n\
                  To use a library crate, add it as a dependency in a Cargo project instead.",
                 pkg
             );
@@ -283,7 +283,7 @@ impl<'cfg, 'a> InstallablePackage<'cfg, 'a> {
         if !self.source_id.is_path() {
             let target_dir = if let Some(dir) = self.config.target_dir()? {
                 dir
-            } else if let Ok(td) = TempFileBuilder::new().prefix("cargo-install").tempdir() {
+            } else if let Ok(td) = TempFileBuilder::new().prefix("corgi-install").tempdir() {
                 let p = td.path().to_owned();
                 td_opt = Some(td);
                 Filesystem::new(p)
@@ -385,7 +385,7 @@ impl<'cfg, 'a> InstallablePackage<'cfg, 'a> {
         // some failure modes (e.g., out of space) before touching the existing
         // binaries. This directory will get cleaned up via RAII.
         let staging_dir = TempFileBuilder::new()
-            .prefix("cargo-install")
+            .prefix("corgi-install")
             .tempdir_in(&dst)?;
         for &(bin, src) in binaries.iter() {
             let dst = staging_dir.path().join(bin);

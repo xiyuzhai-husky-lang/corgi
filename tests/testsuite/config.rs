@@ -135,7 +135,7 @@ fn read_env_vars_for_config() {
 }
 
 pub fn write_config(config: &str) {
-    write_config_at(paths::root().join(".cargo/config"), config);
+    write_config_at(paths::root().join(".corgi/config"), config);
 }
 
 pub fn write_config_at(path: impl AsRef<Path>, contents: &str) {
@@ -145,7 +145,7 @@ pub fn write_config_at(path: impl AsRef<Path>, contents: &str) {
 }
 
 pub fn write_config_toml(config: &str) {
-    write_config_at(paths::root().join(".cargo/config.toml"), config);
+    write_config_at(paths::root().join(".corgi/config.toml"), config);
 }
 
 #[cfg(unix)]
@@ -159,8 +159,8 @@ fn symlink_file(target: &Path, link: &Path) -> io::Result<()> {
 }
 
 fn symlink_config_to_config_toml() {
-    let toml_path = paths::root().join(".cargo/config.toml");
-    let symlink_path = paths::root().join(".cargo/config");
+    let toml_path = paths::root().join(".corgi/config.toml");
+    let symlink_path = paths::root().join(".corgi/config");
     t!(symlink_file(&toml_path, &symlink_path));
 }
 
@@ -276,7 +276,7 @@ f1 = 2
     // But it also should have warned.
     let output = read_output(config);
     let expected = "\
-warning: Both `[..]/.cargo/config` and `[..]/.cargo/config.toml` exist. Using `[..]/.cargo/config`
+warning: Both `[..]/.corgi/config` and `[..]/.corgi/config.toml` exist. Using `[..]/.corgi/config`
 ";
     assert_match(expected, &output);
 }
@@ -310,7 +310,7 @@ unused = 456
     // Verify the warnings.
     let output = read_output(config);
     let expected = "\
-warning: unused config key `S.unused` in `[..]/.cargo/config`
+warning: unused config key `S.unused` in `[..]/.corgi/config`
 ";
     assert_match(expected, &output);
 }
@@ -495,10 +495,10 @@ Caused by:
     assert_error(
         config.unwrap_err(),
         "\
-failed to merge --config key `a` into `[..]/.cargo/config`
+failed to merge --config key `a` into `[..]/.corgi/config`
 
 Caused by:
-  failed to merge config value from `--config cli option` into `[..]/.cargo/config`: \
+  failed to merge config value from `--config cli option` into `[..]/.corgi/config`: \
 expected boolean, but found array",
     );
 
@@ -544,7 +544,7 @@ opt-level = 'foo'
     assert_error(
         config.get::<toml::TomlProfile>("profile.dev").unwrap_err(),
         "\
-error in [..]/.cargo/config: could not load config key `profile.dev.opt-level`
+error in [..]/.corgi/config: could not load config key `profile.dev.opt-level`
 
 Caused by:
   must be `0`, `1`, `2`, `3`, `s` or `z`, but found the string: \"foo\"",
@@ -626,12 +626,12 @@ big = 123456789
     );
     assert_error(
         config.get::<i64>("S.f2").unwrap_err(),
-        "error in [..]/.cargo/config: `S.f2` expected an integer, but found a string",
+        "error in [..]/.corgi/config: `S.f2` expected an integer, but found a string",
     );
     assert_error(
         config.get::<u8>("S.big").unwrap_err(),
         "\
-error in [..].cargo/config: could not load config key `S.big`
+error in [..].corgi/config: could not load config key `S.big`
 
 Caused by:
   invalid value: integer `123456789`, expected u8",
@@ -690,7 +690,7 @@ fn config_bad_toml() {
 could not load Cargo configuration
 
 Caused by:
-  could not parse TOML configuration in `[..]/.cargo/config`
+  could not parse TOML configuration in `[..]/.corgi/config`
 
 Caused by:
   could not parse input as TOML
@@ -748,7 +748,7 @@ l = ['y']
         config.get::<L>("l3").unwrap_err(),
         "\
 invalid configuration for key `l3`
-expected a list, but found a integer for `l3` in [..]/.cargo/config",
+expected a list, but found a integer for `l3` in [..]/.corgi/config",
     );
     assert_eq!(
         config.get::<L>("l4").unwrap(),
@@ -944,7 +944,7 @@ i64max = 9223372036854775807
     assert_error(
         config.get::<u32>("nneg").unwrap_err(),
         "\
-error in [..].cargo/config: could not load config key `nneg`
+error in [..].corgi/config: could not load config key `nneg`
 
 Caused by:
   invalid value: integer `-123456789`, expected u32",
@@ -960,7 +960,7 @@ Caused by:
     assert_error(
         config.get::<i8>("npos").unwrap_err(),
         "\
-error in [..].cargo/config: could not load config key `npos`
+error in [..].corgi/config: could not load config key `npos`
 
 Caused by:
   invalid value: integer `123456789`, expected i8",
@@ -1060,7 +1060,7 @@ ssl-version.max = 'tlsv1.3'
 could not load Cargo configuration
 
 Caused by:
-  could not parse TOML configuration in `[..]/.cargo/config`
+  could not parse TOML configuration in `[..]/.corgi/config`
 
 Caused by:
   could not parse input as TOML
@@ -1078,7 +1078,7 @@ Dotted key `ssl-version` attempted to extend non-table type (string)
 
 #[cargo_test]
 /// Assert that unstable options can be configured with the `unstable` table in
-/// cargo config files
+/// corgi config files
 fn unstable_table_notation() {
     write_config(
         "\
@@ -1133,7 +1133,7 @@ unstable.an-invalid-flag = 'yes'
 
 #[cargo_test]
 /// Assert that unstable options can be configured with the `unstable` table in
-/// cargo config files
+/// corgi config files
 fn unstable_flags_ignored_on_stable() {
     write_config(
         "\
@@ -1150,14 +1150,14 @@ print-im-a-teapot = true
 fn table_merge_failure() {
     // Config::merge fails to merge entries in two tables.
     write_config_at(
-        "foo/.cargo/config",
+        "foo/.corgi/config",
         "
         [table]
         key = ['foo']
         ",
     );
     write_config_at(
-        ".cargo/config",
+        ".corgi/config",
         "
         [table]
         key = 'bar'
@@ -1176,16 +1176,16 @@ fn table_merge_failure() {
 could not load Cargo configuration
 
 Caused by:
-  failed to merge configuration at `[..]/.cargo/config`
+  failed to merge configuration at `[..]/.corgi/config`
 
 Caused by:
-  failed to merge key `table` between [..]/foo/.cargo/config and [..]/.cargo/config
+  failed to merge key `table` between [..]/foo/.corgi/config and [..]/.corgi/config
 
 Caused by:
-  failed to merge key `key` between [..]/foo/.cargo/config and [..]/.cargo/config
+  failed to merge key `key` between [..]/foo/.corgi/config and [..]/.corgi/config
 
 Caused by:
-  failed to merge config value from `[..]/.cargo/config` into `[..]/foo/.cargo/config`: \
+  failed to merge config value from `[..]/.corgi/config` into `[..]/foo/.corgi/config`: \
   expected array, but found string",
     );
 }
@@ -1201,7 +1201,7 @@ fn non_string_in_array() {
 could not load Cargo configuration
 
 Caused by:
-  failed to load TOML configuration from `[..]/.cargo/config`
+  failed to load TOML configuration from `[..]/.corgi/config`
 
 Caused by:
   failed to parse key `foo`
@@ -1401,7 +1401,7 @@ fn string_list_wrong_type() {
         config.get::<StringList>("some_list").unwrap_err(),
         "\
 invalid configuration for key `some_list`
-expected a string or array of strings, but found a integer for `some_list` in [..]/.cargo/config",
+expected a string or array of strings, but found a integer for `some_list` in [..]/.corgi/config",
     );
 
     write_config("some_list = \"1 2\"");
@@ -1458,7 +1458,7 @@ target-dir = ''
 
     assert_error(
         config.target_dir().unwrap_err(),
-        "the target directory is set to an empty string in [..]/.cargo/config",
+        "the target directory is set to an empty string in [..]/.corgi/config",
     );
 }
 

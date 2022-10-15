@@ -502,7 +502,7 @@ bar v1.0.0
         .run();
 
     // This is a little strange in that it produces no output.
-    // Maybe `cargo tree` should print a note about why?
+    // Maybe `corgi tree` should print a note about why?
     p.cargo("tree -e features -i bar --features bar?/feat")
         .with_stdout("")
         .run();

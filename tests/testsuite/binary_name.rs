@@ -22,7 +22,7 @@ fn gated() {
         .file("src/main.rs", "fn main() { assert!(true) }")
         .build();
 
-    // Run cargo build.
+    // Run corgi build.
     p.cargo("build")
         .masquerade_as_nightly_cargo(&["different-binary-name"])
         .with_status(101)
@@ -35,14 +35,14 @@ fn gated() {
 // 1. The correct binary is produced
 // 2. The deps file has the correct content
 // 3. Fingerprinting works
-// 4. `cargo clean` command works
+// 4. `corgi clean` command works
 fn binary_name1() {
     // Create the project.
     let p = project()
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["different-binary-name"]
+                corgi-features = ["different-binary-name"]
 
                 [project]
                 name =  "foo"
@@ -57,12 +57,12 @@ fn binary_name1() {
         .file("src/main.rs", "fn main() { assert!(true) }")
         .build();
 
-    // Run cargo build.
+    // Run corgi build.
     p.cargo("build")
         .masquerade_as_nightly_cargo(&["different-binary-name"])
         .run();
 
-    // Check the name of the binary that cargo has generated.
+    // Check the name of the binary that corgi has generated.
     // A binary with the name of the crate should NOT be created.
     let foo_path = p.bin("foo");
     assert!(!foo_path.is_file());
@@ -90,7 +90,7 @@ fn binary_name1() {
         deps_path.to_string_lossy()
     );
 
-    // Run cargo second time, to verify fingerprint.
+    // Run corgi second time, to verify fingerprint.
     p.cargo("build -p foo -v")
         .masquerade_as_nightly_cargo(&["different-binary-name"])
         .with_stderr(
@@ -101,7 +101,7 @@ fn binary_name1() {
         )
         .run();
 
-    // Run cargo clean.
+    // Run corgi clean.
     p.cargo("clean -p foo")
         .masquerade_as_nightly_cargo(&["different-binary-name"])
         .run();
@@ -109,22 +109,22 @@ fn binary_name1() {
     // Check if the appropriate file was removed.
     assert!(
         !bar_path.is_file(),
-        "`cargo clean` did not remove the correct files"
+        "`corgi clean` did not remove the correct files"
     );
 }
 
 #[cargo_test]
 // This test checks if:
-// 1. Check `cargo run`
-// 2. Check `cargo test`
-// 3. Check `cargo install/uninstall`
+// 1. Check `corgi run`
+// 2. Check `corgi test`
+// 3. Check `corgi install/uninstall`
 fn binary_name2() {
     // Create the project.
     let p = project()
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["different-binary-name"]
+                corgi-features = ["different-binary-name"]
 
                 [project]
                 name =  "foo"
@@ -159,12 +159,12 @@ fn binary_name2() {
         )
         .build();
 
-    // Run cargo build.
+    // Run corgi build.
     p.cargo("build")
         .masquerade_as_nightly_cargo(&["different-binary-name"])
         .run();
 
-    // Check the name of the binary that cargo has generated.
+    // Check the name of the binary that corgi has generated.
     // A binary with the name of the crate should NOT be created.
     let foo_path = p.bin("foo");
     assert!(!foo_path.is_file());
@@ -172,7 +172,7 @@ fn binary_name2() {
     let bar_path = p.bin("007bar");
     assert!(bar_path.is_file());
 
-    // Check if `cargo test` works
+    // Check if `corgi test` works
     p.cargo("test")
         .masquerade_as_nightly_cargo(&["different-binary-name"])
         .with_stderr(
@@ -184,7 +184,7 @@ fn binary_name2() {
         .with_stdout_contains("test tests::check_crabs ... ok")
         .run();
 
-    // Check if `cargo run` is able to execute the binary
+    // Check if `corgi run` is able to execute the binary
     p.cargo("run")
         .masquerade_as_nightly_cargo(&["different-binary-name"])
         .with_stdout("Hello, crabs!")
@@ -197,7 +197,7 @@ fn binary_name2() {
     assert_has_installed_exe(cargo_home(), "007bar");
 
     p.cargo("uninstall")
-        .with_stderr("[REMOVING] [ROOT]/home/.cargo/bin/007bar[EXE]")
+        .with_stderr("[REMOVING] [ROOT]/home/.corgi/bin/007bar[EXE]")
         .masquerade_as_nightly_cargo(&["different-binary-name"])
         .run();
 
@@ -210,7 +210,7 @@ fn check_env_vars() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["different-binary-name"]
+                corgi-features = ["different-binary-name"]
 
                 [project]
                 name =  "foo"
@@ -241,7 +241,7 @@ fn check_env_vars() {
         )
         .build();
 
-    // Run cargo build.
+    // Run corgi build.
     p.cargo("build")
         .masquerade_as_nightly_cargo(&["different-binary-name"])
         .run();
@@ -262,7 +262,7 @@ fn check_msg_format_json() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["different-binary-name"]
+                corgi-features = ["different-binary-name"]
 
                 [project]
                 name =  "foo"
@@ -293,7 +293,7 @@ fn check_msg_format_json() {
 {"reason":"build-finished", "success":true}
 "#;
 
-    // Run cargo build.
+    // Run corgi build.
     p.cargo("build --message-format=json")
         .masquerade_as_nightly_cargo(&["different-binary-name"])
         .with_json(output)

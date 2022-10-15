@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 /// Finds the root `Cargo.toml`.
 pub fn find_root_manifest_for_wd(cwd: &Path) -> CorgiResult<PathBuf> {
     let valid_corgi_toml_file_name = "Cargo.toml";
-    let invalid_corgi_toml_file_name = "cargo.toml";
+    let invalid_corgi_toml_file_name = "corgi.toml";
     let mut invalid_corgi_toml_path_exists = false;
 
     for current in paths::ancestors(cwd, None) {
@@ -20,7 +20,7 @@ pub fn find_root_manifest_for_wd(cwd: &Path) -> CorgiResult<PathBuf> {
 
     if invalid_corgi_toml_path_exists {
         anyhow::bail!(
-        "could not find `{}` in `{}` or any parent directory, but found cargo.toml please try to rename it to Cargo.toml",
+        "could not find `{}` in `{}` or any parent directory, but found corgi.toml please try to rename it to Cargo.toml",
         valid_corgi_toml_file_name,
         cwd.display()
     )

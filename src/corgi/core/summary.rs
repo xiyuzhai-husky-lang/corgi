@@ -398,7 +398,7 @@ fn validate_feature_name(config: &Config, pkg_id: PackageId, name: &str) -> Corg
     let mut chars = name.chars();
     const FUTURE: &str = "This was previously accepted but is being phased out; \
         it will become a hard error in a future release.\n\
-        For more information, see issue #8813 <https://github.com/rust-lang/cargo/issues/8813>, \
+        For more information, see issue #8813 <https://github.com/rust-lang/corgi/issues/8813>, \
         and please leave a comment if this will be a problem for your project.";
     if let Some(ch) = chars.next() {
         if !(unicode_xid::UnicodeXID::is_xid_start(ch) || ch == '_' || ch.is_digit(10)) {

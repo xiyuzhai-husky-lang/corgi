@@ -240,7 +240,7 @@ pub trait CommandExt: Sized {
     }
 
     fn arg_quiet(self) -> Self {
-        self._arg(flag("quiet", "Do not print cargo log messages").short('q'))
+        self._arg(flag("quiet", "Do not print corgi log messages").short('q'))
     }
 
     fn arg_timings(self) -> Self {
@@ -303,10 +303,10 @@ pub fn subcommand(name: &'static str) -> Command {
 
 /// Determines whether or not to gate `--profile` as unstable when resolving it.
 pub enum ProfileChecking {
-    /// `cargo rustc` historically has allowed "test", "bench", and "check". This
+    /// `corgi rustc` historically has allowed "test", "bench", and "check". This
     /// variant explicitly allows those.
     LegacyRustc,
-    /// `cargo check` and `cargo fix` historically has allowed "test". This variant
+    /// `corgi check` and `corgi fix` historically has allowed "test". This variant
     /// explicitly allows that on stable.
     LegacyTestOnly,
     /// All other commands, which allow any valid custom named profile.
@@ -404,9 +404,9 @@ pub trait ArgMatchesExt {
         // Check for allowed legacy names.
         // This is an early exit, since it allows combination with `--release`.
         match (specified_profile, profile_checking) {
-            // `cargo rustc` has legacy handling of these names
+            // `corgi rustc` has legacy handling of these names
             (Some(name @ ("dev" | "test" | "bench" | "check")), ProfileChecking::LegacyRustc)
-            // `cargo fix` and `cargo check` has legacy handling of this profile name
+            // `corgi fix` and `corgi check` has legacy handling of this profile name
             | (Some(name @ "test"), ProfileChecking::LegacyTestOnly) => {
                 if self.flag("release") {
                     config.shell().warn(
@@ -617,12 +617,12 @@ pub trait ArgMatchesExt {
         if let Some(ws) = workspace {
             self.check_optional_opts(ws, &opts)?;
         } else if self.is_present_with_zero_values("package") {
-            // As for cargo 0.50.0, this won't occur but if someone sneaks in
+            // As for corgi 0.50.0, this won't occur but if someone sneaks in
             // we can still provide this informative message for them.
             anyhow::bail!(
                 "\"--package <SPEC>\" requires a SPEC format value, \
                 which can be any package ID specifier in the dependency graph.\n\
-                Run `cargo help pkgid` for more information about SPEC format."
+                Run `corgi help pkgid` for more information about SPEC format."
             )
         }
 
@@ -680,7 +680,7 @@ pub trait ArgMatchesExt {
 
                 if registry == CRATES_IO_REGISTRY {
                     // If "crates.io" is specified, then we just need to return `None`,
-                    // as that will cause cargo to use crates.io. This is required
+                    // as that will cause corgi to use crates.io. This is required
                     // for the case where a default alternative registry is used
                     // but the user wants to switch back to crates.io for a single
                     // command.

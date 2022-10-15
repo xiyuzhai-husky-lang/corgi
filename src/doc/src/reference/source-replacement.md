@@ -42,7 +42,7 @@ and the full set of available keys are:
 # Under the `source` table are a number of other tables whose keys are a
 # name for the relevant source. For example this section defines a new
 # source, called `my-vendor-source`, which comes from a directory
-# located at `vendor` relative to the directory containing this `.cargo/config.toml`
+# located at `vendor` relative to the directory containing this `.corgi/config.toml`
 # file
 [source.my-vendor-source]
 directory = "vendor"

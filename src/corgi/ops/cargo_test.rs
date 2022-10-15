@@ -294,7 +294,7 @@ fn run_doc_tests(
 
 /// Displays human-readable descriptions of the test executables.
 ///
-/// This is used when `cargo test --no-run` is used.
+/// This is used when `corgi test --no-run` is used.
 fn display_no_run_information(
     ws: &Workspace<'_>,
     test_args: &[&str],

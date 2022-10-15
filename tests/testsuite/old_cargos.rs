@@ -7,7 +7,7 @@
 //! tested 1.0 to 1.51. Run this with:
 //!
 //! ```console
-//! cargo test --test testsuite -- old_cargos --nocapture --ignored
+//! corgi test --test testsuite -- old_cargos --nocapture --ignored
 //! ```
 
 use cargo_test_support::paths::CargoPathExt;
@@ -20,7 +20,7 @@ use std::fs;
 
 fn tc_process(cmd: &str, toolchain: &str) -> ProcessBuilder {
     let mut p = if toolchain == "this" {
-        if cmd == "cargo" {
+        if cmd == "corgi" {
             process(&cargo_exe())
         } else {
             process(cmd)
@@ -100,7 +100,7 @@ fn default_toolchain_is_stable() -> bool {
     }
 }
 
-// This is a test for exercising the behavior of older versions of cargo with
+// This is a test for exercising the behavior of older versions of corgi with
 // the new feature syntax.
 //
 // The test involves a few dependencies with different feature requirements:
@@ -110,7 +110,7 @@ fn default_toolchain_is_stable() -> bool {
 //   The optional dependency `new-baz-dep` should not be activated.
 // * `bar` 1.0.2 has a dependency on `baz` that *requires* the new feature
 //   syntax.
-#[ignore = "must be run manually, requires old cargo installations"]
+#[ignore = "must be run manually, requires old corgi installations"]
 #[cargo_test]
 fn new_features() {
     let registry = registry::init();
@@ -291,7 +291,7 @@ fn new_features() {
 
     let toolchains = collect_all_toolchains();
 
-    let config_path = paths::home().join(".cargo/config");
+    let config_path = paths::home().join(".corgi/config");
     let lock_path = p.root().join("Cargo.lock");
 
     struct ToolchainBehavior {
@@ -339,7 +339,7 @@ fn new_features() {
 
         // Fetches the version of a package in the lock file.
         let pkg_version = |pkg| -> Option<Version> {
-            let output = tc_process("cargo", toolchain)
+            let output = tc_process("corgi", toolchain)
                 .args(&["pkgid", pkg])
                 .cwd(p.root())
                 .exec_with_output()
@@ -353,9 +353,9 @@ fn new_features() {
             Some(Version::parse(version).expect("parseable version"))
         };
 
-        // Runs `cargo build` and returns the versions selected in the lock.
+        // Runs `corgi build` and returns the versions selected in the lock.
         let run_cargo = || -> CorgiResult<ToolchainBehavior> {
-            match tc_process("cargo", toolchain)
+            match tc_process("corgi", toolchain)
                 .args(&["build", "--verbose"])
                 .cwd(p.root())
                 .exec_with_output()
@@ -534,13 +534,13 @@ fn new_features() {
 }
 
 #[cargo_test]
-#[ignore = "must be run manually, requires old cargo installations"]
+#[ignore = "must be run manually, requires old corgi installations"]
 fn index_cache_rebuild() {
     // Checks that the index cache gets rebuilt.
     //
     // 1.48 will not cache entries with features with the same name as a
     // dependency. If the cache does not get rebuilt, then running with
-    // `-Znamespaced-features` would prevent the new cargo from seeing those
+    // `-Znamespaced-features` would prevent the new corgi from seeing those
     // entries. The index cache version was changed to prevent this from
     // happening, and switching between versions should work correctly
     // (although it will thrash the cash, that's better than not working
@@ -570,7 +570,7 @@ fn index_cache_rebuild() {
     // This version of Cargo errors on index entries that have overlapping
     // feature names, so 1.0.1 will be missing.
     execs()
-        .with_process_builder(tc_process("cargo", "1.48.0"))
+        .with_process_builder(tc_process("corgi", "1.48.0"))
         .arg("check")
         .cwd(p.root())
         .with_stderr(
@@ -605,7 +605,7 @@ fn index_cache_rebuild() {
 
     // Verify 1.48 can still resolve, and is at 1.0.0.
     execs()
-        .with_process_builder(tc_process("cargo", "1.48.0"))
+        .with_process_builder(tc_process("corgi", "1.48.0"))
         .arg("tree")
         .cwd(p.root())
         .with_stdout(
@@ -618,7 +618,7 @@ foo v0.1.0 [..]
 }
 
 #[cargo_test]
-#[ignore = "must be run manually, requires old cargo installations"]
+#[ignore = "must be run manually, requires old corgi installations"]
 fn avoids_split_debuginfo_collision() {
     // Test needs two different toolchains.
     // If the default toolchain is stable, then it won't work.
@@ -643,7 +643,7 @@ fn avoids_split_debuginfo_collision() {
         .build();
 
     execs()
-        .with_process_builder(tc_process("cargo", "stable"))
+        .with_process_builder(tc_process("corgi", "stable"))
         .arg("build")
         .env("CARGO_INCREMENTAL", "1")
         .cwd(p.root())
@@ -666,7 +666,7 @@ fn avoids_split_debuginfo_collision() {
         .run();
 
     execs()
-        .with_process_builder(tc_process("cargo", "stable"))
+        .with_process_builder(tc_process("corgi", "stable"))
         .arg("build")
         .env("CARGO_INCREMENTAL", "1")
         .cwd(p.root())

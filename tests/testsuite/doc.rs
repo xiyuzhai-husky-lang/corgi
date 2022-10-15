@@ -1,4 +1,4 @@
-//! Tests for the `cargo doc` command.
+//! Tests for the `corgi doc` command.
 
 use cargo_test_support::paths::CargoPathExt;
 use cargo_test_support::registry::Package;
@@ -280,7 +280,7 @@ has the same output filename as the lib target `foo_lib` in package \
 Colliding filename is: [ROOT]/foo/target/doc/foo_lib/index.html
 The targets should have unique names.
 This is a known bug where multiple crates with the same name use
-the same path; see <https://github.com/rust-lang/cargo/issues/6313>.
+the same path; see <https://github.com/rust-lang/corgi/issues/6313>.
 [DOCUMENTING] bar v0.1.0 ([ROOT]/foo/bar)
 [DOCUMENTING] foo v0.1.0 ([ROOT]/foo/foo)
 [FINISHED] [..]
@@ -474,7 +474,7 @@ has the same output filename as the lib target `foo` in package `foo v0.0.1 ([RO
 Colliding filename is: [ROOT]/foo/target/doc/foo/index.html
 The targets should have unique names.
 This is a known bug where multiple crates with the same name use
-the same path; see <https://github.com/rust-lang/cargo/issues/6313>.
+the same path; see <https://github.com/rust-lang/corgi/issues/6313>.
 [CHECKING] foo v0.0.1 ([CWD])
 [DOCUMENTING] foo v0.0.1 ([CWD])
 [FINISHED] dev [unoptimized + debuginfo] target(s) in [..]
@@ -519,7 +519,7 @@ has the same output filename as the lib target `foo` in package `foo v0.0.1 ([RO
 Colliding filename is: [ROOT]/foo/target/doc/foo/index.html
 The targets should have unique names.
 This is a known bug where multiple crates with the same name use
-the same path; see <https://github.com/rust-lang/cargo/issues/6313>.
+the same path; see <https://github.com/rust-lang/corgi/issues/6313>.
 [CHECKING] foo v0.0.1 ([CWD])
 [DOCUMENTING] foo v0.0.1 ([CWD])
 [FINISHED] dev [unoptimized + debuginfo] target(s) in [..]
@@ -1271,7 +1271,7 @@ the lib target `bar` in package `bar v0.1.0 ([ROOT]/foo/bar)`.
 Colliding filename is: [ROOT]/foo/target/doc/bar/index.html
 The targets should have unique names.
 This is a known bug where multiple crates with the same name use
-the same path; see <https://github.com/rust-lang/cargo/issues/6313>.
+the same path; see <https://github.com/rust-lang/corgi/issues/6313>.
 [DOCUMENTING] bar v0.1.0
 [CHECKING] bar v0.1.0
 [DOCUMENTING] bar v0.1.0 [..]
@@ -1318,7 +1318,7 @@ fn doc_extern_map_local() {
             "#,
         )
         .file("src/lib.rs", "")
-        .file(".cargo/config.toml", "doc.extern-map.std = 'local'")
+        .file(".corgi/config.toml", "doc.extern-map.std = 'local'")
         .build();
 
     p.cargo("doc -v --no-deps -Zrustdoc-map --open")
@@ -1391,7 +1391,7 @@ fn doc_workspace_open_different_library_and_package_names() {
         .run();
 
     p.change_file(
-        ".cargo/config.toml",
+        ".corgi/config.toml",
         &format!(
             r#"
                 [doc]
@@ -1401,7 +1401,7 @@ fn doc_workspace_open_different_library_and_package_names() {
         ),
     );
 
-    // check that the cargo config overrides the browser env var
+    // check that the corgi config overrides the browser env var
     p.cargo("doc --open")
         .env("BROWSER", "do_not_run_me")
         .with_stdout_contains("a [CWD]/target/doc/foolib/index.html")
@@ -1526,7 +1526,7 @@ fn doc_target_edition() {
 }
 
 // Tests an issue where depending on different versions of the same crate depending on `cfg`s
-// caused `cargo doc` to fail.
+// caused `corgi doc` to fail.
 #[cargo_test]
 fn issue_5345() {
     let foo = project()
@@ -2176,7 +2176,7 @@ LLVM version: 9.0
     .expect("Error writing test bogus file");
 
     // Now if we trigger another compilation, since the fingerprint contains an old version
-    // of rustc, cargo should remove the entire `/doc` folder (including the fingerprint)
+    // of rustc, corgi should remove the entire `/doc` folder (including the fingerprint)
     // and generating another one with the actual version.
     // It should also remove the bogus file we created above.
     dummy_project.cargo("doc").run();
@@ -2262,7 +2262,7 @@ LLVM version: 9.0
     .expect("Error writing test bogus file");
 
     // Now if we trigger another compilation, since the fingerprint contains an old version
-    // of rustc, cargo should remove the entire `/doc` folder (including the fingerprint)
+    // of rustc, corgi should remove the entire `/doc` folder (including the fingerprint)
     // and generating another one with the actual version.
     // It should also remove the bogus file we created above.
     dummy_project.cargo("doc --target").arg(rustc_host()).run();

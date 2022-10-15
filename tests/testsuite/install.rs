@@ -1,4 +1,4 @@
-//! Tests for the `cargo install` command.
+//! Tests for the `corgi install` command.
 
 use std::fs::{self, OpenOptions};
 use std::io::prelude::*;
@@ -40,7 +40,7 @@ fn simple() {
 [INSTALLING] foo v0.0.1
 [COMPILING] foo v0.0.1
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [CWD]/home/.cargo/bin/foo[EXE]
+[INSTALLING] [CWD]/home/.corgi/bin/foo[EXE]
 [INSTALLED] package `foo v0.0.1` (executable `foo[EXE]`)
 [WARNING] be sure to add `[..]` to your PATH to be able to run the installed binaries
 ",
@@ -49,7 +49,7 @@ fn simple() {
     assert_has_installed_exe(cargo_home(), "foo");
 
     cargo_process("uninstall foo")
-        .with_stderr("[REMOVING] [CWD]/home/.cargo/bin/foo[EXE]")
+        .with_stderr("[REMOVING] [CWD]/home/.corgi/bin/foo[EXE]")
         .run();
     assert_has_not_installed_exe(cargo_home(), "foo");
 }
@@ -67,7 +67,7 @@ fn simple_with_message_format() {
 [INSTALLING] foo v0.0.1
 [COMPILING] foo v0.0.1
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [CWD]/home/.cargo/bin/foo[EXE]
+[INSTALLING] [CWD]/home/.corgi/bin/foo[EXE]
 [INSTALLED] package `foo v0.0.1` (executable `foo[EXE]`)
 [WARNING] be sure to add `[..]` to your PATH to be able to run the installed binaries
 ",
@@ -146,7 +146,7 @@ fn with_index() {
 [INSTALLING] foo v0.0.1 (registry `{reg}`)
 [COMPILING] foo v0.0.1 (registry `{reg}`)
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [CWD]/home/.cargo/bin/foo[EXE]
+[INSTALLING] [CWD]/home/.corgi/bin/foo[EXE]
 [INSTALLED] package `foo v0.0.1 (registry `{reg}`)` (executable `foo[EXE]`)
 [WARNING] be sure to add `[..]` to your PATH to be able to run the installed binaries
 ",
@@ -156,7 +156,7 @@ fn with_index() {
     assert_has_installed_exe(cargo_home(), "foo");
 
     cargo_process("uninstall foo")
-        .with_stderr("[REMOVING] [CWD]/home/.cargo/bin/foo[EXE]")
+        .with_stderr("[REMOVING] [CWD]/home/.corgi/bin/foo[EXE]")
         .run();
     assert_has_not_installed_exe(cargo_home(), "foo");
 }
@@ -179,12 +179,12 @@ fn multiple_pkgs() {
 [INSTALLING] foo v0.0.1
 [COMPILING] foo v0.0.1
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [CWD]/home/.cargo/bin/foo[EXE]
+[INSTALLING] [CWD]/home/.corgi/bin/foo[EXE]
 [INSTALLED] package `foo v0.0.1` (executable `foo[EXE]`)
 [INSTALLING] bar v0.0.2
 [COMPILING] bar v0.0.2
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [CWD]/home/.cargo/bin/bar[EXE]
+[INSTALLING] [CWD]/home/.corgi/bin/bar[EXE]
 [INSTALLED] package `bar v0.0.2` (executable `bar[EXE]`)
 [SUMMARY] Successfully installed foo, bar! Failed to install baz (see error(s) above).
 [WARNING] be sure to add `[..]` to your PATH to be able to run the installed binaries
@@ -198,8 +198,8 @@ fn multiple_pkgs() {
     cargo_process("uninstall foo bar")
         .with_stderr(
             "\
-[REMOVING] [CWD]/home/.cargo/bin/foo[EXE]
-[REMOVING] [CWD]/home/.cargo/bin/bar[EXE]
+[REMOVING] [CWD]/home/.corgi/bin/foo[EXE]
+[REMOVING] [CWD]/home/.corgi/bin/bar[EXE]
 [SUMMARY] Successfully uninstalled foo, bar!
 ",
         )
@@ -239,12 +239,12 @@ fn multiple_pkgs_path_set() {
 [INSTALLING] foo v0.0.1
 [COMPILING] foo v0.0.1
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [CWD]/home/.cargo/bin/foo[EXE]
+[INSTALLING] [CWD]/home/.corgi/bin/foo[EXE]
 [INSTALLED] package `foo v0.0.1` (executable `foo[EXE]`)
 [INSTALLING] bar v0.0.2
 [COMPILING] bar v0.0.2
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [CWD]/home/.cargo/bin/bar[EXE]
+[INSTALLING] [CWD]/home/.corgi/bin/bar[EXE]
 [INSTALLED] package `bar v0.0.2` (executable `bar[EXE]`)
 [SUMMARY] Successfully installed foo, bar! Failed to install baz (see error(s) above).
 [ERROR] some crates failed to install
@@ -257,8 +257,8 @@ fn multiple_pkgs_path_set() {
     cargo_process("uninstall foo bar")
         .with_stderr(
             "\
-[REMOVING] [CWD]/home/.cargo/bin/foo[EXE]
-[REMOVING] [CWD]/home/.cargo/bin/bar[EXE]
+[REMOVING] [CWD]/home/.corgi/bin/foo[EXE]
+[REMOVING] [CWD]/home/.corgi/bin/bar[EXE]
 [SUMMARY] Successfully uninstalled foo, bar!
 ",
         )
@@ -285,7 +285,7 @@ fn pick_max_version() {
 [INSTALLING] foo v0.2.1
 [COMPILING] foo v0.2.1
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [CWD]/home/.cargo/bin/foo[EXE]
+[INSTALLING] [CWD]/home/.corgi/bin/foo[EXE]
 [INSTALLED] package `foo v0.2.1` (executable `foo[EXE]`)
 [WARNING] be sure to add `[..]` to your PATH to be able to run the installed binaries
 ",
@@ -329,7 +329,7 @@ fn missing_current_working_directory() {
         .with_stderr(
             "\
 error: To install the binaries for the package in current working \
-directory use `cargo install --path .`. Use `cargo build` if you \
+directory use `corgi install --path .`. Use `corgi build` if you \
 want to simply build the package.
 ",
         )
@@ -385,9 +385,9 @@ fn install_location_precedence() {
     let t3 = root.join("t3");
     let t4 = cargo_home();
 
-    fs::create_dir(root.join(".cargo")).unwrap();
+    fs::create_dir(root.join(".corgi")).unwrap();
     fs::write(
-        root.join(".cargo/config"),
+        root.join(".corgi/config"),
         &format!(
             "[install]
              root = '{}'
@@ -420,9 +420,9 @@ fn install_location_precedence() {
     assert_has_installed_exe(&t3, "foo");
     assert_has_not_installed_exe(&t4, "foo");
 
-    fs::remove_file(root.join(".cargo/config")).unwrap();
+    fs::remove_file(root.join(".corgi/config")).unwrap();
 
-    println!("install cargo home");
+    println!("install corgi home");
 
     cargo_process("install foo").run();
     assert_has_installed_exe(&t4, "foo");
@@ -440,7 +440,7 @@ fn install_path() {
             "\
 [INSTALLING] foo v0.0.1 [..]
 [FINISHED] release [..]
-[REPLACING] [..]/.cargo/bin/foo[EXE]
+[REPLACING] [..]/.corgi/bin/foo[EXE]
 [REPLACED] package `foo v0.0.1 [..]` with `foo v0.0.1 [..]` (executable `foo[EXE]`)
 [WARNING] be sure to add [..]
 ",
@@ -455,7 +455,7 @@ fn install_target_dir() {
     p.cargo("install --target-dir td_test")
         .with_stderr(
             "\
-[WARNING] Using `cargo install` [..]
+[WARNING] Using `corgi install` [..]
 [INSTALLING] foo v0.0.1 [..]
 [COMPILING] foo v0.0.1 [..]
 [FINISHED] release [..]
@@ -488,7 +488,7 @@ fn install_path_with_lowercase_corgi_toml() {
         .with_stderr(
             "\
 [ERROR] `[CWD]` does not contain a Cargo.toml file, \
-but found cargo.toml please try to rename it to Cargo.toml. --path must point to a directory containing a Cargo.toml file.
+but found corgi.toml please try to rename it to Cargo.toml. --path must point to a directory containing a Cargo.toml file.
 ",
         )
         .run();
@@ -574,7 +574,7 @@ fn multiple_crates_error() {
             "\
 [UPDATING] git repository [..]
 [ERROR] multiple packages with binaries found: bar, foo. \
-When installing a git repository, cargo will always search the entire repo for any Cargo.toml. \
+When installing a git repository, corgi will always search the entire repo for any Cargo.toml. \
 Please specify which to install.
 ",
         )
@@ -768,7 +768,7 @@ fn install_force() {
 [INSTALLING] foo v0.2.0 ([..])
 [COMPILING] foo v0.2.0 ([..])
 [FINISHED] release [optimized] target(s) in [..]
-[REPLACING] [CWD]/home/.cargo/bin/foo[EXE]
+[REPLACING] [CWD]/home/.corgi/bin/foo[EXE]
 [REPLACED] package `foo v0.0.1 ([..]/foo)` with `foo v0.2.0 ([..]/foo2)` (executable `foo[EXE]`)
 [WARNING] be sure to add `[..]` to your PATH to be able to run the installed binaries
 ",
@@ -808,8 +808,8 @@ fn install_force_partial_overlap() {
 [INSTALLING] foo v0.2.0 ([..])
 [COMPILING] foo v0.2.0 ([..])
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [CWD]/home/.cargo/bin/foo-bin3[EXE]
-[REPLACING] [CWD]/home/.cargo/bin/foo-bin2[EXE]
+[INSTALLING] [CWD]/home/.corgi/bin/foo-bin3[EXE]
+[REPLACING] [CWD]/home/.corgi/bin/foo-bin2[EXE]
 [REMOVING] executable `[..]/bin/foo-bin1[EXE]` from previous version foo v0.0.1 [..]
 [INSTALLED] package `foo v0.2.0 ([..]/foo2)` (executable `foo-bin3[EXE]`)
 [REPLACED] package `foo v0.0.1 ([..]/foo)` with `foo v0.2.0 ([..]/foo2)` (executable `foo-bin2[EXE]`)
@@ -852,7 +852,7 @@ fn install_force_bin() {
 [INSTALLING] foo v0.2.0 ([..])
 [COMPILING] foo v0.2.0 ([..])
 [FINISHED] release [optimized] target(s) in [..]
-[REPLACING] [CWD]/home/.cargo/bin/foo-bin2[EXE]
+[REPLACING] [CWD]/home/.corgi/bin/foo-bin2[EXE]
 [REPLACED] package `foo v0.0.1 ([..]/foo)` with `foo v0.2.0 ([..]/foo2)` (executable `foo-bin2[EXE]`)
 [WARNING] be sure to add `[..]` to your PATH to be able to run the installed binaries
 ",
@@ -905,7 +905,7 @@ fn git_repo() {
 [INSTALLING] foo v0.1.0 ([..])
 [COMPILING] foo v0.1.0 ([..])
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [CWD]/home/.cargo/bin/foo[EXE]
+[INSTALLING] [CWD]/home/.corgi/bin/foo[EXE]
 [INSTALLED] package `foo v0.1.0 ([..]/foo#[..])` (executable `foo[EXE]`)
 [WARNING] be sure to add `[..]` to your PATH to be able to run the installed binaries
 ",
@@ -919,7 +919,7 @@ fn git_repo() {
 #[cfg(target_os = "linux")]
 fn git_repo_with_lowercase_corgi_toml() {
     let p = git::repo(&paths::root().join("foo"))
-        .file("cargo.toml", &basic_manifest("foo", "0.1.0"))
+        .file("corgi.toml", &basic_manifest("foo", "0.1.0"))
         .file("src/main.rs", "fn main() {}")
         .build();
 
@@ -929,7 +929,7 @@ fn git_repo_with_lowercase_corgi_toml() {
         .with_stderr(
             "\
 [UPDATING] git repository [..]
-[ERROR] Could not find Cargo.toml in `[..]`, but found cargo.toml please try to rename it to Cargo.toml
+[ERROR] Could not find Cargo.toml in `[..]`, but found corgi.toml please try to rename it to Cargo.toml
 ",
         )
         .run();
@@ -1048,10 +1048,10 @@ fn uninstall_piecemeal() {
 
 #[cargo_test]
 fn subcommand_works_out_of_the_box() {
-    Package::new("cargo-foo", "1.0.0")
+    Package::new("corgi-foo", "1.0.0")
         .file("src/main.rs", r#"fn main() { println!("bar"); }"#)
         .publish();
-    cargo_process("install cargo-foo").run();
+    cargo_process("install corgi-foo").run();
     cargo_process("foo").with_stdout("bar\n").run();
     cargo_process("--list")
         .with_stdout_contains("    foo\n")
@@ -1064,10 +1064,10 @@ fn installs_from_cwd_by_default() {
 
     p.cargo("install")
         .with_stderr_contains(
-            "warning: Using `cargo install` to install the binaries for the \
+            "warning: Using `corgi install` to install the binaries for the \
              package in current working directory is deprecated, \
-             use `cargo install --path .` instead. \
-             Use `cargo build` if you want to simply build the package.",
+             use `corgi install --path .` instead. \
+             Use `corgi build` if you want to simply build the package.",
         )
         .run();
     assert_has_installed_exe(cargo_home(), "foo");
@@ -1092,10 +1092,10 @@ fn installs_from_cwd_with_2018_warnings() {
     p.cargo("install")
         .with_status(101)
         .with_stderr_contains(
-            "error: Using `cargo install` to install the binaries for the \
+            "error: Using `corgi install` to install the binaries for the \
              package in current working directory is no longer supported, \
-             use `cargo install --path .` instead. \
-             Use `cargo build` if you want to simply build the package.",
+             use `corgi install --path .` instead. \
+             Use `corgi build` if you want to simply build the package.",
         )
         .run();
     assert_has_not_installed_exe(cargo_home(), "foo");
@@ -1179,10 +1179,10 @@ fn do_not_rebuilds_on_local_install() {
 
 #[cargo_test]
 fn reports_unsuccessful_subcommand_result() {
-    Package::new("cargo-fail", "1.0.0")
+    Package::new("corgi-fail", "1.0.0")
         .file("src/main.rs", "fn main() { panic!(); }")
         .publish();
-    cargo_process("install cargo-fail").run();
+    cargo_process("install corgi-fail").run();
     cargo_process("--list")
         .with_stdout_contains("    fail\n")
         .run();
@@ -1482,7 +1482,7 @@ fn uninstall_with_empty_package_option() {
         .with_stderr(
             "\
 [ERROR] \"--package <SPEC>\" requires a SPEC format value.
-Run `cargo help pkgid` for more information about SPEC format.
+Run `corgi help pkgid` for more information about SPEC format.
 ",
         )
         .run();
@@ -1498,7 +1498,7 @@ fn uninstall_multiple_and_some_pkg_does_not_exist() {
         .with_status(101)
         .with_stderr(
             "\
-[REMOVING] [CWD]/home/.cargo/bin/foo[EXE]
+[REMOVING] [CWD]/home/.corgi/bin/foo[EXE]
 error: package ID specification `bar` did not match any packages
 [SUMMARY] Successfully uninstalled foo! Failed to uninstall bar (see error(s) above).
 error: some packages failed to uninstall
@@ -1531,7 +1531,7 @@ fn custom_target_dir_for_git_source() {
 
 #[cargo_test]
 fn install_respects_lock_file() {
-    // `cargo install` now requires --locked to use a Cargo.lock.
+    // `corgi install` now requires --locked to use a Cargo.lock.
     Package::new("bar", "0.1.0").publish();
     Package::new("bar", "0.1.1")
         .file("src/lib.rs", "not rust")
@@ -1671,7 +1671,7 @@ fn git_repo_replace() {
     git::commit(&repo);
     let new_rev = repo.revparse_single("HEAD").unwrap().id();
     let mut path = paths::home();
-    path.push(".cargo/.crates.toml");
+    path.push(".corgi/.crates.toml");
 
     assert_ne!(old_rev, new_rev);
     assert!(fs::read_to_string(path.clone())
@@ -1727,7 +1727,7 @@ fn install_ignores_local_cargo_config() {
 
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [build]
                 target = "non-existing-target"
@@ -1746,7 +1746,7 @@ fn install_ignores_unstable_table_in_local_cargo_config() {
 
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [unstable]
                 build-std = ["core"]
@@ -1786,7 +1786,7 @@ fn install_global_cargo_config() {
 fn install_path_config() {
     project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
             [build]
             target = 'nonexistent'
@@ -1850,7 +1850,7 @@ fn git_install_reads_workspace_manifest() {
 
 #[cargo_test]
 fn install_git_with_symlink_home() {
-    // Ensure that `cargo install` with a git repo is OK when CARGO_HOME is a
+    // Ensure that `corgi install` with a git repo is OK when CARGO_HOME is a
     // symlink, and uses an build script.
     if !symlink_supported() {
         return;
@@ -1868,7 +1868,7 @@ fn install_git_with_symlink_home() {
 
     let actual = paths::root().join("actual-home");
     t!(std::fs::create_dir(&actual));
-    t!(symlink(&actual, paths::home().join(".cargo")));
+    t!(symlink(&actual, paths::home().join(".corgi")));
     cargo_process("install --git")
         .arg(p.url().to_string())
         .with_stderr(
@@ -1877,7 +1877,7 @@ fn install_git_with_symlink_home() {
 [INSTALLING] foo v1.0.0 [..]
 [COMPILING] foo v1.0.0 [..]
 [FINISHED] [..]
-[INSTALLING] [..]home/.cargo/bin/foo[..]
+[INSTALLING] [..]home/.corgi/bin/foo[..]
 [INSTALLED] package `foo [..]
 [WARNING] be sure to add [..]
 ",
@@ -2007,15 +2007,15 @@ fn install_semver_metadata() {
 [INSTALLING] foo v1.0.0+abc (registry `alternative`)
 [COMPILING] foo v1.0.0+abc (registry `alternative`)
 [FINISHED] [..]
-[REPLACING] [ROOT]/home/.cargo/bin/foo[EXE]
+[REPLACING] [ROOT]/home/.corgi/bin/foo[EXE]
 [REPLACED] package [..]
 [WARNING] be sure to add [..]
 ",
         )
         .run();
     // Check that from a fresh cache will work without metadata, too.
-    paths::home().join(".cargo/registry").rm_rf();
-    paths::home().join(".cargo/bin").rm_rf();
+    paths::home().join(".corgi/registry").rm_rf();
+    paths::home().join(".corgi/bin").rm_rf();
     cargo_process("install foo --registry alternative --version 1.0.0")
         .with_stderr(
             "\
@@ -2025,7 +2025,7 @@ fn install_semver_metadata() {
 [INSTALLING] foo v1.0.0+abc (registry `alternative`)
 [COMPILING] foo v1.0.0+abc (registry `alternative`)
 [FINISHED] [..]
-[INSTALLING] [ROOT]/home/.cargo/bin/foo[EXE]
+[INSTALLING] [ROOT]/home/.corgi/bin/foo[EXE]
 [INSTALLED] package `foo v1.0.0+abc (registry `alternative`)` (executable `foo[EXE]`)
 [WARNING] be sure to add [..]
 ",

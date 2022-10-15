@@ -48,7 +48,7 @@ fn broken_path_override_warns() {
             "#,
         )
         .file("a2/src/lib.rs", "")
-        .file(".cargo/config", r#"paths = ["a2"]"#)
+        .file(".corgi/config", r#"paths = ["a2"]"#)
         .build();
 
     p.cargo("build")
@@ -115,7 +115,7 @@ fn override_to_path_dep() {
         .file("bar/src/lib.rs", "")
         .file("bar/baz/Cargo.toml", &basic_manifest("baz", "0.0.1"))
         .file("bar/baz/src/lib.rs", "")
-        .file(".cargo/config", r#"paths = ["bar"]"#)
+        .file(".corgi/config", r#"paths = ["bar"]"#)
         .build();
 
     p.cargo("build").run();
@@ -165,7 +165,7 @@ fn paths_ok_with_optional() {
             "#,
         )
         .file("bar2/src/lib.rs", "")
-        .file(".cargo/config", r#"paths = ["bar2"]"#)
+        .file(".corgi/config", r#"paths = ["bar2"]"#)
         .build();
 
     p.cargo("build")
@@ -212,7 +212,7 @@ fn paths_add_optional_bad() {
             "#,
         )
         .file("bar2/src/lib.rs", "")
-        .file(".cargo/config", r#"paths = ["bar2"]"#)
+        .file(".corgi/config", r#"paths = ["bar2"]"#)
         .build();
 
     p.cargo("build")

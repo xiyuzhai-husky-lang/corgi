@@ -21,7 +21,7 @@ fn wstr(s: &str) -> Vec<u16> {
 }
 
 fn target_name(registry_name: &str) -> Vec<u16> {
-    wstr(&format!("cargo-registry:{}", registry_name))
+    wstr(&format!("corgi-registry:{}", registry_name))
 }
 
 impl Credential for WindowsCredential {

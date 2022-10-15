@@ -1,4 +1,4 @@
-//! Tests for the `cargo check` command.
+//! Tests for the `corgi check` command.
 
 use std::fmt::{self, Write};
 
@@ -312,7 +312,7 @@ fn dylib_check_preserves_build_cache() {
         .run();
 }
 
-// test `cargo rustc --profile check`
+// test `corgi rustc --profile check`
 #[cargo_test]
 fn rustc_check() {
     let foo = project()
@@ -849,7 +849,7 @@ fn proc_macro() {
             "#,
         )
         .build();
-    p.cargo("check -v").env("CARGO_LOG", "cargo=trace").run();
+    p.cargo("check -v").env("CARGO_LOG", "corgi=trace").run();
 }
 
 #[cargo_test]
@@ -875,7 +875,7 @@ fn does_not_use_empty_rustc_wrapper() {
     let p = project()
         .file("src/lib.rs", "")
         .file(
-            ".cargo/config.toml",
+            ".corgi/config.toml",
             r#"
                 [build]
                 rustc-wrapper = "do-not-execute-me"

@@ -280,7 +280,7 @@ fn clean_bins(
     // This loop performs basic checks on each of the TomlTarget in `bins`.
     for bin in &bins {
         // For each binary, check if the `filename` parameter is populated. If it is,
-        // check if the corresponding cargo feature has been activated.
+        // check if the corresponding corgi feature has been activated.
         if bin.filename.is_some() {
             features.require(Feature::different_binary_name())?;
         }
@@ -311,7 +311,7 @@ fn clean_bins(
         if restricted_names::is_conflicting_artifact_name(&name) {
             anyhow::bail!(
                 "the binary target name `{}` is forbidden, \
-                 it conflicts with with cargo's build directory names",
+                 it conflicts with with corgi's build directory names",
                 name
             )
         }
@@ -713,7 +713,7 @@ This inference behavior will change in the Rust 2018 edition and the following
 files will be included as a {target_kind_human} target:
 
 {rem_targets_str}
-This is likely to break cargo build or cargo test as these files may not be
+This is likely to break corgi build or corgi test as these files may not be
 ready to be compiled as a {target_kind_human} target today. You can future-proof yourself
 and disable this warning by adding `{autodiscover_flag_name} = false` to your [package]
 section. You may also move the files to a location where Cargo would not

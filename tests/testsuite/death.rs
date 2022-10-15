@@ -60,8 +60,8 @@ fn ctrl_c_kills_everyone() {
         Err(e) => assert_eq!(e.kind(), io::ErrorKind::ConnectionReset),
     }
 
-    // Ok so what we just did was spawn cargo that spawned a build script, then
-    // we killed cargo in hopes of it killing the build script as well. If all
+    // Ok so what we just did was spawn corgi that spawned a build script, then
+    // we killed corgi in hopes of it killing the build script as well. If all
     // went well the build script is now dead. On Windows, however, this is
     // enforced with job objects which means that it may actually be in the
     // *process* of being torn down at this point.

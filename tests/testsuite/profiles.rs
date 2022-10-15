@@ -616,7 +616,7 @@ fn rustflags_works() {
         .file(
             "Cargo.toml",
             r#"
-            cargo-features = ["profile-rustflags"]
+            corgi-features = ["profile-rustflags"]
 
             [profile.dev]
             rustflags = ["-C", "link-dead-code=yes"]
@@ -647,7 +647,7 @@ fn rustflags_works_with_env() {
         .file(
             "Cargo.toml",
             r#"
-            cargo-features = ["profile-rustflags"]
+            corgi-features = ["profile-rustflags"]
 
             [package]
             name = "foo"
@@ -699,7 +699,7 @@ Caused by:
 
   The package requires the Cargo feature called `profile-rustflags`, but that feature is \
   not stabilized in this version of Cargo (1.[..]).
-  Consider adding `cargo-features = [\"profile-rustflags\"]` to the top of Cargo.toml \
+  Consider adding `corgi-features = [\"profile-rustflags\"]` to the top of Cargo.toml \
   (above the [package] table) to tell Cargo you are opting in to use this unstable feature.
   See https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#profile-rustflags-option \
   for more information about the status of this feature.
@@ -734,7 +734,7 @@ Caused by:
 
   The package requires the Cargo feature called `profile-rustflags`, but that feature is \
   not stabilized in this version of Cargo (1.[..]).
-  Consider adding `cargo-features = [\"profile-rustflags\"]` to the top of Cargo.toml \
+  Consider adding `corgi-features = [\"profile-rustflags\"]` to the top of Cargo.toml \
   (above the [package] table) to tell Cargo you are opting in to use this unstable feature.
   See https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#profile-rustflags-option \
   for more information about the status of this feature.

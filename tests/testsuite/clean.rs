@@ -1,4 +1,4 @@
-//! Tests for the `cargo clean` command.
+//! Tests for the `corgi clean` command.
 
 use cargo_test_support::registry::Package;
 use cargo_test_support::{
@@ -470,7 +470,7 @@ fn assert_all_clean(build_dir: &Path) {
     }) {
         let entry = entry.unwrap();
         let path = entry.path();
-        if let ".rustc_info.json" | ".cargo-lock" | "CACHEDIR.TAG" =
+        if let ".rustc_info.json" | ".corgi-lock" | "CACHEDIR.TAG" =
             path.file_name().unwrap().to_str().unwrap()
         {
             continue;

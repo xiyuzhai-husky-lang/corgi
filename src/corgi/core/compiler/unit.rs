@@ -13,7 +13,7 @@ use std::rc::Rc;
 
 /// All information needed to define a unit.
 ///
-/// A unit is an object that has enough information so that cargo knows how to build it.
+/// A unit is an object that has enough information so that corgi knows how to build it.
 /// For example, if your package has dependencies, then every dependency will be built as a library
 /// unit. If your package is a library, then it will be built as a library unit as well, or if it
 /// is a binary with `main.rs`, then a binary will be output. There are also separate unit types

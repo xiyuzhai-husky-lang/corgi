@@ -5,7 +5,7 @@ use serde::Deserialize;
 use std::io::Read;
 use std::process::{Command, Stdio};
 
-const CARGO_TAG: &str = "cargo-registry";
+const CARGO_TAG: &str = "corgi-registry";
 
 /// Implementation of 1password keychain access for Cargo registries.
 struct OnePasswordKeychain {
@@ -282,7 +282,7 @@ impl Credential for OnePasswordKeychain {
             self.get_token(&session, &uuid)
         } else {
             return Err(format!(
-                "no 1password entry found for registry `{}`, try `cargo login` to add a token",
+                "no 1password entry found for registry `{}`, try `corgi login` to add a token",
                 registry_name
             )
             .into());

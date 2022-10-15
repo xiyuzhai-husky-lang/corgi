@@ -1,4 +1,4 @@
-//! Tests for the `cargo new` command.
+//! Tests for the `corgi new` command.
 
 use cargo_test_support::cargo_process;
 use cargo_test_support::paths;
@@ -121,7 +121,7 @@ fn existing() {
         .with_status(101)
         .with_stderr(
             "[ERROR] destination `[CWD]/foo` already exists\n\n\
-             Use `cargo init` to initialize the directory",
+             Use `corgi init` to initialize the directory",
         )
         .run();
 }
@@ -186,7 +186,7 @@ If you need a package name to not match the directory name, consider using --nam
         .with_stderr(
             "\
 [WARNING] the name `incremental` will not support binary executables with that name, \
-it conflicts with cargo's build directory names
+it conflicts with corgi's build directory names
 [CREATED] library `incremental` package
 ",
         )
@@ -241,11 +241,11 @@ or change the name in Cargo.toml with:
 #[cargo_test]
 fn git_prefers_command_line() {
     let root = paths::root();
-    fs::create_dir(&root.join(".cargo")).unwrap();
+    fs::create_dir(&root.join(".corgi")).unwrap();
     fs::write(
-        &root.join(".cargo/config"),
+        &root.join(".corgi/config"),
         r#"
-            [cargo-new]
+            [corgi-new]
             vcs = "none"
             name = "foo"
             email = "bar"

@@ -566,7 +566,7 @@ fn dylib() {
     verify_lto(&output, "bar", "--crate-type dylib", Lto::OnlyObject);
     // `foo` is LTO because it is a binary, and the profile specifies `lto=true`.
     verify_lto(&output, "foo", "--crate-type bin", Lto::Run(None));
-    // `cargo test` should not rebuild dependencies. It builds the test
+    // `corgi test` should not rebuild dependencies. It builds the test
     // executables with `lto=true` because the tests are built with the
     // `--release` flag.
     p.cargo("test --release -v")

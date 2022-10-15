@@ -1,4 +1,4 @@
-//! Tests for the `cargo yank` command.
+//! Tests for the `corgi yank` command.
 
 use std::fs;
 

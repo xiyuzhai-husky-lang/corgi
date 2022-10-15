@@ -355,7 +355,7 @@ impl Profiles {
 /// An object used for handling the profile hierarchy.
 ///
 /// The precedence of profiles are (first one wins):
-/// - Profiles in `.cargo/config` files (using same order as below).
+/// - Profiles in `.corgi/config` files (using same order as below).
 /// - [profile.dev.package.name] -- a named package.
 /// - [profile.dev.package."*"] -- this cannot apply to workspace members.
 /// - [profile.dev.build-override] -- this can only apply to `build.rs` scripts
@@ -559,7 +559,7 @@ pub struct Profile {
     pub panic: PanicStrategy,
     pub strip: Strip,
     #[serde(skip_serializing_if = "Vec::is_empty")] // remove when `rustflags` is stablized
-    // Note that `rustflags` is used for the cargo-feature `profile_rustflags`
+    // Note that `rustflags` is used for the corgi-feature `profile_rustflags`
     pub rustflags: Vec<InternedString>,
 }
 
@@ -1045,7 +1045,7 @@ fn merge_config_profiles(
             check_to_add.insert(*inherits);
         }
     }
-    // Add the built-in profiles. This is important for things like `cargo
+    // Add the built-in profiles. This is important for things like `corgi
     // test` which implicitly use the "dev" profile for dependencies.
     for name in &["dev", "release", "test", "bench"] {
         check_to_add.insert(InternedString::new(name));

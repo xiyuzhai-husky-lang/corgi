@@ -58,7 +58,7 @@ pub struct Timings<'cfg> {
 /// Tracking information for an individual unit.
 struct UnitTime {
     unit: Unit,
-    /// A string describing the cargo target.
+    /// A string describing the corgi target.
     target: String,
     /// The time when this unit started as an offset in seconds from `Timings::start`.
     start: f64,
@@ -314,9 +314,9 @@ impl<'cfg> Timings<'cfg> {
     fn report_html(&self, cx: &Context<'_, '_>, error: &Option<anyhow::Error>) -> CorgiResult<()> {
         let duration = self.start.elapsed().as_secs_f64();
         let timestamp = self.start_str.replace(&['-', ':'][..], "");
-        let timings_path = cx.files().host_root().join("cargo-timings");
+        let timings_path = cx.files().host_root().join("corgi-timings");
         paths::create_dir_all(&timings_path)?;
-        let filename = timings_path.join(format!("cargo-timing-{}.html", timestamp));
+        let filename = timings_path.join(format!("corgi-timing-{}.html", timestamp));
         let mut f = BufWriter::new(paths::create(&filename)?);
         let roots: Vec<&str> = self
             .root_targets
@@ -352,7 +352,7 @@ impl<'cfg> Timings<'cfg> {
                 .join(&filename)
                 .display()
         );
-        let unstamped_filename = timings_path.join("cargo-timing.html");
+        let unstamped_filename = timings_path.join("corgi-timing.html");
         paths::link_or_copy(&filename, &unstamped_filename)?;
         self.config
             .shell()
@@ -733,7 +733,7 @@ h1 {
 <body>
 
 <h1>Cargo Build Timings</h1>
-See <a href="https://doc.rust-lang.org/nightly/cargo/reference/timings.html">Documentation</a>
+See <a href="https://doc.rust-lang.org/nightly/corgi/reference/timings.html">Documentation</a>
 "#;
 
 static HTML_CANVAS: &str = r#"

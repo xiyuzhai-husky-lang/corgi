@@ -1,4 +1,4 @@
-//! Tests for the `cargo fix` command.
+//! Tests for the `corgi fix` command.
 
 use cargo_test_support::compare::assert_match_exact;
 use cargo_test_support::git;
@@ -65,7 +65,7 @@ fn broken_fixes_backed_out() {
     // - The second "check" to verify the changes, `foo` swaps out the content
     //   with something that fails to compile. It creates a second file so it
     //   won't do anything in the third check.
-    // - cargo fix discovers that the fix failed, and it backs out the changes.
+    // - corgi fix discovers that the fix failed, and it backs out the changes.
     // - The third "check" is done to display the original diagnostics of the
     //   original code.
     let p = project()
@@ -156,9 +156,9 @@ fn broken_fixes_backed_out() {
              \n  \
              * src/lib.rs\n\
              \n\
-             This likely indicates a bug in either rustc or cargo itself,\n\
+             This likely indicates a bug in either rustc or corgi itself,\n\
              and we would appreciate a bug report! You're likely to see \n\
-             a number of compiler warnings after this message which cargo\n\
+             a number of compiler warnings after this message which corgi\n\
              attempted to fix but failed. If you could open an issue at\n\
              [..]\n\
              quoting the full output of this command we'd be very appreciative!\n\
@@ -714,7 +714,7 @@ fn warns_if_no_vcs_detected() {
     p.cargo("fix")
         .with_status(101)
         .with_stderr(
-            "error: no VCS found for this package and `cargo fix` can potentially perform \
+            "error: no VCS found for this package and `corgi fix` can potentially perform \
              destructive changes; if you'd like to suppress this error pass `--allow-no-vcs`\
              ",
         )
@@ -733,7 +733,7 @@ fn warns_about_dirty_working_directory() {
         .with_stderr(
             "\
 error: the working directory of this package has uncommitted changes, \
-and `cargo fix` can potentially perform destructive changes; if you'd \
+and `corgi fix` can potentially perform destructive changes; if you'd \
 like to suppress this error pass `--allow-dirty`, `--allow-staged`, or \
 commit the changes to these files:
 
@@ -758,7 +758,7 @@ fn warns_about_staged_working_directory() {
         .with_stderr(
             "\
 error: the working directory of this package has uncommitted changes, \
-and `cargo fix` can potentially perform destructive changes; if you'd \
+and `corgi fix` can potentially perform destructive changes; if you'd \
 like to suppress this error pass `--allow-dirty`, `--allow-staged`, or \
 commit the changes to these files:
 
@@ -844,9 +844,9 @@ If you are trying to migrate from the previous edition ({prev}), the
 process requires following these steps:
 
 1. Start with `edition = \"{prev}\"` in `Cargo.toml`
-2. Run `cargo fix --edition`
+2. Run `corgi fix --edition`
 3. Modify `Cargo.toml` to set `edition = \"{latest_stable}\"`
-4. Run `cargo build` or `cargo test` to verify the fixes worked
+4. Run `corgi build` or `corgi test` to verify the fixes worked
 
 More details may be found at
 https://doc.rust-lang.org/edition-guide/editions/transitioning-an-existing-project-to-a-new-edition.html
@@ -924,7 +924,7 @@ fn prepare_for_already_on_latest_unstable() {
             "Cargo.toml",
             &format!(
                 r#"
-                cargo-features = ["edition{}"]
+                corgi-features = ["edition{}"]
 
                 [package]
                 name = 'foo'
@@ -1784,7 +1784,7 @@ fn non_edition_lint_migration() {
     assert!(contents.contains("from_utf8(crate::foo::FOO)"));
 }
 
-// For rust-lang/cargo#9857
+// For rust-lang/corgi#9857
 #[cargo_test]
 fn fix_in_dependency() {
     Package::new("bar", "1.0.0")

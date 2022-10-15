@@ -194,7 +194,7 @@ fn attach_std_deps(
 fn deps_of_roots(roots: &[Unit], state: &mut State<'_, '_>) -> CorgiResult<()> {
     for unit in roots.iter() {
         // Dependencies of tests/benches should not have `panic` set.
-        // We check the global test mode to see if we are running in `cargo
+        // We check the global test mode to see if we are running in `corgi
         // test` in which case we ensure all dependencies have `panic`
         // cleared, and avoid building the lib thrice (once with `panic`, once
         // without, once for `--test`). In particular, the lib included for

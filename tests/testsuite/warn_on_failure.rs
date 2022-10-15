@@ -24,10 +24,10 @@ fn make_lib(lib_src: &str) {
                 r#"
                     fn main() {{
                         use std::io::Write;
-                        println!("cargo:warning={{}}", "{}");
+                        println!("corgi:warning={{}}", "{}");
                         println!("hidden stdout");
                         write!(&mut ::std::io::stderr(), "hidden stderr");
-                        println!("cargo:warning={{}}", "{}");
+                        println!("corgi:warning={{}}", "{}");
                     }}
                 "#,
                 WARNING1, WARNING2

@@ -1,4 +1,4 @@
-//! Tests for the `cargo verify-project` command.
+//! Tests for the `corgi verify-project` command.
 
 use cargo_test_support::{basic_bin_manifest, main_file, project};
 
@@ -51,7 +51,7 @@ fn cargo_verify_project_honours_unstable_features() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["test-dummy-unstable"]
+                corgi-features = ["test-dummy-unstable"]
 
                 [package]
                 name = "foo"

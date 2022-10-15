@@ -621,7 +621,7 @@ fn tar(
                 header.set_entry_type(EntryType::file());
                 header.set_mode(0o644);
                 header.set_size(contents.len() as u64);
-                // use something nonzero to avoid rust-lang/cargo#9512
+                // use something nonzero to avoid rust-lang/corgi#9512
                 header.set_mtime(1);
                 header.set_cksum();
                 ar.append_data(&mut header, &ar_path, contents.as_bytes())
@@ -841,7 +841,7 @@ fn run_verify(
     if pkg_fingerprint != ws_fingerprint {
         let changes = report_hash_difference(&pkg_fingerprint, &ws_fingerprint);
         anyhow::bail!(
-            "Source directory was modified by build.rs during cargo publish. \
+            "Source directory was modified by build.rs during corgi publish. \
              Build scripts should not modify anything outside of OUT_DIR.\n\
              {}\n\n\
              To proceed despite this, pass the `--no-verify` flag.",

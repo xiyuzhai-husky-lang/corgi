@@ -42,19 +42,19 @@ Posting this in the PR message also helps create reference links on each Cargo P
 The following is an example of the command to run in a local clone of rust-lang/rust to run a certain set of tests of things that are likely to get broken by a Cargo update:
 
 ```bash
-subup --up-branch update-cargo \
+subup --up-branch update-corgi \
     --commit-message "Update cargo" \
     --test="src/tools/linkchecker tidy \
         src/tools/cargo \
         src/tools/rustfmt \
         src/tools/rls" \
-    src/tools/cargo
+    src/tools/corgi
 ```
 
 If doing a [beta backport](#beta-backports), the command is similar, but needs to point to the correct branches:
 
 ```bash
-subup --up-branch update-beta-cargo \
+subup --up-branch update-beta-corgi \
     --rust-branch beta \
     --set-config rust.channel=beta \
     --commit-message "[beta] Update cargo" \
@@ -62,7 +62,7 @@ subup --up-branch update-beta-cargo \
         src/tools/cargo \
         src/tools/rustfmt \
         src/tools/rls" \
-    rust-1.63.0:src/tools/cargo
+    rust-1.63.0:src/tools/corgi
 ```
 
 [@ehuss]: https://github.com/ehuss/

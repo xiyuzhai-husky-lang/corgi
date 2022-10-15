@@ -143,7 +143,7 @@ fn member_manifest_version_error() {
         .file("bar/src/main.rs", "fn main() {}")
         .build();
 
-    // Prevent this test from accessing the network by setting up .cargo/config.
+    // Prevent this test from accessing the network by setting up .corgi/config.
     registry::init();
     let config = Config::new(
         Shell::from_write(Box::new(Vec::new())),

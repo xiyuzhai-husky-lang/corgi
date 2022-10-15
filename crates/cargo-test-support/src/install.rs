@@ -2,7 +2,7 @@ use crate::paths;
 use std::env::consts::EXE_SUFFIX;
 use std::path::{Path, PathBuf};
 
-/// Used by `cargo install` tests to assert an executable binary
+/// Used by `corgi install` tests to assert an executable binary
 /// has been installed. Example usage:
 ///
 ///     assert_has_installed_exe(cargo_home(), "foo");
@@ -21,7 +21,7 @@ fn check_has_installed_exe<P: AsRef<Path>>(path: P, name: &'static str) -> bool 
 }
 
 pub fn cargo_home() -> PathBuf {
-    paths::home().join(".cargo")
+    paths::home().join(".corgi")
 }
 
 pub fn exe(name: &str) -> String {

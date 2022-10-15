@@ -1,4 +1,4 @@
-//! Tests for the `cargo read-manifest` command.
+//! Tests for the `corgi read-manifest` command.
 
 use cargo_test_support::{basic_bin_manifest, main_file, project};
 

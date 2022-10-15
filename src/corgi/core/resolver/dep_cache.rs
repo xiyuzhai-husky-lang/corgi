@@ -33,7 +33,7 @@ pub struct RegistryQueryer<'a> {
     replacements: &'a [(PackageIdSpec, Dependency)],
     version_prefs: &'a VersionPreferences,
     /// If set the list of dependency candidates will be sorted by minimal
-    /// versions first. That allows `cargo update -Z minimal-versions` which will
+    /// versions first. That allows `corgi update -Z minimal-versions` which will
     /// specify minimum dependency versions to be used.
     minimal_versions: bool,
     /// a cache of `Candidate`s that fulfil a `Dependency`

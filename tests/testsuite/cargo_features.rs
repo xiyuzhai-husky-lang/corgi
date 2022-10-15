@@ -1,4 +1,4 @@
-//! Tests for `cargo-features` definitions.
+//! Tests for `corgi-features` definitions.
 
 use cargo_test_support::registry::Package;
 use cargo_test_support::{project, registry};
@@ -33,7 +33,7 @@ Caused by:
 
   The package requires the Cargo feature called `test-dummy-unstable`, \
   but that feature is not stabilized in this version of Cargo (1.[..]).
-  Consider adding `cargo-features = [\"test-dummy-unstable\"]` to the top of Cargo.toml \
+  Consider adding `corgi-features = [\"test-dummy-unstable\"]` to the top of Cargo.toml \
   (above the [package] table) to tell Cargo you are opting in to use this unstable feature.
   See https://doc.rust-lang.org/nightly/cargo/reference/unstable.html for more information \
   about the status of this feature.
@@ -163,7 +163,7 @@ fn unknown_feature() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["foo"]
+                corgi-features = ["foo"]
 
                 [package]
                 name = "a"
@@ -180,7 +180,7 @@ fn unknown_feature() {
 error: failed to parse manifest at `[..]`
 
 Caused by:
-  unknown cargo feature `foo`
+  unknown corgi feature `foo`
 ",
         )
         .run();
@@ -192,7 +192,7 @@ fn stable_feature_warns() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["test-dummy-stable"]
+                corgi-features = ["test-dummy-stable"]
 
                 [package]
                 name = "a"
@@ -205,7 +205,7 @@ fn stable_feature_warns() {
     p.cargo("build")
         .with_stderr(
             "\
-warning: the cargo feature `test-dummy-stable` has been stabilized in the 1.0 \
+warning: the corgi feature `test-dummy-stable` has been stabilized in the 1.0 \
 release and is no longer necessary to be listed in the manifest
   See https://doc.rust-lang.org/[..]cargo/ for more information about using this feature.
 [COMPILING] a [..]
@@ -221,7 +221,7 @@ fn allow_features() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["test-dummy-unstable"]
+                corgi-features = ["test-dummy-unstable"]
 
                 [package]
                 name = "a"
@@ -323,7 +323,7 @@ fn allow_features_in_cfg() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["test-dummy-unstable"]
+                corgi-features = ["test-dummy-unstable"]
 
                 [package]
                 name = "a"
@@ -333,7 +333,7 @@ fn allow_features_in_cfg() {
             "#,
         )
         .file(
-            ".cargo/config.toml",
+            ".corgi/config.toml",
             r#"
                 [unstable]
                 allow-features = ["test-dummy-unstable", "print-im-a-teapot"]
@@ -376,7 +376,7 @@ error: the feature `unstable-options` is not in the list of allowed features: [p
         )
         .run();
 
-    // -Zallow-features overrides .cargo/config
+    // -Zallow-features overrides .corgi/config
     p.cargo("-Zallow-features=test-dummy-unstable -Zprint-im-a-teapot build")
         .masquerade_as_nightly_cargo(&[
             "allow-features",
@@ -415,7 +415,7 @@ fn nightly_feature_requires_nightly() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["test-dummy-unstable"]
+                corgi-features = ["test-dummy-unstable"]
 
                 [package]
                 name = "a"
@@ -443,7 +443,7 @@ fn nightly_feature_requires_nightly() {
 error: failed to parse manifest at `[..]`
 
 Caused by:
-  the cargo feature `test-dummy-unstable` requires a nightly version of Cargo, \
+  the corgi feature `test-dummy-unstable` requires a nightly version of Cargo, \
   but this is the `stable` channel
   See [..]
   See https://doc.rust-lang.org/[..]cargo/reference/unstable.html for more \
@@ -472,7 +472,7 @@ fn nightly_feature_requires_nightly_in_dep() {
         .file(
             "a/Cargo.toml",
             r#"
-                cargo-features = ["test-dummy-unstable"]
+                corgi-features = ["test-dummy-unstable"]
 
                 [package]
                 name = "a"
@@ -510,7 +510,7 @@ Caused by:
   failed to parse manifest at `[..]`
 
 Caused by:
-  the cargo feature `test-dummy-unstable` requires a nightly version of Cargo, \
+  the corgi feature `test-dummy-unstable` requires a nightly version of Cargo, \
   but this is the `stable` channel
   See [..]
   See https://doc.rust-lang.org/[..]cargo/reference/unstable.html for more \
@@ -526,7 +526,7 @@ fn cant_publish() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["test-dummy-unstable"]
+                corgi-features = ["test-dummy-unstable"]
 
                 [package]
                 name = "a"
@@ -554,7 +554,7 @@ fn cant_publish() {
 error: failed to parse manifest at `[..]`
 
 Caused by:
-  the cargo feature `test-dummy-unstable` requires a nightly version of Cargo, \
+  the corgi feature `test-dummy-unstable` requires a nightly version of Cargo, \
   but this is the `stable` channel
   See [..]
   See https://doc.rust-lang.org/[..]cargo/reference/unstable.html for more \
@@ -570,7 +570,7 @@ fn z_flags_rejected() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["test-dummy-unstable"]
+                corgi-features = ["test-dummy-unstable"]
 
                 [package]
                 name = "a"
@@ -616,7 +616,7 @@ fn publish_allowed() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["test-dummy-unstable"]
+                corgi-features = ["test-dummy-unstable"]
 
                 [package]
                 name = "a"
@@ -640,7 +640,7 @@ fn wrong_position() {
                 [package]
                 name = "foo"
                 version = "0.1.0"
-                cargo-features = ["test-dummy-unstable"]
+                corgi-features = ["test-dummy-unstable"]
             "#,
         )
         .file("src/lib.rs", "")
@@ -653,7 +653,7 @@ fn wrong_position() {
 error: failed to parse manifest at [..]
 
 Caused by:
-  cargo-features = [\"test-dummy-unstable\"] was found in the wrong location: it \
+  corgi-features = [\"test-dummy-unstable\"] was found in the wrong location: it \
   should be set at the top of Cargo.toml before any tables
 ",
         )

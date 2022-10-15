@@ -83,7 +83,7 @@ pub struct FeatureOpts {
 /// This disables decoupling of dev dependencies. It may be possible to relax
 /// this in the future, but it will require significant changes to how unit
 /// dependencies are computed, and can result in longer build times with
-/// `cargo test` because the lib may need to be built 3 times instead of
+/// `corgi test` because the lib may need to be built 3 times instead of
 /// twice.
 #[derive(Copy, Clone, PartialEq)]
 pub enum HasDevUnits {
@@ -337,7 +337,7 @@ impl ResolvedFeatures {
 
     /// Variant of `activated_features` that returns `None` if this is
     /// not a valid pkg_id/is_build combination. Used in places which do
-    /// not know which packages are activated (like `cargo clean`).
+    /// not know which packages are activated (like `corgi clean`).
     pub fn activated_features_unverified(
         &self,
         pkg_id: PackageId,
@@ -361,7 +361,7 @@ impl ResolvedFeatures {
 
     /// Compares the result against the original resolver behavior.
     ///
-    /// Used by `cargo fix --edition` to display any differences.
+    /// Used by `corgi fix --edition` to display any differences.
     pub fn compare_legacy(&self, legacy: &ResolvedFeatures) -> DiffMap {
         self.activated_features
             .iter()
@@ -483,7 +483,7 @@ impl<'a, 'cfg> FeatureResolver<'a, 'cfg> {
             let fk = if self.track_for_host && self.is_proc_macro(member.package_id()) {
                 // Also activate for normal dependencies. This is needed if the
                 // proc-macro includes other targets (like binaries or tests),
-                // or running in `cargo test`. Note that in a workspace, if
+                // or running in `corgi test`. Note that in a workspace, if
                 // the proc-macro is selected on the command like (like with
                 // `--workspace`), this forces feature unification with normal
                 // dependencies. This is part of the bigger problem where
@@ -820,7 +820,7 @@ impl<'a, 'cfg> FeatureResolver<'a, 'cfg> {
                         //
                         // All this may result in a dependency being built multiple times
                         // for various targets which are either specified in the manifest
-                        // or on the cargo command-line.
+                        // or on the corgi command-line.
                         let lib_fk = if fk == FeaturesFor::default() {
                             (self.track_for_host && (dep.is_build() || self.is_proc_macro(dep_id)))
                                 .then(|| FeaturesFor::HostDep)

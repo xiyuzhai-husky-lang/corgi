@@ -57,7 +57,7 @@ fn do_resolve<'cfg>(config: &'cfg Config, ws_root: &Path) -> ResolveInfo<'cfg> {
 
 /// Benchmark of the full `resolve_ws_with_opts` which runs the resolver
 /// twice, the feature resolver, and more. This is a major component of a
-/// regular cargo build.
+/// regular corgi build.
 fn resolve_ws(c: &mut Criterion) {
     let fixtures = fixtures!();
     let mut group = c.benchmark_group("resolve_ws");
@@ -65,7 +65,7 @@ fn resolve_ws(c: &mut Criterion) {
         let config = fixtures.make_config(&ws_root);
         // The resolver info is initialized only once in a lazy fashion. This
         // allows criterion to skip this workspace if the user passes a filter
-        // on the command-line (like `cargo bench -- resolve_ws/tikv`).
+        // on the command-line (like `corgi bench -- resolve_ws/tikv`).
         //
         // Due to the way criterion works, it tends to only run the inner
         // iterator once, and we don't want to call `do_resolve` in every

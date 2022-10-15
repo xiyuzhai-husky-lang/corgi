@@ -729,7 +729,7 @@ impl RegistrySource {
     /// Specify dependency by version requirement.
     pub fn new(version: impl AsRef<str>) -> Self {
         // versions might have semver metadata appended which we do not want to
-        // store in the cargo toml files.  This would cause a warning upon compilation
+        // store in the corgi toml files.  This would cause a warning upon compilation
         // ("version requirement […] includes semver metadata which will be ignored")
         let version = version.as_ref().split('+').next().unwrap();
         Self {
@@ -766,7 +766,7 @@ impl PathSource {
     /// Set an optional version requirement.
     pub fn set_version(mut self, version: impl AsRef<str>) -> Self {
         // versions might have semver metadata appended which we do not want to
-        // store in the cargo toml files.  This would cause a warning upon compilation
+        // store in the corgi toml files.  This would cause a warning upon compilation
         // ("version requirement […] includes semver metadata which will be ignored")
         let version = version.as_ref().split('+').next().unwrap();
         self.version = Some(version.to_owned());
@@ -860,7 +860,7 @@ impl GitSource {
     /// Set an optional version requirement.
     pub fn set_version(mut self, version: impl AsRef<str>) -> Self {
         // versions might have semver metadata appended which we do not want to
-        // store in the cargo toml files.  This would cause a warning upon compilation
+        // store in the corgi toml files.  This would cause a warning upon compilation
         // ("version requirement […] includes semver metadata which will be ignored")
         let version = version.as_ref().split('+').next().unwrap();
         self.version = Some(version.to_owned());

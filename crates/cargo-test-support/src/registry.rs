@@ -184,7 +184,7 @@ impl RegistryBuilder {
     /// Initializes the registry.
     #[must_use]
     pub fn build(self) -> TestRegistry {
-        let config_path = paths::home().join(".cargo/config");
+        let config_path = paths::home().join(".corgi/config");
         t!(fs::create_dir_all(config_path.parent().unwrap()));
         let prefix = if let Some(alternative) = &self.alternative {
             format!("{alternative}-")
@@ -264,7 +264,7 @@ impl RegistryBuilder {
 
         if self.configure_token {
             let token = registry.token.as_deref().unwrap();
-            let credentials = paths::home().join(".cargo/credentials");
+            let credentials = paths::home().join(".corgi/credentials");
             if let Some(alternative) = &self.alternative {
                 append(
                     &credentials,
@@ -313,7 +313,7 @@ impl RegistryBuilder {
 /// A builder for creating a new package in a registry.
 ///
 /// This uses "source replacement" using an automatically generated
-/// `.cargo/config` file to ensure that dependencies will use these packages
+/// `.corgi/config` file to ensure that dependencies will use these packages
 /// instead of contacting crates.io. See `source-replacement.md` for more
 /// details on how source replacement works.
 ///
@@ -370,7 +370,7 @@ impl RegistryBuilder {
 ///     "#)
 ///     .build();
 ///
-/// p.cargo("run").with_stdout("24").run();
+/// p.corgi("run").with_stdout("24").run();
 /// ```
 #[must_use]
 pub struct Package {
@@ -832,7 +832,7 @@ impl Package {
     /// Creates a new package builder.
     /// Call `publish()` to finalize and build the package.
     pub fn new(name: &str, vers: &str) -> Package {
-        let config = paths::home().join(".cargo/config");
+        let config = paths::home().join(".corgi/config");
         if !config.exists() {
             init();
         }
@@ -1135,7 +1135,7 @@ impl Package {
 
         if !self.cargo_features.is_empty() {
             manifest.push_str(&format!(
-                "cargo-features = {}\n\n",
+                "corgi-features = {}\n\n",
                 toml_edit::ser::to_item(&self.cargo_features).unwrap()
             ));
         }

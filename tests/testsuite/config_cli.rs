@@ -288,9 +288,9 @@ warning: unused config key `build.unused` in `--config cli option`
 fn rerooted_remains() {
     // Re-rooting keeps cli args.
     let somedir = paths::root().join("somedir");
-    fs::create_dir_all(somedir.join(".cargo")).unwrap();
+    fs::create_dir_all(somedir.join(".corgi")).unwrap();
     fs::write(
-        somedir.join(".cargo").join("config"),
+        somedir.join(".corgi").join("config"),
         "
         a = 'file1'
         b = 'file2'

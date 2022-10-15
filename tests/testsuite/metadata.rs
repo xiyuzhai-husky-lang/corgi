@@ -1,4 +1,4 @@
-//! Tests for the `cargo metadata` command.
+//! Tests for the `corgi metadata` command.
 
 use cargo_test_support::install::cargo_home;
 use cargo_test_support::paths::CargoPathExt;
@@ -1952,7 +1952,7 @@ fn package_metadata() {
                 categories = ["database"]
                 keywords = ["database"]
                 readme = "README.md"
-                repository = "https://github.com/rust-lang/cargo"
+                repository = "https://github.com/rust-lang/corgi"
                 homepage = "https://rust-lang.org"
                 documentation = "https://doc.rust-lang.org/stable/std/"
 
@@ -1975,7 +1975,7 @@ fn package_metadata() {
                 "default_run": null,
                 "name": "foo",
                 "readme": "README.md",
-                "repository": "https://github.com/rust-lang/cargo",
+                "repository": "https://github.com/rust-lang/corgi",
                 "rust_version": null,
                 "homepage": "https://rust-lang.org",
                 "documentation": "https://doc.rust-lang.org/stable/std/",
@@ -2035,7 +2035,7 @@ fn package_publish() {
                 categories = ["database"]
                 keywords = ["database"]
                 readme = "README.md"
-                repository = "https://github.com/rust-lang/cargo"
+                repository = "https://github.com/rust-lang/corgi"
                 publish = ["my-registry"]
             "#,
         )
@@ -2054,7 +2054,7 @@ fn package_publish() {
                 "default_run": null,
                 "name": "foo",
                 "readme": "README.md",
-                "repository": "https://github.com/rust-lang/cargo",
+                "repository": "https://github.com/rust-lang/corgi",
                 "rust_version": null,
                 "homepage": null,
                 "documentation": null,

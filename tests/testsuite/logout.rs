@@ -1,4 +1,4 @@
-//! Tests for the `cargo logout` command.
+//! Tests for the `corgi logout` command.
 
 use cargo_test_support::install::cargo_home;
 use cargo_test_support::{cargo_process, registry};
@@ -9,13 +9,13 @@ use toml_edit::easy as toml;
 fn gated() {
     registry::init();
     cargo_process("logout")
-        .masquerade_as_nightly_cargo(&["cargo-logout"])
+        .masquerade_as_nightly_cargo(&["corgi-logout"])
         .with_status(101)
         .with_stderr(
             "\
-[ERROR] the `cargo logout` command is unstable, pass `-Z unstable-options` to enable it
+[ERROR] the `corgi logout` command is unstable, pass `-Z unstable-options` to enable it
 See https://github.com/rust-lang/cargo/issues/8933 for more information about \
-the `cargo logout` command.
+the `corgi logout` command.
 ",
         )
         .run();
@@ -48,7 +48,7 @@ fn simple_logout_test(reg: Option<&str>, flag: &str) {
     let msg = reg.unwrap_or("crates.io");
     check_config_token(reg, true);
     cargo_process(&format!("logout -Z unstable-options {}", flag))
-        .masquerade_as_nightly_cargo(&["cargo-logout"])
+        .masquerade_as_nightly_cargo(&["corgi-logout"])
         .with_stderr(&format!(
             "\
 [UPDATING] [..]
@@ -60,7 +60,7 @@ fn simple_logout_test(reg: Option<&str>, flag: &str) {
     check_config_token(reg, false);
 
     cargo_process(&format!("logout -Z unstable-options {}", flag))
-        .masquerade_as_nightly_cargo(&["cargo-logout"])
+        .masquerade_as_nightly_cargo(&["corgi-logout"])
         .with_stderr(&format!(
             "\
 [LOGOUT] not currently logged in to `{}`

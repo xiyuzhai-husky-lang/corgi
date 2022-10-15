@@ -143,7 +143,7 @@ fn custom_build_env_var_rustflags() {
     let rustflags_alt = "--cfg=notspecial";
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                 [build]
@@ -188,7 +188,7 @@ fn custom_build_env_var_encoded_rustflags() {
     // thing either way.
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
             [build]
             rustflags = ["-Clink-arg=-B nope", "--cfg=foo"]
@@ -314,7 +314,7 @@ fn custom_build_env_var_rustc_linker() {
     let target = cross_compile::alternate();
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                 [target.{}]
@@ -346,7 +346,7 @@ fn custom_build_env_var_rustc_linker_bad_host_target() {
     let target = rustc_host();
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                 [target.{}]
@@ -377,7 +377,7 @@ fn custom_build_env_var_rustc_linker_host_target() {
     let target = rustc_host();
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                 target-applies-to-host = false
@@ -413,7 +413,7 @@ fn custom_build_env_var_rustc_linker_host_target_env() {
     let target = rustc_host();
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                 [target.{}]
@@ -449,7 +449,7 @@ fn custom_build_invalid_host_config_feature_flag() {
     let target = rustc_host();
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                 [target.{}]
@@ -480,7 +480,7 @@ fn custom_build_linker_host_target_with_bad_host_config() {
     let target = rustc_host();
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                 [host]
@@ -515,7 +515,7 @@ fn custom_build_linker_bad_host() {
     let target = rustc_host();
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                 [host]
@@ -550,7 +550,7 @@ fn custom_build_linker_bad_host_with_arch() {
     let target = rustc_host();
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                 [host]
@@ -588,7 +588,7 @@ fn custom_build_env_var_rustc_linker_cross_arch_host() {
     let cross_target = cross_compile::alternate();
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                 [host.{}]
@@ -626,7 +626,7 @@ fn custom_build_linker_bad_cross_arch_host() {
     let cross_target = cross_compile::alternate();
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                 [host]
@@ -1037,7 +1037,7 @@ fn overrides_and_links() {
             "#,
         )
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [target.{}.foo]
@@ -1096,7 +1096,7 @@ fn unused_overrides() {
         .file("src/lib.rs", "")
         .file("build.rs", "fn main() {}")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [target.{}.foo]
@@ -1159,8 +1159,8 @@ fn links_passes_env_vars() {
                     let lib = env::var("CARGO_MANIFEST_LINKS").unwrap();
                     assert_eq!(lib, "foo");
 
-                    println!("cargo:foo=bar");
-                    println!("cargo:bar=baz");
+                    println!("corgi:foo=bar");
+                    println!("corgi:bar=baz");
                 }
             "#,
         )
@@ -1225,8 +1225,8 @@ fn rebuild_continues_to_pass_env_vars() {
             r#"
                 use std::time::Duration;
                 fn main() {
-                    println!("cargo:foo=bar");
-                    println!("cargo:bar=baz");
+                    println!("corgi:foo=bar");
+                    println!("corgi:bar=baz");
                     std::thread::sleep(Duration::from_millis(500));
                 }
             "#,
@@ -1386,7 +1386,7 @@ fn propagation_of_l_flags() {
         .file("b/src/lib.rs", "")
         .file("b/build.rs", "bad file")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [target.{}.foo]
@@ -1461,7 +1461,7 @@ fn propagation_of_l_flags_new() {
         .file("b/src/lib.rs", "")
         .file("b/build.rs", "bad file")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [target.{}.foo]
@@ -2358,7 +2358,7 @@ fn cfg_override() {
         .file("src/main.rs", "#[cfg(foo)] fn main() {}")
         .file("build.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [target.{}.a]
@@ -2493,7 +2493,7 @@ fn cfg_override_test() {
         )
         .file("build.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [target.{}.a]
@@ -2563,7 +2563,7 @@ fn cfg_override_doc() {
             "#,
         )
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [target.{target}.a]
@@ -2888,7 +2888,7 @@ fn adding_an_override_invalidates() {
             "#,
         )
         .file("src/lib.rs", "")
-        .file(".cargo/config", "")
+        .file(".corgi/config", "")
         .file(
             "build.rs",
             r#"
@@ -2912,7 +2912,7 @@ fn adding_an_override_invalidates() {
         .run();
 
     p.change_file(
-        ".cargo/config",
+        ".corgi/config",
         &format!(
             "
                 [target.{}.foo]
@@ -2950,7 +2950,7 @@ fn changing_an_override_invalidates() {
         )
         .file("src/lib.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 "
             [target.{}.foo]
@@ -2973,7 +2973,7 @@ fn changing_an_override_invalidates() {
         .run();
 
     p.change_file(
-        ".cargo/config",
+        ".corgi/config",
         &format!(
             "
                 [target.{}.foo]
@@ -3012,7 +3012,7 @@ fn fresh_builds_possible_with_link_libs() {
         )
         .file("src/lib.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 "
             [target.{}.nativefoo]
@@ -3064,7 +3064,7 @@ fn fresh_builds_possible_with_multiple_metadata_overrides() {
         )
         .file("src/lib.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 "
             [target.{}.foo]
@@ -3121,8 +3121,8 @@ fn generate_good_d_files() {
             "awoo/build.rs",
             r#"
                 fn main() {
-                    println!("cargo:rerun-if-changed=build.rs");
-                    println!("cargo:rerun-if-changed=barkbarkbark");
+                    println!("corgi:rerun-if-changed=build.rs");
+                    println!("corgi:rerun-if-changed=barkbarkbark");
                 }
             "#,
         )
@@ -3158,7 +3158,7 @@ fn generate_good_d_files() {
         .any(|v| v == "barkbarkbark" || v == "build.rs"));
 
     p.change_file(
-        ".cargo/config.toml",
+        ".corgi/config.toml",
         r#"
         [build]
         dep-info-basedir="."
@@ -3200,8 +3200,8 @@ fn generate_good_d_files_for_external_tools() {
             "awoo/build.rs",
             r#"
                 fn main() {
-                    println!("cargo:rerun-if-changed=build.rs");
-                    println!("cargo:rerun-if-changed=barkbarkbark");
+                    println!("corgi:rerun-if-changed=build.rs");
+                    println!("corgi:rerun-if-changed=barkbarkbark");
                 }
             "#,
         )
@@ -3217,7 +3217,7 @@ fn generate_good_d_files_for_external_tools() {
         )
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config.toml",
+            ".corgi/config.toml",
             r#"
                 [build]
                 dep-info-basedir="../.."
@@ -3262,8 +3262,8 @@ fn rebuild_only_on_explicit_paths() {
             "build.rs",
             r#"
                 fn main() {
-                    println!("cargo:rerun-if-changed=foo");
-                    println!("cargo:rerun-if-changed=bar");
+                    println!("corgi:rerun-if-changed=foo");
+                    println!("corgi:rerun-if-changed=bar");
                 }
             "#,
         )
@@ -3474,7 +3474,7 @@ fn non_utf8_output() {
                     // print something that's not utf8
                     out.write_all(b"\xff\xff\n").unwrap();
 
-                    // now print some cargo metadata that's utf8
+                    // now print some corgi metadata that's utf8
                     println!("cargo:rustc-cfg=foo");
 
                     // now print more non-utf8
@@ -3505,7 +3505,7 @@ fn custom_target_dir() {
         )
         .file("src/lib.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [build]
                 target-dir = 'test'
@@ -3608,8 +3608,8 @@ fn warnings_emitted() {
             "build.rs",
             r#"
                 fn main() {
-                    println!("cargo:warning=foo");
-                    println!("cargo:warning=bar");
+                    println!("corgi:warning=foo");
+                    println!("corgi:warning=bar");
                 }
             "#,
         )
@@ -3648,8 +3648,8 @@ fn warnings_emitted_when_build_script_panics() {
             "build.rs",
             r#"
                 fn main() {
-                    println!("cargo:warning=foo");
-                    println!("cargo:warning=bar");
+                    println!("corgi:warning=foo");
+                    println!("corgi:warning=bar");
                     panic!();
                 }
             "#,
@@ -3670,8 +3670,8 @@ fn warnings_hidden_for_upstream() {
             "build.rs",
             r#"
                 fn main() {
-                    println!("cargo:warning=foo");
-                    println!("cargo:warning=bar");
+                    println!("corgi:warning=foo");
+                    println!("corgi:warning=bar");
                 }
             "#,
         )
@@ -3729,8 +3729,8 @@ fn warnings_printed_on_vv() {
             "build.rs",
             r#"
                 fn main() {
-                    println!("cargo:warning=foo");
-                    println!("cargo:warning=bar");
+                    println!("corgi:warning=foo");
+                    println!("corgi:warning=bar");
                 }
             "#,
         )
@@ -3851,7 +3851,7 @@ fn links_with_dots() {
             "#,
         )
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [target.{}.'a.b']
@@ -4300,7 +4300,7 @@ fn _rename_with_link_search_path(cross: bool) {
                     // handle windows, like below
                     drop(fs::copy(root.join("foo.dll.lib"), dst_dir.join("foo.dll.lib")));
 
-                    println!("cargo:rerun-if-changed=build.rs");
+                    println!("corgi:rerun-if-changed=build.rs");
                     if cfg!(target_env = "msvc") {
                         println!("cargo:rustc-link-lib=foo.dll");
                     } else {
@@ -4355,7 +4355,7 @@ fn _rename_with_link_search_path(cross: bool) {
     // Everything should work the first time
     p2.cargo(&format!("run{}", target_arg)).run();
 
-    // Now rename the root directory and rerun `cargo run`. Not only should we
+    // Now rename the root directory and rerun `corgi run`. Not only should we
     // not build anything but we also shouldn't crash.
     let mut new = p2.root();
     new.pop();
@@ -4522,7 +4522,7 @@ fn using_rerun_if_changed_does_not_rebuild() {
             "build.rs",
             r#"
                 fn main() {
-                    println!("cargo:rerun-if-changed=build.rs");
+                    println!("corgi:rerun-if-changed=build.rs");
                 }
             "#,
         )
@@ -4560,7 +4560,7 @@ fn links_interrupted_can_restart() {
             "build.rs",
             r#"
             fn main() {
-                println!("cargo:rerun-if-env-changed=SOMEVAR");
+                println!("corgi:rerun-if-env-changed=SOMEVAR");
             }
             "#,
         )
@@ -4589,7 +4589,7 @@ fn links_interrupted_can_restart() {
             r#"
             use std::env;
             fn main() {
-                println!("cargo:rebuild-if-changed=build.rs");
+                println!("corgi:rebuild-if-changed=build.rs");
                 if std::path::Path::new("abort").exists() {
                     panic!("Crash!");
                 }
@@ -4667,7 +4667,7 @@ fn rerun_if_directory() {
             "build.rs",
             r#"
                 fn main() {
-                    println!("cargo:rerun-if-changed=somedir");
+                    println!("corgi:rerun-if-changed=somedir");
                 }
             "#,
         )
@@ -4777,7 +4777,7 @@ fn test_with_dep_metadata() {
             "bar/build.rs",
             r#"
                 fn main() {
-                    println!("cargo:foo=bar");
+                    println!("corgi:foo=bar");
                 }
             "#,
         )
@@ -4886,7 +4886,7 @@ fn wrong_output() {
             "build.rs",
             r#"
                 fn main() {
-                    println!("cargo:example");
+                    println!("corgi:example");
                 }
             "#,
         )
@@ -4897,8 +4897,8 @@ fn wrong_output() {
         .with_stderr(
             "\
 [COMPILING] foo [..]
-error: invalid output in build script of `foo v0.0.1 ([ROOT]/foo)`: `cargo:example`
-Expected a line with `cargo:key=value` with an `=` character, but none was found.
+error: invalid output in build script of `foo v0.0.1 ([ROOT]/foo)`: `corgi:example`
+Expected a line with `corgi:key=value` with an `=` character, but none was found.
 See https://doc.rust-lang.org/cargo/reference/build-scripts.html#outputs-of-the-build-script \
 for more information about build script outputs.
 ",

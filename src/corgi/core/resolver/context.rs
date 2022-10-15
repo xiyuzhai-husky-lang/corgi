@@ -49,7 +49,7 @@ pub type ContextAge = usize;
 pub type ActivationsKey = (InternedString, SourceId, SemverCompatibility);
 pub type Activations = im_rc::HashMap<ActivationsKey, (Summary, ContextAge)>;
 
-/// A type that represents when cargo treats two Versions as compatible.
+/// A type that represents when corgi treats two Versions as compatible.
 /// Versions `a` and `b` are compatible if their left-most nonzero digit is the
 /// same.
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Debug, PartialOrd, Ord)]
@@ -113,7 +113,7 @@ impl Context {
                 debug_assert_eq!(
                     &o.get().0,
                     summary,
-                    "cargo does not allow two semver compatible versions"
+                    "corgi does not allow two semver compatible versions"
                 );
             }
             im_rc::hashmap::Entry::Vacant(v) => {

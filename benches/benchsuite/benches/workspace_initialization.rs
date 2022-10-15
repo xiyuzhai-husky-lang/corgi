@@ -9,7 +9,7 @@ fn workspace_initialization(c: &mut Criterion) {
         let config = fixtures.make_config(&ws_root);
         // The resolver info is initialized only once in a lazy fashion. This
         // allows criterion to skip this workspace if the user passes a filter
-        // on the command-line (like `cargo bench -- workspace_initialization/tikv`).
+        // on the command-line (like `corgi bench -- workspace_initialization/tikv`).
         group.bench_function(ws_name, |b| {
             b.iter(|| Workspace::new(&ws_root.join("Cargo.toml"), &config).unwrap())
         });

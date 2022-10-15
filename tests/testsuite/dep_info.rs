@@ -570,7 +570,7 @@ fn non_local_build_script() {
             "build.rs",
             r#"
                 fn main() {
-                    println!("cargo:rerun-if-changed=build.rs");
+                    println!("corgi:rerun-if-changed=build.rs");
                 }
             "#,
         )

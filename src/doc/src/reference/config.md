@@ -68,7 +68,7 @@ rustc = "rustc"               # the rust compiler tool
 rustc-wrapper = "…"           # run this wrapper instead of `rustc`
 rustc-workspace-wrapper = "…" # run this wrapper instead of `rustc` for workspace members
 rustdoc = "rustdoc"           # the doc generator tool
-target = "triple"             # build for the target triple (ignored by `cargo install`)
+target = "triple"             # build for the target triple (ignored by `corgi install`)
 target-dir = "target"         # path of where to place all generated artifacts
 rustflags = ["…", "…"]        # custom flags to pass to all compiler invocations
 rustdocflags = ["…", "…"]     # custom flags to pass to rustdoc
@@ -76,7 +76,7 @@ incremental = true            # whether or not to enable incremental compilation
 dep-info-basedir = "…"        # path for the base directory for targets in depfiles
 
 [doc]
-browser = "chromium"          # browser to use with `cargo doc --open`,
+browser = "chromium"          # browser to use with `corgi doc --open`,
                               # overrides the `BROWSER` environment variable
 
 [env]
@@ -84,7 +84,7 @@ browser = "chromium"          # browser to use with `cargo doc --open`,
 ENV_VAR_NAME = "value"
 # Set even if already present in environment
 ENV_VAR_NAME_2 = { value = "value", force = true }
-# Value is relative to .cargo directory containing `config.toml`, make absolute
+# Value is relative to .corgi directory containing `config.toml`, make absolute
 ENV_VAR_NAME_3 = { value = "relative/path", relative = true }
 
 [future-incompat-report]
@@ -107,7 +107,7 @@ multiplexing = true         # HTTP/2 multiplexing
 user-agent = "…"            # the user-agent header
 
 [install]
-root = "/some/path"         # `cargo install` destination directory
+root = "/some/path"         # `corgi install` destination directory
 
 [net]
 retry = 2                   # network retries
@@ -171,10 +171,10 @@ metadata_key1 = "value"
 metadata_key2 = "value"
 
 [term]
-quiet = false          # whether cargo output is quiet
-verbose = false        # whether cargo provides verbose output
-color = 'auto'         # whether cargo colorizes output
-progress.when = 'auto' # whether cargo shows progress bar
+quiet = false          # whether corgi output is quiet
+verbose = false        # whether corgi provides verbose output
+color = 'auto'         # whether corgi colorizes output
+progress.when = 'auto' # whether corgi shows progress bar
 progress.width = 80    # width of progress bar
 ```
 
@@ -269,8 +269,8 @@ In particular, rules are:
 runner = "foo"  # Searches `PATH` for `foo`.
 
 [source.vendored-sources]
-# Directory is relative to the parent where `.cargo/config.toml` is located.
-# For example, `/my/project/.cargo/config.toml` would result in `/my/project/vendor`.
+# Directory is relative to the parent where `.corgi/config.toml` is located.
+# For example, `/my/project/.corgi/config.toml` would result in `/my/project/vendor`.
 directory = "vendor"
 ```
 

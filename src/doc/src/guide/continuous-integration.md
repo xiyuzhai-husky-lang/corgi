@@ -48,8 +48,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
-      - run: cargo build --verbose
-      - run: cargo test --verbose
+      - run: corgi build --verbose
+      - run: corgi test --verbose
   
 ```
 
@@ -67,15 +67,15 @@ rust-latest:
   stage: build
   image: rust:latest
   script:
-    - cargo build --verbose
-    - cargo test --verbose
+    - corgi build --verbose
+    - corgi test --verbose
 
 rust-nightly:
   stage: build
   image: rustlang/rust:nightly
   script:
-    - cargo build --verbose
-    - cargo test --verbose
+    - corgi build --verbose
+    - corgi test --verbose
   allow_failure: true
 ```
 

@@ -14,7 +14,7 @@ fn dev_prefer_existing_version() {
 
     snapbox::cmd::Command::cargo_ui()
         .arg("add")
-        .arg_line("cargo-list-test-fixture-dependency --dev")
+        .arg_line("corgi-list-test-fixture-dependency --dev")
         .current_dir(cwd)
         .assert()
         .success()

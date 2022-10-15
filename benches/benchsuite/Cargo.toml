@@ -10,7 +10,7 @@ description = "Benchmarking suite for Cargo."
 
 [dependencies]
 cargo = { path = "../.." }
-# Consider removing html_reports in 0.4 and switching to `cargo criterion`.
+# Consider removing html_reports in 0.4 and switching to `corgi criterion`.
 criterion = { version = "0.3.5", features = ["html_reports"] }
 flate2 = { version = "1.0.3", default-features = false, features = ["zlib"] }
 tar = { version = "0.4.38", default-features = false }

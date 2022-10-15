@@ -19,7 +19,7 @@ lazy_static! {
     static ref TEST_ROOTS: Mutex<HashMap<String, PathBuf>> = Default::default();
 }
 
-/// This is used when running cargo is pre-CARGO_TARGET_TMPDIR
+/// This is used when running corgi is pre-CARGO_TARGET_TMPDIR
 /// TODO: Remove when CARGO_TARGET_TMPDIR grows old enough.
 fn global_root_legacy() -> PathBuf {
     let mut path = t!(env::current_exe());
@@ -53,7 +53,7 @@ pub fn global_root() -> PathBuf {
 
 // We need to give each test a unique id. The test name could serve this
 // purpose, but the `test` crate doesn't have a way to obtain the current test
-// name.[*] Instead, we used the `cargo-test-macro` crate to automatically
+// name.[*] Instead, we used the `corgi-test-macro` crate to automatically
 // insert an init function for each test that sets the test name in a thread
 // local variable.
 //

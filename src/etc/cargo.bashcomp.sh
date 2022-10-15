@@ -96,7 +96,7 @@ _cargo()
 		if [[ "${cmd}" = @(test|bench) ]]; then
 			COMPREPLY=( $( compgen -W "${opt__libtest}" -- "$cur" ) )
 		else
-			# Fallback to filename completion, useful with `cargo run`.
+			# Fallback to filename completion, useful with `corgi run`.
 			_filedir
 		fi
 	elif [[ $cword -le $cmd_i ]]; then

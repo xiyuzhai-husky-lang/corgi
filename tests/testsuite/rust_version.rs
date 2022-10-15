@@ -161,7 +161,7 @@ fn rust_version_dependency_fails() {
              error: package `bar v0.0.1` cannot be built because it requires \
              rustc 1.2345.0 or newer, while the currently active rustc version is [..]\n\
              Either upgrade to rustc 1.2345.0 or newer, or use\n\
-             cargo update -p bar@0.0.1 --precise ver\n\
+             corgi update -p bar@0.0.1 --precise ver\n\
              where `ver` is the latest version of `bar` supporting rustc [..]",
         )
         .run();

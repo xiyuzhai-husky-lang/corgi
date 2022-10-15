@@ -564,7 +564,7 @@ fn cargo_config_injects_compiler_builtins() {
             "#,
         )
         .file(
-            ".cargo/config.toml",
+            ".corgi/config.toml",
             r#"
                 [unstable]
                 build-std = ['core']

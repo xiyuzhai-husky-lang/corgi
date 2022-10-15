@@ -14,9 +14,9 @@
 //!
 //! One of the major difficulties with a registry is that hosting so many
 //! packages may quickly run into performance problems when dealing with
-//! dependency graphs. It's infeasible for cargo to download the entire contents
+//! dependency graphs. It's infeasible for corgi to download the entire contents
 //! of the registry just to resolve one package's dependencies, for example. As
-//! a result, cargo needs some efficient method of querying what packages are
+//! a result, corgi needs some efficient method of querying what packages are
 //! available on a registry, what versions are available, and what the
 //! dependencies for each version is.
 //!
@@ -128,16 +128,16 @@
 //!
 //! # Filesystem Hierarchy
 //!
-//! Overall, the `$HOME/.cargo` looks like this when talking about the registry:
+//! Overall, the `$HOME/.corgi` looks like this when talking about the registry:
 //!
 //! ```notrust
 //! # A folder under which all registry metadata is hosted (similar to
-//! # $HOME/.cargo/git)
-//! $HOME/.cargo/registry/
+//! # $HOME/.corgi/git)
+//! $HOME/.corgi/registry/
 //!
-//!     # For each registry that cargo knows about (keyed by hostname + hash)
+//!     # For each registry that corgi knows about (keyed by hostname + hash)
 //!     # there is a folder which is the checked out version of the index for
-//!     # the registry in this location. Note that this is done so cargo can
+//!     # the registry in this location. Note that this is done so corgi can
 //!     # support multiple registries simultaneously
 //!     index/
 //!         registry1-<hash>/
@@ -186,11 +186,11 @@ use crate::util::{
     restricted_names, Config, CorgiResult, Filesystem, LimitErrorReader, OptVersionReq,
 };
 
-const PACKAGE_SOURCE_LOCK: &str = ".cargo-ok";
-pub const CRATES_IO_INDEX: &str = "https://github.com/rust-lang/crates.io-index";
+const PACKAGE_SOURCE_LOCK: &str = ".corgi-ok";
+pub const CRATES_IO_INDEX: &str = "https://github.com/ancient-software/husky-packages.io-index";
 pub const CRATES_IO_HTTP_INDEX: &str = "sparse+https://index.crates.io/";
 pub const CRATES_IO_REGISTRY: &str = "crates-io";
-pub const CRATES_IO_DOMAIN: &str = "crates.io";
+pub const CRATES_IO_DOMAIN: &str = "husky-packages.io";
 const CRATE_TEMPLATE: &str = "{crate}";
 const VERSION_TEMPLATE: &str = "{version}";
 const PREFIX_TEMPLATE: &str = "{prefix}";
@@ -218,7 +218,7 @@ pub struct RegistrySource<'cfg> {
     /// yanked.
     ///
     /// This is populated from the entries in `Cargo.lock` to ensure that
-    /// `cargo update -p somepkg` won't unlock yanked entries in `Cargo.lock`.
+    /// `corgi update -p somepkg` won't unlock yanked entries in `Cargo.lock`.
     /// Otherwise, the resolver would think that those entries no longer
     /// exist, and it would trigger updates to unrelated packages.
     yanked_whitelist: HashSet<PackageId>,
@@ -252,7 +252,7 @@ pub struct RegistryConfig {
     pub api: Option<String>,
 }
 
-/// The maximum version of the `v` field in the index this version of cargo
+/// The maximum version of the `v` field in the index this version of corgi
 /// understands.
 pub(crate) const INDEX_V_MAX: u32 = 2;
 
@@ -290,17 +290,17 @@ pub struct RegistryPackage<'a> {
     /// Version `2` format adds the `features2` field.
     ///
     /// This provides a method to safely introduce changes to index entries
-    /// and allow older versions of cargo to ignore newer entries it doesn't
+    /// and allow older versions of corgi to ignore newer entries it doesn't
     /// understand. This is honored as of 1.51, so unfortunately older
     /// versions will ignore it, and potentially misinterpret version 2 and
     /// newer entries.
     ///
     /// The intent is that versions older than 1.51 will work with a
-    /// pre-existing `Cargo.lock`, but they may not correctly process `cargo
-    /// update` or build a lock from scratch. In that case, cargo may
+    /// pre-existing `Cargo.lock`, but they may not correctly process `corgi
+    /// update` or build a lock from scratch. In that case, corgi may
     /// incorrectly select a new package that uses a new index format. A
     /// workaround is to downgrade any packages that are incompatible with the
-    /// `--precise` flag of `cargo update`.
+    /// `--precise` flag of `corgi update`.
     v: Option<u32>,
 }
 
@@ -354,7 +354,7 @@ struct RegistryDependency<'a> {
 }
 
 impl<'a> RegistryDependency<'a> {
-    /// Converts an encoded dependency in the registry to a cargo dependency
+    /// Converts an encoded dependency in the registry to a corgi dependency
     pub fn into_dep(self, default: SourceId) -> CorgiResult<Dependency> {
         let RegistryDependency {
             name,
@@ -393,7 +393,7 @@ impl<'a> RegistryDependency<'a> {
         // All dependencies are private by default
         let public = public.unwrap_or(false);
 
-        // Unfortunately older versions of cargo and/or the registry ended up
+        // Unfortunately older versions of corgi and/or the registry ended up
         // publishing lots of entries where the features array contained the
         // empty feature, "", inside. This confuses the resolution process much
         // later on and these features aren't actually valid, so filter them all
@@ -451,7 +451,7 @@ pub trait RegistryData {
     /// Loads the JSON for a specific named package from the index.
     ///
     /// * `root` is the root path to the index.
-    /// * `path` is the relative path to the package to load (like `ca/rg/cargo`).
+    /// * `path` is the relative path to the package to load (like `ca/rg/corgi`).
     /// * `index_version` is the version of the requested crate data currently in cache.
     fn load(
         &mut self,
@@ -604,7 +604,7 @@ impl<'cfg> RegistrySource<'cfg> {
     ///
     /// No action is taken if the source looks like it's already unpacked.
     fn unpack_package(&self, pkg: PackageId, tarball: &File) -> CorgiResult<PathBuf> {
-        // The `.cargo-ok` file is used to track if the source is already
+        // The `.corgi-ok` file is used to track if the source is already
         // unpacked.
         let package_dir = format!("{}-{}", pkg.name(), pkg.version());
         let dst = self.src_path.join(&package_dir);

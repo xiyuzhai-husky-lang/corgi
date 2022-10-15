@@ -88,11 +88,11 @@ pub fn echo() -> PathBuf {
     path
 }
 
-/// Returns a project which builds a cargo-echo simple subcommand
+/// Returns a project which builds a corgi-echo simple subcommand
 pub fn echo_subcommand() -> Project {
     let p = project()
-        .at("cargo-echo")
-        .file("Cargo.toml", &basic_manifest("cargo-echo", "0.0.1"))
+        .at("corgi-echo")
+        .file("Cargo.toml", &basic_manifest("corgi-echo", "0.0.1"))
         .file(
             "src/main.rs",
             r#"

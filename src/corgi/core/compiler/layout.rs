@@ -18,9 +18,9 @@
 //!     # like `.` to avoid name collisions.
 //!     debug/  # or release/
 //!
-//!         # File used to lock the directory to prevent multiple cargo processes
+//!         # File used to lock the directory to prevent multiple corgi processes
 //!         # from using it at the same time.
-//!         .cargo-lock
+//!         .corgi-lock
 //!
 //!         # Hidden directory that holds all of the fingerprint files for all
 //!         # packages
@@ -91,7 +91,7 @@
 //!     # Output from rustdoc
 //!     doc/
 //!
-//!     # Used by `cargo package` and `cargo publish` to build a `.crate` file.
+//!     # Used by `corgi package` and `corgi publish` to build a `.crate` file.
 //!     package/
 //!
 //!     # Experimental feature for generated build scripts.
@@ -132,7 +132,7 @@ pub struct Layout {
     doc: PathBuf,
     /// The directory for temporary data of integration tests and benches: `$dest/tmp`
     tmp: PathBuf,
-    /// The lockfile for a build (`.cargo-lock`). Will be unlocked when this
+    /// The lockfile for a build (`.corgi-lock`). Will be unlocked when this
     /// struct is `drop`ped.
     _lock: FileLock,
 }
@@ -166,7 +166,7 @@ impl Layout {
         // For now we don't do any more finer-grained locking on the artifact
         // directory, so just lock the entire thing for the duration of this
         // compile.
-        let lock = dest.open_rw(".cargo-lock", ws.config(), "build directory")?;
+        let lock = dest.open_rw(".corgi-lock", ws.config(), "build directory")?;
         let root = root.into_path_unlocked();
         let dest = dest.into_path_unlocked();
         let deps = dest.join("deps");

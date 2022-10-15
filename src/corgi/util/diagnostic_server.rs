@@ -1,5 +1,5 @@
 //! A small TCP server to handle collection of diagnostics information in a
-//! cross-platform way for the `cargo fix` command.
+//! cross-platform way for the `corgi fix` command.
 
 use std::collections::HashSet;
 use std::env;
@@ -20,9 +20,9 @@ use crate::util::Config;
 
 const DIAGNOSTICS_SERVER_VAR: &str = "__CARGO_FIX_DIAGNOSTICS_SERVER";
 const PLEASE_REPORT_THIS_BUG: &str =
-    "This likely indicates a bug in either rustc or cargo itself,\n\
+    "This likely indicates a bug in either rustc or corgi itself,\n\
      and we would appreciate a bug report! You're likely to see \n\
-     a number of compiler warnings after this message which cargo\n\
+     a number of compiler warnings after this message which corgi\n\
      attempted to fix but failed. If you could open an issue at\n\
      https://github.com/rust-lang/rust/issues\n\
      quoting the full output of this command we'd be very appreciative!\n\
@@ -201,9 +201,9 @@ If you are trying to migrate from the previous edition ({prev_edition}), the
 process requires following these steps:
 
 1. Start with `edition = \"{prev_edition}\"` in `Cargo.toml`
-2. Run `cargo fix --edition`
+2. Run `corgi fix --edition`
 3. Modify `Cargo.toml` to set `edition = \"{this_edition}\"`
-4. Run `cargo build` or `cargo test` to verify the fixes worked
+4. Run `corgi build` or `corgi test` to verify the fixes worked
 
 More details may be found at
 https://doc.rust-lang.org/edition-guide/editions/transitioning-an-existing-project-to-a-new-edition.html

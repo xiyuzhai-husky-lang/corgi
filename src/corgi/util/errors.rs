@@ -207,7 +207,7 @@ pub type CliResult = Result<(), CliError>;
 /// directly.
 pub struct CliError {
     /// The error to display. This can be `None` in rare cases to exit with a
-    /// code without displaying a message. For example `cargo run -q` where
+    /// code without displaying a message. For example `corgi run -q` where
     /// the resulting process exits with a nonzero code (on Windows), or an
     /// external subcommand that exits nonzero (we assume it printed its own
     /// message).

@@ -654,7 +654,7 @@ fn resolving_backtrack() {
 
 #[test]
 fn resolving_backtrack_features() {
-    // test for cargo/issues/4347
+    // test for corgi/issues/4347
     let mut bad = dep("bar");
     bad.set_features(vec!["bad"]);
 
@@ -1015,7 +1015,7 @@ fn resolving_with_constrained_sibling_backtrack_activation() {
     // It makes sense to resolve most-constrained deps first, but
     // with that logic the backtrack traps here come between the two
     // attempted resolutions of 'constrained'. When backtracking,
-    // cargo should skip past them and resume resolution once the
+    // corgi should skip past them and resume resolution once the
     // number of activations for 'constrained' changes.
     let mut reglist = vec![
         pkg!(("foo", "1.0.0") => [dep_req("bar", "=1.0.0"),
@@ -1060,7 +1060,7 @@ fn resolving_with_public_constrained_sibling() {
     // It makes sense to resolve most-constrained deps first, but
     // with that logic the backtrack traps here come between the two
     // attempted resolutions of 'constrained'. When backtracking,
-    // cargo should skip past them and resume resolution once the
+    // corgi should skip past them and resume resolution once the
     // number of activations for 'constrained' changes.
     let mut reglist = vec![
         pkg!(("foo", "1.0.0") => [dep_req("bar", "=1.0.0"),
@@ -1142,7 +1142,7 @@ fn incomplete_information_skipping() {
     // When backtracking due to a failed dependency, if Cargo is
     // trying to be clever and skip irrelevant dependencies, care must
     // be taken to not miss the transitive effects of alternatives.
-    // Fuzzing discovered that for some reason cargo was skipping based
+    // Fuzzing discovered that for some reason corgi was skipping based
     // on incomplete information in the following case:
     // minimized bug found in:
     // https://github.com/rust-lang/cargo/commit/003c29b0c71e5ea28fbe8e72c148c755c9f3f8d9
@@ -1191,7 +1191,7 @@ fn incomplete_information_skipping_2() {
     // When backtracking due to a failed dependency, if Cargo is
     // trying to be clever and skip irrelevant dependencies, care must
     // be taken to not miss the transitive effects of alternatives.
-    // Fuzzing discovered that for some reason cargo was skipping based
+    // Fuzzing discovered that for some reason corgi was skipping based
     // on incomplete information in the following case:
     // https://github.com/rust-lang/cargo/commit/003c29b0c71e5ea28fbe8e72c148c755c9f3f8d9
     let input = vec![
@@ -1260,7 +1260,7 @@ fn incomplete_information_skipping_3() {
     // When backtracking due to a failed dependency, if Cargo is
     // trying to be clever and skip irrelevant dependencies, care must
     // be taken to not miss the transitive effects of alternatives.
-    // Fuzzing discovered that for some reason cargo was skipping based
+    // Fuzzing discovered that for some reason corgi was skipping based
     // on incomplete information in the following case:
     // minimized bug found in:
     // https://github.com/rust-lang/cargo/commit/003c29b0c71e5ea28fbe8e72c148c755c9f3f8d9

@@ -32,7 +32,7 @@ fn removed() {
         .file(
             "Cargo.toml",
             r#"
-            cargo-features = ["publish-lockfile"]
+            corgi-features = ["publish-lockfile"]
             [package]
             name = "foo"
             version = "0.1.0"
@@ -54,7 +54,7 @@ fn removed() {
 [ERROR] failed to parse manifest at [..]
 
 Caused by:
-  the cargo feature `publish-lockfile` has been removed in the 1.37 release
+  the corgi feature `publish-lockfile` has been removed in the 1.37 release
 
   Remove the feature from Cargo.toml to remove this error.
   See https://doc.rust-lang.org/[..]cargo/reference/unstable.html#publish-lockfile [..]
@@ -378,7 +378,7 @@ dependencies = [
 [COMPILING] bar v0.1.0
 [COMPILING] foo v0.1.0
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [..]/.cargo/bin/foo[EXE]
+[INSTALLING] [..]/.corgi/bin/foo[EXE]
 [INSTALLED] package `foo v0.1.0` (executable `foo[EXE]`)
 [WARNING] be sure to add [..]
 ",
@@ -396,7 +396,7 @@ dependencies = [
 [COMPILING] bar v0.1.1
 [COMPILING] foo v0.1.0
 [FINISHED] release [optimized] target(s) in [..]
-[REPLACING] [..]/.cargo/bin/foo[EXE]
+[REPLACING] [..]/.corgi/bin/foo[EXE]
 [REPLACED] package `foo v0.1.0` with `foo v0.1.0` (executable `foo[EXE]`)
 [WARNING] be sure to add [..]
 ",

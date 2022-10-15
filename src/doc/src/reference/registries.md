@@ -271,7 +271,7 @@ explaining the format of the entry.
     //
     // Cargo (starting with version 1.51) will ignore versions it does not
     // recognize. This provides a method to safely introduce changes to index
-    // entries and allow older versions of cargo to ignore newer entries it
+    // entries and allow older versions of corgi to ignore newer entries it
     // doesn't understand. Versions older than 1.51 ignore this field, and
     // thus may misinterpret the meaning of the index entry.
     //
@@ -296,7 +296,7 @@ explaining the format of the entry.
     //
     // Registries are not required to use this field for extended feature
     // syntax, they are allowed to include those in the "features" field.
-    // Using this is only necessary if the registry wants to support cargo
+    // Using this is only necessary if the registry wants to support corgi
     // versions older than 1.19, which in practice is only crates.io since
     // those older versions do not support other registries.
     "features2": {
@@ -461,7 +461,7 @@ considered as an exhaustive list of restrictions [crates.io] imposes.
     "badges": {
         "travis-ci": {
             "branch": "master",
-            "repository": "rust-lang/cargo"
+            "repository": "rust-lang/corgi"
         }
     },
     // The `links` string value from the package's manifest, or null if not
@@ -584,7 +584,7 @@ A successful response includes the JSON object:
     // Indicates the add succeeded, always true.
     "ok": true,
     // A string to be displayed to the user.
-    "msg": "user ehuss has been invited to be an owner of crate cargo"
+    "msg": "user ehuss has been invited to be an owner of crate corgi"
 }
 ```
 

@@ -7,7 +7,7 @@ use cargo_test_support::curr_dir;
 #[cargo_test]
 fn formats_source() {
     // This cannot use `requires_rustfmt` because rustfmt is not available in
-    // the rust-lang/rust environment. Additionally, if running cargo without
+    // the rust-lang/rust environment. Additionally, if running corgi without
     // rustup (but with rustup installed), this test also fails due to HOME
     // preventing the proxy from choosing a toolchain.
     if let Err(e) = process("rustfmt").arg("-V").exec_with_output() {

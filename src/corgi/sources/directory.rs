@@ -96,7 +96,7 @@ impl<'cfg> Source for DirectorySource<'cfg> {
 
             // Ignore hidden/dot directories as they typically don't contain
             // crates and otherwise may conflict with a VCS
-            // (rust-lang/cargo#3414).
+            // (rust-lang/corgi#3414).
             if let Some(s) = path.file_name().and_then(|s| s.to_str()) {
                 if s.starts_with('.') {
                     continue;
@@ -126,10 +126,10 @@ impl<'cfg> Source for DirectorySource<'cfg> {
             src.update()?;
             let mut pkg = src.root_package()?;
 
-            let cksum_file = path.join(".cargo-checksum.json");
+            let cksum_file = path.join(".corgi-checksum.json");
             let cksum = paths::read(&path.join(cksum_file)).with_context(|| {
                 format!(
-                    "failed to load checksum `.cargo-checksum.json` \
+                    "failed to load checksum `.corgi-checksum.json` \
                      of {} v{}",
                     pkg.package_id().name(),
                     pkg.package_id().version()
@@ -137,7 +137,7 @@ impl<'cfg> Source for DirectorySource<'cfg> {
             })?;
             let cksum: Checksum = serde_json::from_str(&cksum).with_context(|| {
                 format!(
-                    "failed to decode `.cargo-checksum.json` of \
+                    "failed to decode `.corgi-checksum.json` of \
                      {} v{}",
                     pkg.package_id().name(),
                     pkg.package_id().version()

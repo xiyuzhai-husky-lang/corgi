@@ -1,4 +1,4 @@
-//! Tests for the `cargo package` command.
+//! Tests for the `corgi package` command.
 
 use cargo_test_support::paths::CargoPathExt;
 use cargo_test_support::publish::validate_crate_contents;
@@ -765,7 +765,7 @@ fn repackage_on_source_change() {
     // Add another source file
     p.change_file("src/foo.rs", r#"fn main() { println!("foo"); }"#);
 
-    // Check that cargo rebuilds the tarball
+    // Check that corgi rebuilds the tarball
     p.cargo("package")
         .with_stderr(
             "\
@@ -847,7 +847,7 @@ Caused by:
 
 #[cargo_test]
 /// Tests if a broken but excluded symlink is ignored.
-/// See issue rust-lang/cargo#10917
+/// See issue rust-lang/corgi#10917
 ///
 /// This test requires you to be able to make symlinks.
 /// For windows, this may require you to enable developer mode.
@@ -1279,7 +1279,7 @@ fn test_edition() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["edition"]
+                corgi-features = ["edition"]
                 [package]
                 name = "foo"
                 version = "0.0.1"
@@ -1418,7 +1418,7 @@ fn do_not_package_if_src_was_modified() {
 error: failed to verify package tarball
 
 Caused by:
-  Source directory was modified by build.rs during cargo publish. \
+  Source directory was modified by build.rs during corgi publish. \
   Build scripts should not modify anything outside of OUT_DIR.
   Changed: [CWD]/target/package/foo-0.0.1/bar.txt
   Added: [CWD]/target/package/foo-0.0.1/new-dir
@@ -2293,7 +2293,7 @@ fn package_with_resolver_and_metadata() {
 
 #[cargo_test]
 fn deleted_git_working_tree() {
-    // When deleting a file, but not staged, cargo should ignore the file.
+    // When deleting a file, but not staged, corgi should ignore the file.
     let (p, repo) = git::new_repo("foo", |p| {
         p.file("src/lib.rs", "").file("src/main.rs", "fn main() {}")
     });

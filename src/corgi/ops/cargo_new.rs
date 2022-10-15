@@ -130,11 +130,11 @@ impl NewOptions {
 
 #[derive(Deserialize)]
 struct CargoNewConfig {
-    #[deprecated = "cargo-new no longer supports adding the authors field"]
+    #[deprecated = "corgi-new no longer supports adding the authors field"]
     #[allow(dead_code)]
     name: Option<String>,
 
-    #[deprecated = "cargo-new no longer supports adding the authors field"]
+    #[deprecated = "corgi-new no longer supports adding the authors field"]
     #[allow(dead_code)]
     email: Option<String>,
 
@@ -207,7 +207,7 @@ fn check_name(
         if has_bin {
             anyhow::bail!(
                 "the name `{}` cannot be used as a package name, \
-                it conflicts with cargo's build directory names{}",
+                it conflicts with corgi's build directory names{}",
                 name,
                 name_help
             );
@@ -215,7 +215,7 @@ fn check_name(
             shell.warn(format!(
                 "the name `{}` will not support binary \
                 executables with that name, \
-                it conflicts with cargo's build directory names",
+                it conflicts with corgi's build directory names",
                 name
             ))?;
         }
@@ -416,7 +416,7 @@ pub fn new(opts: &NewOptions, config: &Config) -> CorgiResult<()> {
     if path.exists() {
         anyhow::bail!(
             "destination `{}` already exists\n\n\
-             Use `cargo init` to initialize the directory",
+             Use `corgi init` to initialize the directory",
             path.display()
         )
     }
@@ -455,7 +455,7 @@ pub fn init(opts: &NewOptions, config: &Config) -> CorgiResult<NewProjectKind> {
     let path = &opts.path;
 
     if path.join("Cargo.toml").exists() {
-        anyhow::bail!("`cargo init` cannot be run on existing Cargo packages")
+        anyhow::bail!("`corgi init` cannot be run on existing Cargo packages")
     }
 
     let name = get_name(path, opts)?;
@@ -519,7 +519,7 @@ pub fn init(opts: &NewOptions, config: &Config) -> CorgiResult<NewProjectKind> {
             num_detected_vsces += 1;
         }
 
-        // if none exists, maybe create git, like in `cargo new`
+        // if none exists, maybe create git, like in `corgi new`
 
         if num_detected_vsces > 1 {
             anyhow::bail!(
@@ -609,7 +609,7 @@ impl IgnoreList {
 
         // Fossil does not support `#` comments.
         if vcs != VersionControl::Fossil {
-            out.push_str("\n\n# Added by cargo\n");
+            out.push_str("\n\n# Added by corgi\n");
             if ignore_items
                 .iter()
                 .any(|item| existing_items.contains(item))
@@ -707,7 +707,7 @@ fn init_vcs(path: &Path, vcs: VersionControl, config: &Config) -> CorgiResult<()
 fn mk(config: &Config, opts: &MkOptions<'_>) -> CorgiResult<()> {
     let path = opts.path;
     let name = opts.name;
-    let cfg = config.get::<CargoNewConfig>("cargo-new")?;
+    let cfg = config.get::<CargoNewConfig>("corgi-new")?;
 
     // Using the push method with multiple arguments ensures that the entries
     // for all mutually-incompatible VCS in terms of syntax are in sync.

@@ -85,7 +85,7 @@ Caused by:
 #[cargo_test(nightly, reason = "fundamentally always nightly")]
 fn edition_unstable() {
     // During the period where a new edition is coming up, but not yet stable,
-    // this test will verify that it can be used with `cargo-features`. If
+    // this test will verify that it can be used with `corgi-features`. If
     // there is no next edition, it does nothing.
     let next = match Edition::LATEST_UNSTABLE {
         Some(next) => next,
@@ -99,7 +99,7 @@ fn edition_unstable() {
             "Cargo.toml",
             &format!(
                 r#"
-                cargo-features = ["edition{next}"]
+                corgi-features = ["edition{next}"]
 
                 [package]
                 name = "foo"

@@ -163,7 +163,7 @@ impl<'cfg> RegistryData for RemoteRegistry<'cfg> {
     // Older versions of Cargo used the single value of the hash of the HEAD commit as a `index_version`.
     // This is technically correct but a little too conservative. If a new commit is fetched all cached
     // files need to be regenerated even if a particular file was not changed.
-    // However if an old cargo has written such a file we still know how to read it, as long as we check for that hash value.
+    // However if an old corgi has written such a file we still know how to read it, as long as we check for that hash value.
     //
     // Cargo now uses a hash of the file's contents as provided by git.
     fn load(
@@ -178,7 +178,7 @@ impl<'cfg> RegistryData for RemoteRegistry<'cfg> {
         // Check if the cache is valid.
         let git_commit_hash = self.current_version();
         if index_version.is_some() && index_version == git_commit_hash.as_deref() {
-            // This file was written by an old version of cargo, but it is still up-to-date.
+            // This file was written by an old version of corgi, but it is still up-to-date.
             return Poll::Ready(Ok(LoadResponse::CacheValid));
         }
         // Note that the index calls this method and the filesystem is locked
@@ -261,7 +261,7 @@ impl<'cfg> RegistryData for RemoteRegistry<'cfg> {
         }
         // Make sure the index is only updated once per session since it is an
         // expensive operation. This generally only happens when the resolver
-        // is run multiple times, such as during `cargo publish`.
+        // is run multiple times, such as during `corgi publish`.
         if self.config.updated_sources().contains(&self.source_id) {
             return Ok(());
         }
@@ -270,7 +270,7 @@ impl<'cfg> RegistryData for RemoteRegistry<'cfg> {
 
         // Ensure that we'll actually be able to acquire an HTTP handle later on
         // once we start trying to download crates. This will weed out any
-        // problems with `.cargo/config` configuration related to HTTP.
+        // problems with `.corgi/config` configuration related to HTTP.
         //
         // This way if there's a problem the error gets printed before we even
         // hit the index, which may not actually read this configuration.

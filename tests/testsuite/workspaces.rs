@@ -1860,20 +1860,20 @@ fn glob_syntax_2() {
         .file("crates/qux/src/main.rs", "fn main() {}");
     p.build();
 
-    p.cargo("build").run();
+    p.corgi("build").run();
     assert!(p.bin("foo").is_file());
     assert!(!p.bin("bar").is_file());
     assert!(!p.bin("baz").is_file());
 
-    p.cargo("build").cwd("crates/bar").run();
+    p.corgi("build").cwd("crates/bar").run();
     assert!(p.bin("foo").is_file());
     assert!(p.bin("bar").is_file());
 
-    p.cargo("build").cwd("crates/baz").run();
+    p.corgi("build").cwd("crates/baz").run();
     assert!(p.bin("foo").is_file());
     assert!(p.bin("baz").is_file());
 
-    p.cargo("build").cwd("crates/qux").run();
+    p.corgi("build").cwd("crates/qux").run();
     assert!(!p.bin("qux").is_file());
 
     assert!(p.root().join("Cargo.lock").is_file());
@@ -1924,7 +1924,7 @@ Caused by:
 /// This test ensures that alternating building `caller1`, `caller2` doesn't force
 /// recompile of `feat_lib`.
 ///
-/// Ideally, once we solve rust-lang/cargo#3620, then a single Cargo build at the top level
+/// Ideally, once we solve rust-lang/corgi#3620, then a single Cargo build at the top level
 /// will be enough.
 #[cargo_test]
 fn dep_used_with_separate_features() {
@@ -1996,7 +1996,7 @@ fn dep_used_with_separate_features() {
 
     // Build `caller1`. Should build the dep library. Because the features
     // are different than the full workspace, it rebuilds.
-    // Ideally once we solve rust-lang/cargo#3620, then a single Cargo build at the top level
+    // Ideally once we solve rust-lang/corgi#3620, then a single Cargo build at the top level
     // will be enough.
     p.cargo("build")
         .cwd("caller1")
@@ -2039,9 +2039,9 @@ fn dont_recurse_out_of_cargo_home() {
                     use std::process::{self, Command};
 
                     fn main() {
-                        let cargo = env::var_os("CARGO").unwrap();
+                        let corgi = env::var_os("CARGO").unwrap();
                         let cargo_manifest_dir = env::var_os("CARGO_MANIFEST_DIR").unwrap();
-                        let output = Command::new(cargo)
+                        let output = Command::new(corgi)
                             .args(&["metadata", "--format-version", "1", "--manifest-path"])
                             .arg(&Path::new(&cargo_manifest_dir).join("Cargo.toml"))
                             .output()
@@ -2075,7 +2075,7 @@ fn dont_recurse_out_of_cargo_home() {
     let p = p.build();
 
     p.cargo("build")
-        .env("CARGO_HOME", p.root().join(".cargo"))
+        .env("CARGO_HOME", p.root().join(".corgi"))
         .run();
 }
 
@@ -2095,10 +2095,10 @@ fn include_and_exclude() {
         .file("foo/bar/src/lib.rs", "");
     p.build();
 
-    p.cargo("build").cwd("foo").run();
+    p.corgi("build").cwd("foo").run();
     assert!(p.root().join("target").is_dir());
     assert!(!p.root().join("foo/target").is_dir());
-    p.cargo("build").cwd("foo/bar").run();
+    p.corgi("build").cwd("foo/bar").run();
     assert!(p.root().join("foo/bar/target").is_dir());
 }
 */
@@ -2304,7 +2304,7 @@ fn ws_warn_path() {
         .file(
             "a/Cargo.toml",
             r#"
-            cargo-features = ["edition"]
+            corgi-features = ["edition"]
             [package]
             name = "foo"
             version = "0.1.0"
@@ -2314,7 +2314,7 @@ fn ws_warn_path() {
         .build();
 
     p.cargo("check")
-        .with_stderr_contains("[WARNING] [..]/foo/a/Cargo.toml: the cargo feature `edition`[..]")
+        .with_stderr_contains("[WARNING] [..]/foo/a/Cargo.toml: the corgi feature `edition`[..]")
         .run();
 }
 

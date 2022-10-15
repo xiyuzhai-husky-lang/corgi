@@ -1,4 +1,4 @@
-//! Tests for the `cargo update` command.
+//! Tests for the `corgi update` command.
 
 use cargo_test_support::registry::Package;
 use cargo_test_support::{basic_manifest, project};
@@ -202,7 +202,7 @@ fn update_via_new_dep() {
     Package::new("log", "0.1.1").publish();
 
     p.uncomment_root_manifest();
-    p.cargo("build").env("CARGO_LOG", "cargo=trace").run();
+    p.cargo("build").env("CARGO_LOG", "corgi=trace").run();
 }
 
 #[cargo_test]
@@ -535,8 +535,8 @@ fn update_aggressive_without_package() {
         .run();
 }
 
-// cargo update should respect its arguments even without a lockfile.
-// See issue "Running cargo update without a Cargo.lock ignores arguments"
+// corgi update should respect its arguments even without a lockfile.
+// See issue "Running corgi update without a Cargo.lock ignores arguments"
 // at <https://github.com/rust-lang/cargo/issues/6872>.
 #[cargo_test]
 fn update_precise_first_run() {
@@ -568,7 +568,7 @@ fn update_precise_first_run() {
         )
         .run();
 
-    // Assert `cargo metadata` shows serde 0.2.0
+    // Assert `corgi metadata` shows serde 0.2.0
     p.cargo("metadata")
         .with_json(
             r#"{
@@ -642,7 +642,7 @@ fn update_precise_first_run() {
       "license": null,
       "license_file": null,
       "links": null,
-      "manifest_path": "[..]/home/.cargo/registry/src/-[..]/serde-0.2.0/Cargo.toml",
+      "manifest_path": "[..]/home/.corgi/registry/src/-[..]/serde-0.2.0/Cargo.toml",
       "metadata": null,
       "publish": null,
       "name": "serde",
@@ -662,7 +662,7 @@ fn update_precise_first_run() {
             "lib"
           ],
           "name": "serde",
-          "src_path": "[..]/home/.cargo/registry/src/-[..]/serde-0.2.0/src/lib.rs",
+          "src_path": "[..]/home/.corgi/registry/src/-[..]/serde-0.2.0/src/lib.rs",
           "test": true
         }
       ],

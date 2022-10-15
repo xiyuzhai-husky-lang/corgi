@@ -309,7 +309,7 @@ fn rustc(cx: &mut Context<'_, '_>, unit: &Unit, exec: &Arc<dyn Executor>) -> Cor
             // Some linkers do not remove the executable, but truncate and modify it.
             // That results in the old hard-link being modified even after renamed.
             // We delete the old artifact here to prevent this behavior from confusing users.
-            // See rust-lang/cargo#8348.
+            // See rust-lang/corgi#8348.
             if output.hardlink.is_some() && output.path.exists() {
                 _ = paths::remove_file(&output.path).map_err(|e| {
                     log::debug!(
@@ -466,12 +466,12 @@ fn link_targets(cx: &mut Context<'_, '_>, unit: &Unit, fresh: bool) -> CorgiResu
     Ok(Work::new(move |state| {
         // If we're a "root crate", e.g., the target of this compilation, then we
         // hard link our outputs out of the `deps` directory into the directory
-        // above. This means that `cargo build` will produce binaries in
+        // above. This means that `corgi build` will produce binaries in
         // `target/debug` which one probably expects.
         let mut destinations = vec![];
         for output in outputs.iter() {
             let src = &output.path;
-            // This may have been a `cargo rustc` command which changes the
+            // This may have been a `corgi rustc` command which changes the
             // output, so the source may not actually exist.
             if !src.exists() {
                 continue;
@@ -769,7 +769,7 @@ fn add_cap_lints(bcx: &BuildContext<'_, '_>, unit: &Unit, cmd: &mut ProcessBuild
     }
 }
 
-/// Forward -Zallow-features if it is set for cargo.
+/// Forward -Zallow-features if it is set for corgi.
 fn add_allow_features(cx: &Context<'_, '_>, cmd: &mut ProcessBuilder) {
     if let Some(allow) = &cx.bcx.config.cli_unstable().allow_features {
         let mut arg = String::from("-Zallow-features=");

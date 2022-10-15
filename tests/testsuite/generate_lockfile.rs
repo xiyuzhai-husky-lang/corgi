@@ -1,4 +1,4 @@
-//! Tests for the `cargo generate-lockfile` command.
+//! Tests for the `corgi generate-lockfile` command.
 
 use cargo_test_support::registry::Package;
 use cargo_test_support::{basic_manifest, paths, project, ProjectBuilder};

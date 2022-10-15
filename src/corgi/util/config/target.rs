@@ -23,7 +23,7 @@ pub struct TargetCfgConfig {
 /// Config definition of a `[target]` table or `[host]`.
 #[derive(Debug, Clone)]
 pub struct TargetConfig {
-    /// Process to run as a wrapper for `cargo run`, `test`, and `bench` commands.
+    /// Process to run as a wrapper for `corgi run`, `test`, and `bench` commands.
     pub runner: OptValue<PathAndArgs>,
     /// Additional rustc flags to pass.
     pub rustflags: OptValue<StringList>,

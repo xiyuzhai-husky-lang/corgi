@@ -454,7 +454,7 @@ fn build_script_override() {
         .file("src/main.rs", "fn main() {}")
         .file("build.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [target.{}.a]
@@ -543,7 +543,7 @@ fn config_valid() {
         )
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config.toml",
+            ".corgi/config.toml",
             r#"
                 [unstable]
                 check-cfg = ["features", "names", "values"]
@@ -572,7 +572,7 @@ fn config_invalid() {
         )
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config.toml",
+            ".corgi/config.toml",
             r#"
                 [unstable]
                 check-cfg = ["va"]

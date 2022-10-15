@@ -1,4 +1,4 @@
-//! Tests for the `cargo run` command.
+//! Tests for the `corgi run` command.
 
 use cargo_test_support::{basic_bin_manifest, basic_lib_manifest, project, Project};
 use cargo_util::paths::dylib_path_envvar;
@@ -51,7 +51,7 @@ fn quiet_arg_and_verbose_arg() {
 fn quiet_arg_and_verbose_config() {
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [term]
                 verbose = true
@@ -67,7 +67,7 @@ fn quiet_arg_and_verbose_config() {
 fn verbose_arg_and_quiet_config() {
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [term]
                 quiet = true
@@ -92,7 +92,7 @@ fn verbose_arg_and_quiet_config() {
 fn quiet_config_alone() {
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [term]
                 quiet = true
@@ -108,7 +108,7 @@ fn quiet_config_alone() {
 fn verbose_config_alone() {
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [term]
                 verbose = true
@@ -133,7 +133,7 @@ fn verbose_config_alone() {
 fn quiet_config_and_verbose_config() {
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [term]
                 verbose = true
@@ -244,7 +244,7 @@ fn no_main_file() {
         .with_status(101)
         .with_stderr(
             "[ERROR] a bin target must be available \
-             for `cargo run`\n",
+             for `corgi run`\n",
         )
         .run();
 }
@@ -261,7 +261,7 @@ fn too_many_bins() {
     p.cargo("run")
         .with_status(101)
         .with_stderr(
-            "[ERROR] `cargo run` could not determine which binary to run. \
+            "[ERROR] `corgi run` could not determine which binary to run. \
              Use the `--bin` option to specify a binary, or the \
              `default-run` manifest key.\
              \navailable binaries: [..]\n",
@@ -495,7 +495,7 @@ files will be included as a example target:
 
 * [..]a.rs
 
-This is likely to break cargo build or cargo test as these files may not be
+This is likely to break corgi build or corgi test as these files may not be
 ready to be compiled as a example target today. You can future-proof yourself
 and disable this warning by adding `autoexamples = false` to your [package]
 section. You may also move the files to a location where Cargo would not
@@ -574,7 +574,7 @@ fn autobins_disables() {
 
     p.cargo("run")
         .with_status(101)
-        .with_stderr("[ERROR] a bin target must be available for `cargo run`")
+        .with_stderr("[ERROR] a bin target must be available for `corgi run`")
         .run();
 }
 
@@ -663,7 +663,7 @@ fn either_name_or_example() {
     p.cargo("run --bin a --example b")
         .with_status(101)
         .with_stderr(
-            "[ERROR] `cargo run` can run at most one \
+            "[ERROR] `corgi run` can run at most one \
              executable, but multiple were \
              specified",
         )
@@ -1008,7 +1008,7 @@ fn run_with_bin_dep_in_workspace() {
         .with_status(101)
         .with_stderr(
             "\
-[ERROR] `cargo run` could not determine which binary to run[..]
+[ERROR] `corgi run` could not determine which binary to run[..]
 available binaries: bar1, bar2, foo1, foo2",
         )
         .run();
@@ -1330,7 +1330,7 @@ fn run_multiple_packages() {
         .arg("d*")
         .with_status(101)
         .with_stderr_contains(
-            "[ERROR] `cargo run` does not support glob pattern `d*` on package selection",
+            "[ERROR] `corgi run` does not support glob pattern `d*` on package selection",
         )
         .run();
 }
@@ -1372,7 +1372,7 @@ fn run_workspace() {
         .with_status(101)
         .with_stderr(
             "\
-[ERROR] `cargo run` could not determine which binary to run[..]
+[ERROR] `corgi run` could not determine which binary to run[..]
 available binaries: a, b",
         )
         .run();
@@ -1445,7 +1445,7 @@ fn run_link_system_path_macos() {
     // 1. Build with rustc-link-search pointing to libfoo so the initial
     //    binary can be linked.
     // 2. Move the library to ~/lib
-    // 3. Run `cargo run` to make sure it can still find the library in
+    // 3. Run `corgi run` to make sure it can still find the library in
     //    ~/lib.
     //
     // This should be equivalent to having the library in /usr/local/lib.
@@ -1489,7 +1489,7 @@ fn run_link_system_path_macos() {
     p.root().rm_rf();
     const VAR: &str = "DYLD_FALLBACK_LIBRARY_PATH";
     // Reset DYLD_FALLBACK_LIBRARY_PATH so that we don't inherit anything that
-    // was set by the cargo that invoked the test.
+    // was set by the corgi that invoked the test.
     p2.cargo("run").env_remove(VAR).run();
     p2.cargo("test").env_remove(VAR).run();
     // Ensure this still works when DYLD_FALLBACK_LIBRARY_PATH has

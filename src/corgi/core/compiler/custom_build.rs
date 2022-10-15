@@ -16,7 +16,7 @@ use std::path::{Path, PathBuf};
 use std::str;
 use std::sync::{Arc, Mutex};
 
-const CARGO_WARNING: &str = "cargo:warning=";
+const CARGO_WARNING: &str = "corgi:warning=";
 
 /// Contains the parsed output of a custom build script.
 #[derive(Clone, Debug, Hash, Default)]
@@ -568,8 +568,8 @@ impl BuildOutput {
                 Err(..) => continue,
             };
             let mut iter = line.splitn(2, ':');
-            if iter.next() != Some("cargo") {
-                // skip this line since it doesn't start with "cargo:"
+            if iter.next() != Some("corgi") {
+                // skip this line since it doesn't start with "corgi:"
                 continue;
             }
             let data = match iter.next() {
@@ -583,9 +583,9 @@ impl BuildOutput {
             let value = iter.next();
             let (key, value) = match (key, value) {
                 (Some(a), Some(b)) => (a, b.trim_end()),
-                // Line started with `cargo:` but didn't match `key=value`.
+                // Line started with `corgi:` but didn't match `key=value`.
                 _ => bail!("invalid output in {}: `{}`\n\
-                    Expected a line with `cargo:key=value` with an `=` character, \
+                    Expected a line with `corgi:key=value` with an `=` character, \
                     but none was found.\n\
                     See https://doc.rust-lang.org/cargo/reference/build-scripts.html#outputs-of-the-build-script \
                     for more information about build script outputs.", whence, line),
@@ -601,7 +601,7 @@ impl BuildOutput {
                 ($target_kind: expr, $is_target_kind: expr, $link_type: expr) => {
                     if !targets.iter().any(|target| $is_target_kind(target)) {
                         bail!(
-                            "invalid instruction `cargo:{}` from {}\n\
+                            "invalid instruction `corgi:{}` from {}\n\
                                 The package {} does not have a {} target.",
                             key,
                             whence,
@@ -625,13 +625,13 @@ impl BuildOutput {
                 "rustc-link-arg-cdylib" | "rustc-cdylib-link-arg" => {
                     if !targets.iter().any(|target| target.is_cdylib()) {
                         warnings.push(format!(
-                            "cargo:{} was specified in the build script of {}, \
+                            "corgi:{} was specified in the build script of {}, \
                              but that package does not contain a cdylib target\n\
                              \n\
                              Allowing this was an unintended change in the 1.50 \
                              release, and may become an error in the future. \
                              For more information, see \
-                             <https://github.com/rust-lang/cargo/issues/9562>.",
+                             <https://github.com/rust-lang/corgi/issues/9562>.",
                             key, pkg_descr
                         ));
                     }
@@ -645,8 +645,8 @@ impl BuildOutput {
                     let bin_name = parts.next().unwrap().to_string();
                     let arg = parts.next().ok_or_else(|| {
                         anyhow::format_err!(
-                            "invalid instruction `cargo:{}={}` from {}\n\
-                                The instruction should have the form cargo:{}=BIN=ARG",
+                            "invalid instruction `corgi:{}={}` from {}\n\
+                                The instruction should have the form corgi:{}=BIN=ARG",
                             key,
                             value,
                             whence,
@@ -658,7 +658,7 @@ impl BuildOutput {
                         .any(|target| target.is_bin() && target.name() == bin_name)
                     {
                         bail!(
-                            "invalid instruction `cargo:{}` from {}\n\
+                            "invalid instruction `corgi:{}` from {}\n\
                                 The package {} does not have a bin target with the name `{}`.",
                             key,
                             whence,
@@ -685,7 +685,7 @@ impl BuildOutput {
                     if extra_check_cfg {
                         check_cfgs.push(value.to_string());
                     } else {
-                        warnings.push(format!("cargo:{} requires -Zcheck-cfg=output flag", key));
+                        warnings.push(format!("corgi:{} requires -Zcheck-cfg=output flag", key));
                     }
                 }
                 "rustc-env" => {
@@ -699,7 +699,7 @@ impl BuildOutput {
                         // to set RUSTC_BOOTSTRAP.
                         // If this is a nightly build, setting RUSTC_BOOTSTRAP wouldn't affect the
                         // behavior, so still only give a warning.
-                        // NOTE: cargo only allows nightly features on RUSTC_BOOTSTRAP=1, but we
+                        // NOTE: corgi only allows nightly features on RUSTC_BOOTSTRAP=1, but we
                         // want setting any value of RUSTC_BOOTSTRAP to downgrade this to a warning
                         // (so that `RUSTC_BOOTSTRAP=library_name` will work)
                         let rustc_bootstrap_allows = |name: Option<&str>| {
@@ -725,7 +725,7 @@ impl BuildOutput {
                             // Abort with an error.
                             bail!("Cannot set `RUSTC_BOOTSTRAP={}` from {}.\n\
                                 note: Crates cannot set `RUSTC_BOOTSTRAP` themselves, as doing so would subvert the stability guarantees of Rust for your project.\n\
-                                help: If you're sure you want to do this in your project, set the environment variable `RUSTC_BOOTSTRAP={}` before running cargo instead.",
+                                help: If you're sure you want to do this in your project, set the environment variable `RUSTC_BOOTSTRAP={}` before running corgi instead.",
                                 val,
                                 whence,
                                 library_name.as_deref().unwrap_or("1"),

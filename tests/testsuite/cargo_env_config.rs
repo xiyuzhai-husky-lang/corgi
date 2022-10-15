@@ -17,7 +17,7 @@ fn env_basic() {
         "#,
         )
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [env]
                 ENV_TEST_1233 = "Hello"
@@ -43,7 +43,7 @@ fn env_invalid() {
         "#,
         )
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [env]
                 ENV_TEST_BOOL = false
@@ -73,7 +73,7 @@ fn env_force() {
         "#,
         )
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [env]
                 ENV_TEST_UNFORCED_DEFAULT = "from-config"
@@ -114,7 +114,7 @@ fn env_relative() {
         "#,
         )
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [env]
                 ENV_TEST_REGULAR = { value = "Cargo.toml", relative = false }
@@ -141,7 +141,7 @@ fn env_no_override() {
         "#,
         )
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [env]
                 CARGO_PKG_NAME = { value = "from-config", force = true }

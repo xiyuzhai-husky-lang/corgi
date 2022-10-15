@@ -8,7 +8,7 @@
 //! ## Index Performance
 //!
 //! One important aspect of the index is that we want to optimize the "happy
-//! path" as much as possible. Whenever you type `cargo build` Cargo will
+//! path" as much as possible. Whenever you type `corgi build` Cargo will
 //! *always* reparse the registry and learn about dependency information. This
 //! is done because Cargo needs to learn about the upstream crates.io crates
 //! that you're using and ensure that the preexisting `Cargo.lock` still matches
@@ -423,7 +423,7 @@ impl<'cfg> RegistryIndex<'cfg> {
             // target-cfg or optional), but are not downloaded. Normally the
             // build should succeed if they are not downloaded and not used,
             // but they still need to resolve. If they are actually needed
-            // then cargo will fail to download and an error message
+            // then corgi will fail to download and an error message
             // indicating that the required dependency is unavailable while
             // offline will be displayed.
             if ready!(self.query_inner_with_online(dep, load, yanked_whitelist, f, false)?) > 0 {
@@ -464,7 +464,7 @@ impl<'cfg> RegistryIndex<'cfg> {
             .filter(|s| !s.yanked || yanked_whitelist.contains(&s.summary.package_id()))
             .map(|s| s.summary.clone());
 
-        // Handle `cargo update --precise` here. If specified, our own source
+        // Handle `corgi update --precise` here. If specified, our own source
         // will have a precise version listed of the form
         // `<pkg>=<p_req>o-><f_req>` where `<pkg>` is the name of a crate on
         // this source, `<p_req>` is the version installed and `<f_req> is the
@@ -531,7 +531,7 @@ impl Summaries {
     /// Parse out a `Summaries` instances from on-disk state.
     ///
     /// This will attempt to prefer parsing a previous cache file that already
-    /// exists from a previous invocation of Cargo (aka you're typing `cargo
+    /// exists from a previous invocation of Cargo (aka you're typing `corgi
     /// build` again after typing it previously). If parsing fails or the cache
     /// isn't found, then we take a slower path which loads the full descriptor
     /// for `relative` from the underlying index (aka typically libgit2 with
@@ -603,16 +603,16 @@ impl Summaries {
                 for line in split(&ret.raw_data, b'\n') {
                     // Attempt forwards-compatibility on the index by ignoring
                     // everything that we ourselves don't understand, that should
-                    // allow future cargo implementations to break the
-                    // interpretation of each line here and older cargo will simply
+                    // allow future corgi implementations to break the
+                    // interpretation of each line here and older corgi will simply
                     // ignore the new lines.
                     let summary = match IndexSummary::parse(config, line, source_id) {
                         Ok(summary) => summary,
                         Err(e) => {
                             // This should only happen when there is an index
-                            // entry from a future version of cargo that this
+                            // entry from a future version of corgi that this
                             // version doesn't understand. Hopefully, those future
-                            // versions of cargo correctly set INDEX_V_MAX and
+                            // versions of corgi correctly set INDEX_V_MAX and
                             // CURRENT_CACHE_VERSION, otherwise this will skip
                             // entries in the cache preventing those newer
                             // versions from reading them (that is, until the
@@ -714,7 +714,7 @@ impl Summaries {
 // Cache versions:
 // * `1`: The original version.
 // * `2`: Added the "index format version" field so that if the index format
-//   changes, different versions of cargo won't get confused reading each
+//   changes, different versions of corgi won't get confused reading each
 //   other's caches.
 // * `3`: Bumped the version to work around an issue where multiple versions of
 //   a package were published that differ only by semver metadata. For
@@ -827,7 +827,7 @@ impl IndexSummary {
     fn parse(config: &Config, line: &[u8], source_id: SourceId) -> CorgiResult<IndexSummary> {
         // ****CAUTION**** Please be extremely careful with returning errors
         // from this function. Entries that error are not included in the
-        // index cache, and can cause cargo to get confused when switching
+        // index cache, and can cause corgi to get confused when switching
         // between different versions that understand the index differently.
         // Make sure to consider the INDEX_V_MAX and CURRENT_CACHE_VERSION
         // values carefully when making changes here.

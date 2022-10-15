@@ -54,7 +54,7 @@ The lib target `a` in package `b v1.0.0 ([..]/foo/b)` has the same output filena
 Colliding filename is: [..]/foo/target/debug/deps/{}a{}
 The targets should have unique names.
 Consider changing their names to be unique or compiling them separately.
-This may become a hard error in the future; see <https://github.com/rust-lang/cargo/issues/6313>.
+This may become a hard error in the future; see <https://github.com/rust-lang/corgi/issues/6313>.
 ", env::consts::DLL_PREFIX, env::consts::DLL_SUFFIX))
         .run();
 }
@@ -85,7 +85,7 @@ The example target `ex1` in package `b v1.0.0 ([..]/foo/b)` has the same output 
 Colliding filename is: [..]/foo/target/debug/examples/ex1[EXE]
 The targets should have unique names.
 Consider changing their names to be unique or compiling them separately.
-This may become a hard error in the future; see <https://github.com/rust-lang/cargo/issues/6313>.
+This may become a hard error in the future; see <https://github.com/rust-lang/corgi/issues/6313>.
 ")
         .run();
 }
@@ -114,7 +114,7 @@ The example target `foo` in package `foo v1.0.0 ([..]/foo)` has the same output 
 Colliding filename is: [..]/foo/out/foo[EXE]
 The exported filenames should be unique.
 Consider changing their names to be unique or compiling them separately.
-This may become a hard error in the future; see <https://github.com/rust-lang/cargo/issues/6313>.
+This may become a hard error in the future; see <https://github.com/rust-lang/corgi/issues/6313>.
 ")
         .run();
 }
@@ -157,7 +157,7 @@ filename as the lib target `foo` in package `foo v0.1.0 ([..]/foo)`.
 Colliding filename is: [..]/foo/target/doc/foo/index.html
 The targets should have unique names.
 This is a known bug where multiple crates with the same name use
-the same path; see <https://github.com/rust-lang/cargo/issues/6313>.
+the same path; see <https://github.com/rust-lang/corgi/issues/6313>.
 ",
         )
         .run();
@@ -421,7 +421,7 @@ the lib target `bar` in package `bar v1.0.0 ([..]/foo/bar)`.
 Colliding filename is: [..]/foo/target/doc/bar/index.html
 The targets should have unique names.
 This is a known bug where multiple crates with the same name use
-the same path; see <https://github.com/rust-lang/cargo/issues/6313>.
+the same path; see <https://github.com/rust-lang/corgi/issues/6313>.
 [CHECKING] bar v1.0.0 [..]
 [DOCUMENTING] bar v1.0.0 [..]
 [DOCUMENTING] bar v1.0.0
@@ -536,7 +536,7 @@ The lib target `foo-macro` in package `foo-macro v1.0.0` has the same output fil
 Colliding filename is: [CWD]/target/doc/foo_macro/index.html
 The targets should have unique names.
 This is a known bug where multiple crates with the same name use
-the same path; see <https://github.com/rust-lang/cargo/issues/6313>.
+the same path; see <https://github.com/rust-lang/corgi/issues/6313>.
 [CHECKING] foo-macro v1.0.0
 [DOCUMENTING] foo-macro v1.0.0
 [CHECKING] abc v1.0.0 [..]

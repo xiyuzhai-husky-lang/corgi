@@ -373,7 +373,7 @@ impl<'a> PathAncestors<'a> {
             .or_else(|| stop_root_at.map(|p| p.to_path_buf()));
         PathAncestors {
             current: Some(path),
-            //HACK: avoid reading `~/.cargo/config` when testing Cargo itself.
+            //HACK: avoid reading `~/.corgi/config` when testing Cargo itself.
             stop_at,
         }
     }
@@ -530,7 +530,7 @@ fn _link_or_copy(src: &Path, dst: &Path) -> Result<()> {
         // This is a work-around for a bug in macOS 10.15. When running on
         // APFS, there seems to be a strange race condition with
         // Gatekeeper where it will forcefully kill a process launched via
-        // `cargo run` with SIGKILL. Copying seems to avoid the problem.
+        // `corgi run` with SIGKILL. Copying seems to avoid the problem.
         // This shouldn't affect anyone except Cargo's test suite because
         // it is very rare, and only seems to happen under heavy load and
         // rapidly creating lots of executables and running them.
@@ -635,7 +635,7 @@ pub fn create_dir_all_excluded_from_backups_atomic(p: impl AsRef<Path>) -> Resul
     // We do this in two steps (first create a temporary directory and exclude
     // it from backups, then rename it to the desired name. If we created the
     // directory directly where it should be and then excluded it from backups
-    // we would risk a situation where cargo is interrupted right after the directory
+    // we would risk a situation where corgi is interrupted right after the directory
     // creation but before the exclusion the the directory would remain non-excluded from
     // backups because we only perform exclusion right after we created the directory
     // ourselves.
@@ -651,7 +651,7 @@ pub fn create_dir_all_excluded_from_backups_atomic(p: impl AsRef<Path>) -> Resul
     // the directory being created concurrently by another thread or process as success,
     // hence the check below to follow the existing behavior. If we get an error at
     // rename() and suddently the directory (which didn't exist a moment earlier) exists
-    // we can infer from it it's another cargo process doing work.
+    // we can infer from it it's another corgi process doing work.
     if let Err(e) = fs::rename(tempdir.path(), path) {
         if !path.exists() {
             return Err(anyhow::Error::from(e));
@@ -681,7 +681,7 @@ fn exclude_from_backups(path: &Path) {
     let _ = std::fs::write(
         path.join("CACHEDIR.TAG"),
         "Signature: 8a477f597d28d172789f06886806bc55
-# This file is a cache directory tag created by cargo.
+# This file is a cache directory tag created by corgi.
 # For information about cache directory tags see https://bford.info/cachedir/
 ",
     );
@@ -692,7 +692,7 @@ fn exclude_from_backups(path: &Path) {
 ///
 /// This is recommended to prevent the content of derived/temporary files from being indexed.
 /// This is very important for Windows users, as the live content indexing significantly slows
-/// cargo's I/O operations.
+/// corgi's I/O operations.
 ///
 /// This is currently a no-op on non-Windows platforms.
 fn exclude_from_content_indexing(path: &Path) {

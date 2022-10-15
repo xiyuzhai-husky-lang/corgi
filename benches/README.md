@@ -6,7 +6,7 @@ book to get familiar with how to use it. A basic usage would be:
 
 ```sh
 cd benches/benchsuite
-cargo bench
+corgi bench
 ```
 
 The tests involve downloading the index and benchmarking against some
@@ -21,7 +21,7 @@ faster. You can (and probably should) specify individual benchmarks to run to
 narrow it down to a more reasonable set, for example:
 
 ```sh
-cargo bench -- resolve_ws/rust
+corgi bench -- resolve_ws/rust
 ```
 
 This will only download what's necessary for the rust-lang/rust workspace
@@ -29,7 +29,7 @@ This will only download what's necessary for the rust-lang/rust workspace
 about a minute). To get a list of all the benchmarks, run:
 
 ```sh
-cargo bench -- --list
+corgi bench -- --list
 ```
 
 ## Viewing reports
@@ -51,14 +51,14 @@ To make it easier to compare, Criterion supports naming the baseline so that
 you can iterate on your code and compare against it multiple times.
 
 ```sh
-cargo bench -- --save-baseline master
+corgi bench -- --save-baseline master
 ```
 
 Now you can switch to your branch with your changes. Re-run the benchmarks
 compared against the baseline:
 
 ```sh
-cargo bench -- --baseline master
+corgi bench -- --baseline master
 ```
 
 You can repeat the last command as you make changes to re-compare against the
@@ -82,7 +82,7 @@ To run it, do:
 
 ```sh
 cd benches/capture
-cargo run -- /path/to/workspace/foo
+corgi run -- /path/to/workspace/foo
 ```
 
 The resolver benchmarks also support the `CARGO_BENCH_WORKSPACES` environment
@@ -90,7 +90,7 @@ variable, which you can point to a Cargo workspace if you want to try
 different workspaces. For example:
 
 ```sh
-CARGO_BENCH_WORKSPACES=/path/to/some/workspace cargo bench
+CARGO_BENCH_WORKSPACES=/path/to/some/workspace corgi bench
 ```
 
 ## TODO

@@ -131,7 +131,7 @@ The output has the following format:
                        This property is not included if no required features are set.
                     */
                     "required-features": ["feat1"],
-                    /* Whether the target should be documented by `cargo doc`. */
+                    /* Whether the target should be documented by `corgi doc`. */
                     "doc": true,
                     /* Whether or not this target has doc tests enabled, and
                        the target is compatible with doc testing.
@@ -180,7 +180,7 @@ The output has the following format:
             "categories": [
                 "command-line-utilities"
             ],
-            /* Optional string that is the default binary picked by cargo run. */
+            /* Optional string that is the default binary picked by corgi run. */
             "default_run": null,
             /* Optional string that is the minimum supported rust version */
             "rust_version": "1.56",

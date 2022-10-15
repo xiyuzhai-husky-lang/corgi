@@ -107,7 +107,7 @@ flate2 = { version = "1.0.3", default-features = false, features = ["zlib"] }
 tar = { version = "0.4.38", default-features = false }
 
 [[bin]]
-name = "cargo"
+name = "corgi"
 test = false
 doc = false
 

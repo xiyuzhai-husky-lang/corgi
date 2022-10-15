@@ -193,7 +193,7 @@ impl ProcessBuilder {
     /// This is primarily for the `@path` arg of rustc and rustdoc, which treat
     /// each line as an command-line argument, so `LF` and `CRLF` bytes are not
     /// valid as an argument for argfile at this moment.
-    /// For example, `RUSTDOCFLAGS="--crate-version foo\nbar" cargo doc` is
+    /// For example, `RUSTDOCFLAGS="--crate-version foo\nbar" corgi doc` is
     /// valid when invoking from command-line but not from argfile.
     ///
     /// To sum up, the limitations of the argfile are:
@@ -438,7 +438,7 @@ impl ProcessBuilder {
         use std::io::Write as _;
 
         let mut tmp = tempfile::Builder::new()
-            .prefix("cargo-argfile.")
+            .prefix("corgi-argfile.")
             .tempfile()?;
 
         let mut arg = OsString::from("@");
@@ -638,7 +638,7 @@ mod tests {
         let cmd_args: Vec<_> = cmd.get_args().map(|s| s.to_str().unwrap()).collect();
         assert_eq!(cmd_args.len(), 1);
         assert!(cmd_args[0].starts_with("@"));
-        assert!(cmd_args[0].contains("cargo-argfile."));
+        assert!(cmd_args[0].contains("corgi-argfile."));
 
         let buf = fs::read_to_string(argfile.path()).unwrap();
         assert_eq!(buf, "foo\nbar\n");

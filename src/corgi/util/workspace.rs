@@ -62,7 +62,7 @@ pub fn print_available_packages(ws: &Workspace<'_>) -> CorgiResult<()> {
 
     let mut output = "\"--package <SPEC>\" requires a SPEC format value, \
         which can be any package ID specifier in the dependency graph.\n\
-        Run `cargo help pkgid` for more information about SPEC format.\n\n"
+        Run `corgi help pkgid` for more information about SPEC format.\n\n"
         .to_string();
 
     if packages.is_empty() {
@@ -99,7 +99,7 @@ pub fn print_available_tests(ws: &Workspace<'_>, options: &CompileOptions) -> Co
 /// (important for caching), etc. As a result we need to be pretty careful how we
 /// actually invoke rustc.
 ///
-/// In general users don't expect `cargo build` to cause rebuilds if you change
+/// In general users don't expect `corgi build` to cause rebuilds if you change
 /// directories. That could be if you just change directories in the package or
 /// if you literally move the whole package wholesale to a new directory. As a
 /// result we mostly don't factor in `cwd` to this calculation. Instead we try to

@@ -173,7 +173,7 @@ impl SourceId {
     /// cannot be determined, e.g. a user passes `--index` directly from CLI.
     ///
     /// Use [`SourceId::for_alt_registry`] if a name can provided, which
-    /// generates better messages for cargo.
+    /// generates better messages for corgi.
     pub fn for_registry(url: &Url) -> CorgiResult<SourceId> {
         SourceId::new(SourceKind::Registry, url.clone(), None)
     }
@@ -197,8 +197,8 @@ impl SourceId {
 
     /// Returns the `SourceId` corresponding to the main repository.
     ///
-    /// This is the main cargo registry by default, but it can be overridden in
-    /// a `.cargo/config.toml`.
+    /// This is the main corgi registry by default, but it can be overridden in
+    /// a `.corgi/config.toml`.
     pub fn crates_io(config: &Config) -> CorgiResult<SourceId> {
         config.crates_io_source_id(|| {
             config.check_registry_index_not_set()?;
@@ -551,7 +551,7 @@ impl PartialOrd for SourceKind {
 // otherwise derived.
 //
 // The reason for this is somewhat obtuse. First of all the hash value of
-// `SourceKind` makes its way into `~/.cargo/registry/index/github.com-XXXX`
+// `SourceKind` makes its way into `~/.corgi/registry/index/github.com-XXXX`
 // which means that changes to the hash means that all Rust users need to
 // redownload the crates.io index and all their crates. If possible we strive to
 // not change this to make this redownloading behavior happen as little as

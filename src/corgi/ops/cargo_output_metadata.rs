@@ -53,7 +53,7 @@ pub fn output_metadata(ws: &Workspace<'_>, opt: &OutputMetadataOptions) -> Corgi
 
 /// This is the structure that is serialized and displayed to the user.
 ///
-/// See cargo-metadata.adoc for detailed documentation of the format.
+/// See corgi-metadata.adoc for detailed documentation of the format.
 #[derive(Serialize)]
 pub struct ExportInfo {
     packages: Vec<SerializedPackage>,

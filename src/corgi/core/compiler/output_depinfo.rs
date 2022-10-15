@@ -6,7 +6,7 @@
 //! dependencies needed to build the artifact. Example:
 //!
 //! ```makefile
-//! /path/to/target/debug/deps/cargo-b6219d178925203d: src/bin/main.rs src/bin/cargo/cli.rs # … etc.
+//! /path/to/target/debug/deps/corgi-b6219d178925203d: src/bin/main.rs src/bin/corgi/cli.rs # … etc.
 //! ```
 //!
 //! The fingerprint module has code to parse these files, and stores them as

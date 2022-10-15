@@ -229,7 +229,7 @@ impl<'cfg> Compilation<'cfg> {
     }
 
     /// Returns a [`ProcessBuilder`] appropriate for running a process for the
-    /// target platform. This is typically used for `cargo run` and `cargo
+    /// target platform. This is typically used for `corgi run` and `corgi
     /// test`.
     ///
     /// `script_meta` is the metadata for the `RunCustomBuild` unit that this
@@ -355,7 +355,7 @@ impl<'cfg> Compilation<'cfg> {
 
         // Apply any environment variables from the config
         for (key, value) in self.config.env_config()?.iter() {
-            // never override a value that has already been set by cargo
+            // never override a value that has already been set by corgi
             if cmd.get_envs().contains_key(key) {
                 continue;
             }

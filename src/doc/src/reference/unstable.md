@@ -189,7 +189,7 @@ that the artifacts are copied, so the originals are still in the `target`
 directory. Example:
 
 ```sh
-cargo +nightly build --out-dir=out -Z unstable-options
+corgi +nightly build --out-dir=out -Z unstable-options
 ```
 
 This can also be specified in `.cargo/config.toml` files.
@@ -212,7 +212,7 @@ while also passing it a `--target` option, as well as enabling
 information from `.cargo/config.toml`. See the rustc issue for more information.
 
 ```sh
-cargo test --target foo -Zdoctest-xcompile
+corgi test --target foo -Zdoctest-xcompile
 ```
 
 #### New `dir-name` attribute
@@ -238,7 +238,7 @@ anything. This can be useful when integrating with another build tool.
 Example:
 
 ```sh
-cargo +nightly build --build-plan -Z unstable-options
+corgi +nightly build --build-plan -Z unstable-options
 ```
 
 ### Metabuild
@@ -436,7 +436,7 @@ takes a string for a path to another file relative to the config file, or a
 list of strings. It requires the `-Zconfig-include` command-line option.
 
 ```toml
-# .cargo/config
+# .corgi/config
 include = '../../some-common-config.toml'
 ```
 
@@ -563,10 +563,10 @@ The following is a description of the JSON structure:
   "units": [
     {
       /* An opaque string which indicates the package.
-         Information about the package can be obtained from `cargo metadata`.
+         Information about the package can be obtained from `corgi metadata`.
       */
       "pkg_id": "my-package 0.1.0 (path+file:///path/to/my-package)",
-      /* The Cargo target. See the `cargo metadata` documentation for more
+      /* The Cargo target. See the `corgi metadata` documentation for more
          information about these fields.
          https://doc.rust-lang.org/cargo/commands/cargo-metadata.html
       */

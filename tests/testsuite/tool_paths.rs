@@ -10,7 +10,7 @@ fn pathless_tools() {
         .file("Cargo.toml", &basic_lib_manifest("foo"))
         .file("src/lib.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [target.{}]
@@ -47,7 +47,7 @@ fn absolute_tools() {
         .file("Cargo.toml", &basic_lib_manifest("foo"))
         .file("src/lib.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [target.{target}]
@@ -82,13 +82,13 @@ fn relative_tools() {
     };
 
     // Funky directory structure to test that relative tool paths are made absolute
-    // by reference to the `.cargo/..` directory and not to (for example) the CWD.
+    // by reference to the `.corgi/..` directory and not to (for example) the CWD.
     let p = project()
         .no_manifest()
         .file("bar/Cargo.toml", &basic_lib_manifest("bar"))
         .file("bar/src/lib.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [target.{target}]
@@ -124,7 +124,7 @@ fn custom_runner() {
         .file("tests/test.rs", "")
         .file("benches/bench.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [target.{}]
@@ -178,7 +178,7 @@ fn custom_runner_cfg() {
     let p = project()
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
             [target.'cfg(not(target_os = "none"))']
             runner = "nonexistent-runner -r"
@@ -206,7 +206,7 @@ fn custom_runner_cfg_precedence() {
     let p = project()
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [target.'cfg(not(target_os = "none"))']
@@ -237,7 +237,7 @@ fn custom_runner_cfg_collision() {
     let p = project()
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
             [target.'cfg(not(target_arch = "avr"))']
             runner = "true"
@@ -253,8 +253,8 @@ fn custom_runner_cfg_collision() {
         .with_stderr(
             "\
 [ERROR] several matching instances of `target.'cfg(..)'.runner` in configurations
-first match `cfg(not(target_arch = \"avr\"))` located in [..]/foo/.cargo/config
-second match `cfg(not(target_os = \"none\"))` located in [..]/foo/.cargo/config
+first match `cfg(not(target_arch = \"avr\"))` located in [..]/foo/.corgi/config
+second match `cfg(not(target_os = \"none\"))` located in [..]/foo/.corgi/config
 ",
         )
         .run();
@@ -292,7 +292,7 @@ fn custom_runner_env_overrides_config() {
     let p = project()
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config.toml",
+            ".corgi/config.toml",
             &format!(
                 r#"
                     [target.{}]
@@ -367,7 +367,7 @@ fn cfg_ignored_fields() {
     // Test for some ignored fields in [target.'cfg()'] tables.
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
             # Try some empty tables.
             [target.'cfg(not(foo))']

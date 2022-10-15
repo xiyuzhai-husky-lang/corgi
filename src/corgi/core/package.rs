@@ -731,7 +731,7 @@ impl<'a, 'cfg> Downloads<'a, 'cfg> {
         //
         // Currently Cargo requests the `http2` feature of the `curl` crate
         // which means it should always be built in. On OSX, however, we ship
-        // cargo still linked against the system libcurl. Building curl with
+        // corgi still linked against the system libcurl. Building curl with
         // ALPN support for HTTP/2 requires newer versions of OSX (the
         // SecureTransport API) than we want to ship Cargo for. By linking Cargo
         // against the system libcurl then older curl installations won't use

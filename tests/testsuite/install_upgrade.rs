@@ -1,4 +1,4 @@
-//! Tests for `cargo install` where it upgrades a package if it is out-of-date.
+//! Tests for `corgi install` where it upgrades a package if it is out-of-date.
 
 use corgi::core::PackageId;
 use std::collections::BTreeSet;
@@ -50,7 +50,7 @@ fn installed_exe(name: &str) -> PathBuf {
     cargo_home().join("bin").join(exe(name))
 }
 
-/// Helper for executing binaries installed by cargo.
+/// Helper for executing binaries installed by corgi.
 fn installed_process(name: &str) -> Execs {
     static NEXT_ID: AtomicUsize = AtomicUsize::new(0);
     thread_local!(static UNIQUE_ID: usize = NEXT_ID.fetch_add(1, Ordering::SeqCst));
@@ -135,7 +135,7 @@ fn registry_upgrade() {
 [INSTALLING] foo v1.0.0
 [COMPILING] foo v1.0.0
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [CWD]/home/.cargo/bin/foo[EXE]
+[INSTALLING] [CWD]/home/.corgi/bin/foo[EXE]
 [INSTALLED] package `foo v1.0.0` (executable `foo[EXE]`)
 [WARNING] be sure to add [..]
 ",
@@ -165,7 +165,7 @@ fn registry_upgrade() {
 [INSTALLING] foo v1.0.1
 [COMPILING] foo v1.0.1
 [FINISHED] release [optimized] target(s) in [..]
-[REPLACING] [CWD]/home/.cargo/bin/foo[EXE]
+[REPLACING] [CWD]/home/.corgi/bin/foo[EXE]
 [REPLACED] package `foo v1.0.0` with `foo v1.0.1` (executable `foo[EXE]`)
 [WARNING] be sure to add [..]
 ",
@@ -215,9 +215,9 @@ fn upgrade_force() {
 [INSTALLING] foo v1.0.0
 [COMPILING] foo v1.0.0
 [FINISHED] release [optimized] target(s) in [..]
-[REPLACING] [..]/.cargo/bin/foo[EXE]
+[REPLACING] [..]/.corgi/bin/foo[EXE]
 [REPLACED] package `foo v1.0.0` with `foo v1.0.0` (executable `foo[EXE]`)
-[WARNING] be sure to add `[..]/.cargo/bin` to your PATH [..]
+[WARNING] be sure to add `[..]/.corgi/bin` to your PATH [..]
 ",
         )
         .run();
@@ -603,22 +603,22 @@ fn multiple_report() {
 [INSTALLING] one v1.0.0
 [COMPILING] one v1.0.0
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [..]/.cargo/bin/one[EXE]
+[INSTALLING] [..]/.corgi/bin/one[EXE]
 [INSTALLED] package `one v1.0.0` (executable `one[EXE]`)
 [INSTALLING] two v1.0.0
 [COMPILING] two v1.0.0
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [..]/.cargo/bin/two[EXE]
+[INSTALLING] [..]/.corgi/bin/two[EXE]
 [INSTALLED] package `two v1.0.0` (executable `two[EXE]`)
 [INSTALLING] three v1.0.0
 [COMPILING] three v1.0.0
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [..]/.cargo/bin/three[EXE]
-[INSTALLING] [..]/.cargo/bin/x[EXE]
-[INSTALLING] [..]/.cargo/bin/y[EXE]
+[INSTALLING] [..]/.corgi/bin/three[EXE]
+[INSTALLING] [..]/.corgi/bin/x[EXE]
+[INSTALLING] [..]/.corgi/bin/y[EXE]
 [INSTALLED] package `three v1.0.0` (executables `three[EXE]`, `x[EXE]`, `y[EXE]`)
 [SUMMARY] Successfully installed one, two, three!
-[WARNING] be sure to add `[..]/.cargo/bin` to your PATH [..]
+[WARNING] be sure to add `[..]/.corgi/bin` to your PATH [..]
 ",
         )
         .run();
@@ -636,21 +636,21 @@ fn multiple_report() {
 [INSTALLING] three v1.0.1
 [COMPILING] three v1.0.1
 [FINISHED] release [optimized] target(s) in [..]
-[REPLACING] [..]/.cargo/bin/three[EXE]
-[REPLACING] [..]/.cargo/bin/x[EXE]
-[REPLACING] [..]/.cargo/bin/y[EXE]
+[REPLACING] [..]/.corgi/bin/three[EXE]
+[REPLACING] [..]/.corgi/bin/x[EXE]
+[REPLACING] [..]/.corgi/bin/y[EXE]
 [REPLACED] package `three v1.0.0` with `three v1.0.1` (executables `three[EXE]`, `x[EXE]`, `y[EXE]`)
 [SUMMARY] Successfully installed one, two, three!
-[WARNING] be sure to add `[..]/.cargo/bin` to your PATH [..]
+[WARNING] be sure to add `[..]/.corgi/bin` to your PATH [..]
 ",
         )
         .run();
     cargo_process("uninstall three")
         .with_stderr(
             "\
-[REMOVING] [..]/.cargo/bin/three[EXE]
-[REMOVING] [..]/.cargo/bin/x[EXE]
-[REMOVING] [..]/.cargo/bin/y[EXE]
+[REMOVING] [..]/.corgi/bin/three[EXE]
+[REMOVING] [..]/.corgi/bin/x[EXE]
+[REMOVING] [..]/.corgi/bin/y[EXE]
 ",
         )
         .run();
@@ -661,9 +661,9 @@ fn multiple_report() {
 [INSTALLING] three v1.0.1
 [COMPILING] three v1.0.1
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [..]/.cargo/bin/x[EXE]
+[INSTALLING] [..]/.corgi/bin/x[EXE]
 [INSTALLED] package `three v1.0.1` (executable `x[EXE]`)
-[WARNING] be sure to add `[..]/.cargo/bin` to your PATH [..]
+[WARNING] be sure to add `[..]/.corgi/bin` to your PATH [..]
 ",
         )
         .run();
@@ -674,12 +674,12 @@ fn multiple_report() {
 [INSTALLING] three v1.0.1
 [COMPILING] three v1.0.1
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [..]/.cargo/bin/three[EXE]
-[INSTALLING] [..]/.cargo/bin/y[EXE]
-[REPLACING] [..]/.cargo/bin/x[EXE]
+[INSTALLING] [..]/.corgi/bin/three[EXE]
+[INSTALLING] [..]/.corgi/bin/y[EXE]
+[REPLACING] [..]/.corgi/bin/x[EXE]
 [INSTALLED] package `three v1.0.1` (executables `three[EXE]`, `y[EXE]`)
 [REPLACED] package `three v1.0.1` with `three v1.0.1` (executable `x[EXE]`)
-[WARNING] be sure to add `[..]/.cargo/bin` to your PATH [..]
+[WARNING] be sure to add `[..]/.corgi/bin` to your PATH [..]
 ",
         )
         .run();
@@ -695,7 +695,7 @@ fn no_track() {
         .with_stderr(
             "\
 [UPDATING] `[..]` index
-[ERROR] binary `foo[EXE]` already exists in destination `[..]/.cargo/bin/foo[EXE]`
+[ERROR] binary `foo[EXE]` already exists in destination `[..]/.corgi/bin/foo[EXE]`
 Add --force to overwrite
 ",
         )
@@ -739,10 +739,10 @@ fn deletes_orphaned() {
 [INSTALLING] foo v0.2.0 [..]
 [COMPILING] foo v0.2.0 [..]
 [FINISHED] release [..]
-[INSTALLING] [..]/.cargo/bin/ex2[EXE]
-[REPLACING] [..]/.cargo/bin/ex1[EXE]
-[REPLACING] [..]/.cargo/bin/foo[EXE]
-[REMOVING] executable `[..]/.cargo/bin/other[EXE]` from previous version foo v0.1.0 [..]
+[INSTALLING] [..]/.corgi/bin/ex2[EXE]
+[REPLACING] [..]/.corgi/bin/ex1[EXE]
+[REPLACING] [..]/.corgi/bin/foo[EXE]
+[REMOVING] executable `[..]/.corgi/bin/other[EXE]` from previous version foo v0.1.0 [..]
 [INSTALLED] package `foo v0.2.0 [..]` (executable `ex2[EXE]`)
 [REPLACED] package `foo v0.1.0 [..]` with `foo v0.2.0 [..]` (executables `ex1[EXE]`, `foo[EXE]`)
 [WARNING] be sure to add [..]
@@ -787,7 +787,7 @@ fn already_installed_exact_does_not_update() {
 [INSTALLING] foo v1.0.1
 [COMPILING] foo v1.0.1
 [FINISHED] release [optimized] target(s) in [..]
-[REPLACING] [CWD]/home/.cargo/bin/foo[EXE]
+[REPLACING] [CWD]/home/.corgi/bin/foo[EXE]
 [REPLACED] package `foo v1.0.0` with `foo v1.0.1` (executable `foo[EXE]`)
 [WARNING] be sure to add [..]
 ",
@@ -822,7 +822,7 @@ fn already_installed_updates_yank_status_on_upgrade() {
 [INSTALLING] foo v1.0.1
 [COMPILING] foo v1.0.1
 [FINISHED] release [optimized] target(s) in [..]
-[REPLACING] [CWD]/home/.cargo/bin/foo[EXE]
+[REPLACING] [CWD]/home/.corgi/bin/foo[EXE]
 [REPLACED] package `foo v1.0.0` with `foo v1.0.1` (executable `foo[EXE]`)
 [WARNING] be sure to add [..]
 ",
@@ -848,12 +848,12 @@ fn partially_already_installed_does_one_update() {
 [INSTALLING] bar v1.0.0
 [COMPILING] bar v1.0.0
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [CWD]/home/.cargo/bin/bar[EXE]
+[INSTALLING] [CWD]/home/.corgi/bin/bar[EXE]
 [INSTALLED] package `bar v1.0.0` (executable `bar[EXE]`)
 [INSTALLING] baz v1.0.0
 [COMPILING] baz v1.0.0
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [CWD]/home/.cargo/bin/baz[EXE]
+[INSTALLING] [CWD]/home/.corgi/bin/baz[EXE]
 [INSTALLED] package `baz v1.0.0` (executable `baz[EXE]`)
 [SUMMARY] Successfully installed foo, bar, baz!
 [WARNING] be sure to add [..]

@@ -1,4 +1,4 @@
-//! Tests for the `cargo fetch` command.
+//! Tests for the `corgi fetch` command.
 
 use cargo_test_support::registry::Package;
 use cargo_test_support::rustc_host;

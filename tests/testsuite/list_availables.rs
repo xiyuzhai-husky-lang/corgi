@@ -18,7 +18,7 @@ fn list_availables_test(command: &str, targets: u8) {
         .file("tests/test1.rs", "")
         .file("tests/test2.rs", "")
         .file("src/main.rs", "fn main() { }")
-        .file("Cargo.lock", "") // for `cargo pkgid`
+        .file("Cargo.lock", "") // for `corgi pkgid`
         .build();
 
     if targets & EXAMPLE != 0 {
@@ -91,7 +91,7 @@ Available tests:
                 "\
 [ERROR] \"--package <SPEC>\" requires a SPEC format value, \
 which can be any package ID specifier in the dependency graph.
-Run `cargo help pkgid` for more information about SPEC format.
+Run `corgi help pkgid` for more information about SPEC format.
 
 Possible packages/workspace members:
     foo

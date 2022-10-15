@@ -1,4 +1,4 @@
-//! Tests for the `cargo init` command.
+//! Tests for the `corgi init` command.
 
 mod auto_git;
 mod bin_already_exists_explicit;

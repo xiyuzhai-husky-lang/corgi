@@ -12,7 +12,7 @@ pub struct FetchOptions<'a> {
     pub targets: Vec<String>,
 }
 
-/// Executes `cargo fetch`.
+/// Executes `corgi fetch`.
 pub fn fetch<'a>(
     ws: &Workspace<'a>,
     options: &FetchOptions<'a>,

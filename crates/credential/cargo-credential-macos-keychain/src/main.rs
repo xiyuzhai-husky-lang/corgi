@@ -9,7 +9,7 @@ struct MacKeychain;
 const ACCOUNT: &'static str = "";
 
 fn registry(registry_name: &str) -> String {
-    format!("cargo-registry:{}", registry_name)
+    format!("corgi-registry:{}", registry_name)
 }
 
 impl Credential for MacKeychain {

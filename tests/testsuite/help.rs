@@ -1,4 +1,4 @@
-//! Tests for cargo's help output.
+//! Tests for corgi's help output.
 
 use cargo_test_support::registry::Package;
 use cargo_test_support::{basic_manifest, cargo_exe, cargo_process, paths, process, project};
@@ -25,7 +25,7 @@ fn help() {
 fn help_external_subcommand() {
     // Check that `help external-subcommand` forwards the --help flag to the
     // given subcommand.
-    Package::new("cargo-fake-help", "1.0.0")
+    Package::new("corgi-fake-help", "1.0.0")
         .file(
             "src/main.rs",
             r#"
@@ -37,7 +37,7 @@ fn help_external_subcommand() {
             "#,
         )
         .publish();
-    cargo_process("install cargo-fake-help").run();
+    cargo_process("install corgi-fake-help").run();
     cargo_process("help fake-help")
         .with_stdout("fancy help output\n")
         .run();
@@ -45,7 +45,7 @@ fn help_external_subcommand() {
 
 #[cargo_test]
 fn z_flags_help() {
-    // Test that the output of `cargo -Z help` shows a different help screen with
+    // Test that the output of `corgi -Z help` shows a different help screen with
     // all the `-Z` flags.
     cargo_process("-Z help")
         .with_stdout_contains(
@@ -84,10 +84,10 @@ fn help_with_man_and_path(
     path: &Path,
 ) {
     let contents = if display_command == "man" {
-        fs::read_to_string(format!("src/etc/man/cargo-{}.1", actual_subcommand)).unwrap()
+        fs::read_to_string(format!("src/etc/man/corgi-{}.1", actual_subcommand)).unwrap()
     } else {
         fs::read_to_string(format!(
-            "src/doc/man/generated_txt/cargo-{}.txt",
+            "src/doc/man/generated_txt/corgi-{}.txt",
             actual_subcommand
         ))
         .unwrap()
@@ -140,7 +140,7 @@ fn help_alias() {
     // Check that `help some_alias` will resolve.
     help_with_man_and_path("", "b", "build", Path::new(""));
 
-    let config = paths::root().join(".cargo/config");
+    let config = paths::root().join(".corgi/config");
     fs::create_dir_all(config.parent().unwrap()).unwrap();
     fs::write(
         config,

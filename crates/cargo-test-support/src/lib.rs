@@ -43,7 +43,7 @@ macro_rules! curr_dir {
 pub fn _curr_dir(mut file_path: &'static Path) -> &'static Path {
     if !file_path.exists() {
         // HACK: Must be running in the rust-lang/rust workspace, adjust the paths accordingly.
-        let prefix = PathBuf::from("src").join("tools").join("cargo");
+        let prefix = PathBuf::from("src").join("tools").join("corgi");
         if let Ok(crate_relative) = file_path.strip_prefix(prefix) {
             file_path = crate_relative
         }
@@ -183,7 +183,7 @@ impl SymlinkBuilder {
     }
 }
 
-/// A cargo project to run tests against.
+/// A corgi project to run tests against.
 ///
 /// See [`ProjectBuilder`] or [`Project::from_template`] to get started.
 pub struct Project {
@@ -202,12 +202,12 @@ pub struct ProjectBuilder {
 }
 
 impl ProjectBuilder {
-    /// Root of the project, ex: `/path/to/cargo/target/cit/t0/foo`
+    /// Root of the project, ex: `/path/to/corgi/target/cit/t0/foo`
     pub fn root(&self) -> PathBuf {
         self.root.root()
     }
 
-    /// Project's debug dir, ex: `/path/to/cargo/target/cit/t0/foo/target/debug`
+    /// Project's debug dir, ex: `/path/to/corgi/target/cit/t0/foo/target/debug`
     pub fn target_debug_dir(&self) -> PathBuf {
         self.root.target_debug_dir()
     }
@@ -295,8 +295,8 @@ impl ProjectBuilder {
             file.mk();
             if is_coarse_mtime() {
                 // Place the entire project 1 second in the past to ensure
-                // that if cargo is called multiple times, the 2nd call will
-                // see targets as "fresh". Without this, if cargo finishes in
+                // that if corgi is called multiple times, the 2nd call will
+                // see targets as "fresh". Without this, if corgi finishes in
                 // under 1 second, the second call will see the mtime of
                 // source == mtime of output and consider it dirty.
                 filetime::set_file_times(&file.path, ftime, ftime).unwrap();
@@ -325,29 +325,29 @@ impl Project {
         Self { root: project_root }
     }
 
-    /// Root of the project, ex: `/path/to/cargo/target/cit/t0/foo`
+    /// Root of the project, ex: `/path/to/corgi/target/cit/t0/foo`
     pub fn root(&self) -> PathBuf {
         self.root.clone()
     }
 
-    /// Project's target dir, ex: `/path/to/cargo/target/cit/t0/foo/target`
+    /// Project's target dir, ex: `/path/to/corgi/target/cit/t0/foo/target`
     pub fn build_dir(&self) -> PathBuf {
         self.root().join("target")
     }
 
-    /// Project's debug dir, ex: `/path/to/cargo/target/cit/t0/foo/target/debug`
+    /// Project's debug dir, ex: `/path/to/corgi/target/cit/t0/foo/target/debug`
     pub fn target_debug_dir(&self) -> PathBuf {
         self.build_dir().join("debug")
     }
 
-    /// File url for root, ex: `file:///path/to/cargo/target/cit/t0/foo`
+    /// File url for root, ex: `file:///path/to/corgi/target/cit/t0/foo`
     pub fn url(&self) -> Url {
         path2url(self.root())
     }
 
     /// Path to an example built as a library.
     /// `kind` should be one of: "lib", "rlib", "staticlib", "dylib", "proc-macro"
-    /// ex: `/path/to/cargo/target/cit/t0/foo/target/debug/examples/libex.rlib`
+    /// ex: `/path/to/corgi/target/cit/t0/foo/target/debug/examples/libex.rlib`
     pub fn example_lib(&self, name: &str, kind: &str) -> PathBuf {
         self.target_debug_dir()
             .join("examples")
@@ -355,7 +355,7 @@ impl Project {
     }
 
     /// Path to a debug binary.
-    /// ex: `/path/to/cargo/target/cit/t0/foo/target/debug/foo`
+    /// ex: `/path/to/corgi/target/cit/t0/foo/target/debug/foo`
     pub fn bin(&self, b: &str) -> PathBuf {
         self.build_dir()
             .join("debug")
@@ -363,7 +363,7 @@ impl Project {
     }
 
     /// Path to a release binary.
-    /// ex: `/path/to/cargo/target/cit/t0/foo/target/release/foo`
+    /// ex: `/path/to/corgi/target/cit/t0/foo/target/release/foo`
     pub fn release_bin(&self, b: &str) -> PathBuf {
         self.build_dir()
             .join("release")
@@ -371,7 +371,7 @@ impl Project {
     }
 
     /// Path to a debug binary for a specific target triple.
-    /// ex: `/path/to/cargo/target/cit/t0/foo/target/i686-apple-darwin/debug/foo`
+    /// ex: `/path/to/corgi/target/cit/t0/foo/target/i686-apple-darwin/debug/foo`
     pub fn target_bin(&self, target: &str, b: &str) -> PathBuf {
         self.build_dir().join(target).join("debug").join(&format!(
             "{}{}",
@@ -405,10 +405,10 @@ impl Project {
         execs().with_process_builder(p)
     }
 
-    /// Creates a `ProcessBuilder` to run cargo.
+    /// Creates a `ProcessBuilder` to run corgi.
     /// Arguments can be separated by spaces.
     /// Example:
-    ///     p.cargo("build --bin foo").run();
+    ///     p.corgi("build --bin foo").run();
     pub fn cargo(&self, cmd: &str) -> Execs {
         let mut execs = self.process(&cargo_exe());
         if let Some(ref mut p) = execs.process_builder {
@@ -417,7 +417,7 @@ impl Project {
         execs
     }
 
-    /// Safely run a process after `cargo build`.
+    /// Safely run a process after `corgi build`.
     ///
     /// Windows has a problem where a process cannot be reliably
     /// be replaced, removed, or renamed immediately after executing it.
@@ -425,11 +425,11 @@ impl Project {
     /// it may succeed, but future attempts to use the same filename
     /// will fail with "Already Exists".
     ///
-    /// If you have a test that needs to do `cargo run` multiple
-    /// times, you should instead use `cargo build` and use this
+    /// If you have a test that needs to do `corgi run` multiple
+    /// times, you should instead use `corgi build` and use this
     /// method to run the executable. Each time you call this,
     /// use a new name for `dst`.
-    /// See rust-lang/cargo#5481.
+    /// See rust-lang/corgi#5481.
     pub fn rename_run(&self, src: &str, dst: &str) -> Execs {
         let src = self.bin(src);
         let dst = self.bin(dst);
@@ -512,7 +512,7 @@ pub fn main_file(println: &str, deps: &[&str]) -> String {
 }
 
 pub fn cargo_exe() -> PathBuf {
-    snapbox::cmd::cargo_bin("cargo")
+    snapbox::cmd::cargo_bin("corgi")
 }
 
 /// This is the raw output from the process.
@@ -648,7 +648,7 @@ impl Execs {
     ///
     /// See [`compare`] for supported patterns.
     ///
-    /// This is useful when checking the output of `cargo build -v` since
+    /// This is useful when checking the output of `corgi build -v` since
     /// the order of the output is not always deterministic.
     /// Recommend use `with_stderr_contains` instead unless you really want to
     /// check *every* line of output.
@@ -702,13 +702,13 @@ impl Execs {
 
     /// Verifies the JSON output matches the given JSON.
     ///
-    /// This is typically used when testing cargo commands that emit JSON.
+    /// This is typically used when testing corgi commands that emit JSON.
     /// Each separate JSON object should be separated by a blank line.
     /// Example:
     ///
     /// ```rust,ignore
     /// assert_that(
-    ///     p.cargo("metadata"),
+    ///     p.corgi("metadata"),
     ///     execs().with_json(r#"
     ///         {"example": "abc"}
     ///
@@ -808,7 +808,7 @@ impl Execs {
 
     /// Enables nightly features for testing
     ///
-    /// The list of reasons should be why nightly cargo is needed. If it is
+    /// The list of reasons should be why nightly corgi is needed. If it is
     /// becuase of an unstable feature put the name of the feature as the reason,
     /// e.g. `&["print-im-a-teapot"]`
     pub fn masquerade_as_nightly_cargo(&mut self, reasons: &[&str]) -> &mut Self {
@@ -1121,7 +1121,7 @@ pub fn rustc_host() -> &'static str {
     &RUSTC_INFO.host
 }
 
-/// The host triple suitable for use in a cargo environment variable (uppercased).
+/// The host triple suitable for use in a corgi environment variable (uppercased).
 pub fn rustc_host_env() -> String {
     rustc_host().to_uppercase().replace('-', "_")
 }
@@ -1131,7 +1131,7 @@ pub fn is_nightly() -> bool {
     // CARGO_TEST_DISABLE_NIGHTLY is set in rust-lang/rust's CI so that all
     // nightly-only tests are disabled there. Otherwise, it could make it
     // difficult to land changes which would need to be made simultaneously in
-    // rust-lang/cargo and rust-lan/rust, which isn't possible.
+    // rust-lang/corgi and rust-lan/rust, which isn't possible.
     env::var("CARGO_TEST_DISABLE_NIGHTLY").is_err()
         && (vv.contains("-nightly") || vv.contains("-dev"))
 }
@@ -1148,7 +1148,7 @@ fn _process(t: &OsStr) -> ProcessBuilder {
 
 /// Enable nightly features for testing
 pub trait ChannelChanger {
-    /// The list of reasons should be why nightly cargo is needed. If it is
+    /// The list of reasons should be why nightly corgi is needed. If it is
     /// becuase of an unstable feature put the name of the feature as the reason,
     /// e.g. `&["print-im-a-teapot"]`.
     fn masquerade_as_nightly_cargo(self, _reasons: &[&str]) -> Self;
@@ -1169,7 +1169,7 @@ impl ChannelChanger for snapbox::cmd::Command {
 /// Establish a process's test environment
 pub trait TestEnv: Sized {
     fn test_env(mut self) -> Self {
-        // In general just clear out all cargo-specific configuration already in the
+        // In general just clear out all corgi-specific configuration already in the
         // environment. Our tests all assume a "default configuration" unless
         // specified otherwise.
         for (k, _v) in env::vars() {
@@ -1208,11 +1208,11 @@ pub trait TestEnv: Sized {
         self = self
             .current_dir(&paths::root())
             .env("HOME", paths::home())
-            .env("CARGO_HOME", paths::home().join(".cargo"))
+            .env("CARGO_HOME", paths::home().join(".corgi"))
             .env("__CARGO_TEST_ROOT", paths::global_root())
             // Force Cargo to think it's on the stable channel for all tests, this
-            // should hopefully not surprise us as we add cargo features over time and
-            // cargo rides the trains.
+            // should hopefully not surprise us as we add corgi features over time and
+            // corgi rides the trains.
             .env("__CARGO_TEST_CHANNEL_OVERRIDE_DO_NOT_USE_THIS", "stable")
             // For now disable incremental by default as support hasn't ridden to the
             // stable channel yet. Once incremental support hits the stable compiler we
@@ -1272,7 +1272,7 @@ impl TestEnv for snapbox::cmd::Command {
     }
 }
 
-/// Test the cargo command
+/// Test the corgi command
 pub trait CargoCommand {
     fn cargo_ui() -> Self;
 }

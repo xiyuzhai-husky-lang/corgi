@@ -3,7 +3,7 @@ The `--timings` option gives some information about how long each compilation
 takes, and tracks concurrency information over time.
 
 ```sh
-cargo build --timings
+corgi build --timings
 ```
 
 This writes an HTML report in `target/cargo-timings/cargo-timing.html`. This

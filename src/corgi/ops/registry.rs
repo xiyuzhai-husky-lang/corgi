@@ -473,7 +473,7 @@ fn registry(
     if !sid.is_remote_registry() {
         bail!(
             "{} does not support API commands.\n\
-             Check for a source-replacement in .cargo/config.",
+             Check for a source-replacement in .corgi/config.",
             sid
         );
     }
@@ -517,7 +517,7 @@ fn registry(
                     "using `registry.token` config value with source \
                         replacement is deprecated\n\
                         This may become a hard error in the future; \
-                        see <https://github.com/rust-lang/cargo/issues/xxx>.\n\
+                        see <https://github.com/rust-lang/corgi/issues/xxx>.\n\
                         Use the --token command-line flag to remove this warning.",
                 )?;
                 reg_cfg.as_token().map(|t| t.to_owned())
@@ -541,7 +541,7 @@ fn registry(
     Ok((Registry::new_handle(api_host, token, handle), reg_cfg, sid))
 }
 
-/// Creates a new HTTP handle with appropriate global configuration for cargo.
+/// Creates a new HTTP handle with appropriate global configuration for corgi.
 pub fn http_handle(config: &Config) -> CorgiResult<Easy> {
     let (mut handle, timeout) = http_handle_and_timeout(config)?;
     timeout.configure(&mut handle)?;
@@ -594,7 +594,7 @@ pub fn configure_http_handle(config: &Config, handle: &mut Easy) -> CorgiResult<
     if let Some(user_agent) = &http.user_agent {
         handle.useragent(user_agent)?;
     } else {
-        handle.useragent(&format!("cargo {}", version()))?;
+        handle.useragent(&format!("corgi {}", version()))?;
     }
 
     fn to_ssl_version(s: &str) -> CorgiResult<SslVersion> {
@@ -705,7 +705,7 @@ impl HttpTimeout {
 
 /// Finds an explicit HTTP proxy if one is available.
 ///
-/// Favor cargo's `http.proxy`, then git's `http.proxy`. Proxies specified
+/// Favor corgi's `http.proxy`, then git's `http.proxy`. Proxies specified
 /// via environment variables are picked up by libcurl.
 fn http_proxy(config: &Config) -> CorgiResult<Option<String>> {
     let http = config.http_config()?;
@@ -724,7 +724,7 @@ fn http_proxy(config: &Config) -> CorgiResult<Option<String>> {
 ///
 /// Checks the following for existence, in order:
 ///
-/// * cargo's `http.proxy`
+/// * corgi's `http.proxy`
 /// * git's `http.proxy`
 /// * `http_proxy` env var
 /// * `HTTP_PROXY` env var
@@ -762,9 +762,9 @@ pub fn registry_login(
                 .lock()
                 .read_line(&mut line)
                 .with_context(|| "failed to read stdin")?;
-            // Automatically remove `cargo login` from an inputted token to
+            // Automatically remove `corgi login` from an inputted token to
             // allow direct pastes from `registry.host()`/me.
-            line.replace("cargo login", "").trim().to_string()
+            line.replace("corgi login", "").trim().to_string()
         }
     };
 

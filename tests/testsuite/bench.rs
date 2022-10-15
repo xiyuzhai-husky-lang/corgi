@@ -1,4 +1,4 @@
-//! Tests for the `cargo bench` command.
+//! Tests for the `corgi bench` command.
 
 use cargo_test_support::paths::CargoPathExt;
 use cargo_test_support::{basic_bin_manifest, basic_lib_manifest, basic_manifest, project};
@@ -601,7 +601,7 @@ files will be included as a benchmark target:
 
 * [..]bench_basic.rs
 
-This is likely to break cargo build or cargo test as these files may not be
+This is likely to break corgi build or corgi test as these files may not be
 ready to be compiled as a benchmark target today. You can future-proof yourself
 and disable this warning by adding `autobenches = false` to your [package]
 section. You may also move the files to a location where Cargo would not
@@ -623,7 +623,7 @@ fn dont_run_examples() {
         .file("src/lib.rs", "")
         .file(
             "examples/dont-run-me-i-will-fail.rs",
-            r#"fn main() { panic!("Examples should not be run by 'cargo test'"); }"#,
+            r#"fn main() { panic!("Examples should not be run by 'corgi test'"); }"#,
         )
         .build();
     p.cargo("bench").run();
@@ -664,7 +664,7 @@ fn pass_through_command_line() {
         .run();
 }
 
-// Regression test for running cargo-bench twice with
+// Regression test for running corgi-bench twice with
 // tests in an rlib
 #[cargo_test(nightly, reason = "bench")]
 fn cargo_bench_twice() {

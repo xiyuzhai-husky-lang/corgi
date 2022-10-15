@@ -407,7 +407,7 @@ impl<'a, 'cfg> Context<'a, 'cfg> {
         self.primary_packages.contains(&unit.pkg.package_id())
     }
 
-    /// Returns the list of filenames read by cargo to generate the `BuildContext`
+    /// Returns the list of filenames read by corgi to generate the `BuildContext`
     /// (all `Cargo.toml`, etc.).
     pub fn build_plan_inputs(&self) -> CorgiResult<Vec<PathBuf>> {
         // Keep sorted for consistency.
@@ -449,10 +449,10 @@ impl<'a, 'cfg> Context<'a, 'cfg> {
         let suggestion =
             "Consider changing their names to be unique or compiling them separately.\n\
              This may become a hard error in the future; see \
-             <https://github.com/rust-lang/cargo/issues/6313>.";
+             <https://github.com/rust-lang/corgi/issues/6313>.";
         let rustdoc_suggestion =
             "This is a known bug where multiple crates with the same name use\n\
-             the same path; see <https://github.com/rust-lang/cargo/issues/6313>.";
+             the same path; see <https://github.com/rust-lang/corgi/issues/6313>.";
         let report_collision = |unit: &Unit,
                                 other_unit: &Unit,
                                 path: &PathBuf,
@@ -476,7 +476,7 @@ impl<'a, 'cfg> Context<'a, 'cfg> {
                     If this looks unexpected, it may be a bug in Cargo. Please file a bug report at\n\
                     https://github.com/rust-lang/cargo/issues/ with as much information as you\n\
                     can provide.\n\
-                    cargo {} running on `{}` target `{}`\n\
+                    corgi {} running on `{}` target `{}`\n\
                     First unit: {:?}\n\
                     Second unit: {:?}",
                     describe_collision(unit, other_unit, path),

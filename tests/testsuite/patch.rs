@@ -85,7 +85,7 @@ fn from_config() {
             "#,
         )
         .file(
-            ".cargo/config.toml",
+            ".corgi/config.toml",
             r#"
                 [patch.crates-io]
                 bar = { path = 'bar' }
@@ -126,7 +126,7 @@ fn from_config_relative() {
             "#,
         )
         .file(
-            "../.cargo/config.toml",
+            "../.corgi/config.toml",
             r#"
                 [patch.crates-io]
                 bar = { path = 'foo/bar' }
@@ -170,7 +170,7 @@ fn from_config_precedence() {
             "#,
         )
         .file(
-            ".cargo/config.toml",
+            ".corgi/config.toml",
             r#"
                 [patch.crates-io]
                 bar = { path = 'bar' }
@@ -516,7 +516,7 @@ fn unused_from_config() {
             "#,
         )
         .file(
-            ".cargo/config.toml",
+            ".corgi/config.toml",
             r#"
                 [patch.crates-io]
                 bar = { path = "bar" }
@@ -732,7 +732,7 @@ fn add_patch_from_config() {
     p.cargo("build").with_stderr("[FINISHED] [..]").run();
 
     p.change_file(
-        ".cargo/config.toml",
+        ".corgi/config.toml",
         r#"
             [patch.crates-io]
             bar = { path = 'bar' }
@@ -1899,7 +1899,7 @@ fn canonicalize_a_bunch() {
 #[cargo_test]
 fn update_unused_new_version() {
     // If there is an unused patch entry, and then you update the patch,
-    // make sure `cargo update` will be able to fix the lock file.
+    // make sure `corgi update` will be able to fix the lock file.
     Package::new("bar", "0.1.5").publish();
 
     // Start with a lock file to 0.1.5, and an "unused" patch because the
@@ -1977,7 +1977,7 @@ fn update_unused_new_version() {
         )
         .run();
 
-    // Try with bare `cargo update`.
+    // Try with bare `corgi update`.
     fs::copy(p.root().join("Cargo.lock.bak"), p.root().join("Cargo.lock")).unwrap();
     p.cargo("update")
         .with_stderr(

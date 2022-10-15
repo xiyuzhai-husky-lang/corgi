@@ -13,7 +13,7 @@ fn exported_priv_warning() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["public-dependency"]
+                corgi-features = ["public-dependency"]
 
                 [package]
                 name = "foo"
@@ -52,7 +52,7 @@ fn exported_pub_dep() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["public-dependency"]
+                corgi-features = ["public-dependency"]
 
                 [package]
                 name = "foo"
@@ -92,7 +92,7 @@ pub fn requires_nightly_cargo() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["public-dependency"]
+                corgi-features = ["public-dependency"]
             "#,
         )
         .file("src/lib.rs", "")
@@ -105,7 +105,7 @@ pub fn requires_nightly_cargo() {
 error: failed to parse manifest at `[..]`
 
 Caused by:
-  the cargo feature `public-dependency` requires a nightly version of Cargo, but this is the `stable` channel
+  the corgi feature `public-dependency` requires a nightly version of Cargo, but this is the `stable` channel
   See https://doc.rust-lang.org/book/appendix-07-nightly-rust.html for more information about Rust release channels.
   See https://doc.rust-lang.org/[..]cargo/reference/unstable.html#public-dependency for more information about using this feature.
 "
@@ -146,7 +146,7 @@ Caused by:
 
   The package requires the Cargo feature called `public-dependency`, \
   but that feature is not stabilized in this version of Cargo (1.[..]).
-  Consider adding `cargo-features = [\"public-dependency\"]` to the top of Cargo.toml \
+  Consider adding `corgi-features = [\"public-dependency\"]` to the top of Cargo.toml \
   (above the [package] table) to tell Cargo you are opting in to use this unstable feature.
   See https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#public-dependency \
   for more information about the status of this feature.
@@ -165,7 +165,7 @@ fn pub_dev_dependency() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["public-dependency"]
+                corgi-features = ["public-dependency"]
 
                 [package]
                 name = "foo"

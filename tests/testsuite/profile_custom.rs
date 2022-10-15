@@ -595,7 +595,7 @@ fn reserved_profile_names() {
         .with_stderr("error: profile `doc` is reserved and not allowed to be explicitly specified")
         .run();
     // Not an exhaustive list, just a sample.
-    for name in ["build", "cargo", "check", "rustc", "CaRgO_startswith"] {
+    for name in ["build", "corgi", "check", "rustc", "CaRgO_startswith"] {
         p.cargo(&format!("build --profile={}", name))
             .with_status(101)
             .with_stderr(&format!(
@@ -608,7 +608,7 @@ See https://doc.rust-lang.org/cargo/reference/profiles.html for more on configur
             ))
             .run();
     }
-    for name in ["build", "check", "cargo", "rustc", "CaRgO_startswith"] {
+    for name in ["build", "check", "corgi", "rustc", "CaRgO_startswith"] {
         p.change_file(
             "Cargo.toml",
             &format!(
@@ -703,7 +703,7 @@ fn legacy_commands_support_custom() {
 
 #[cargo_test]
 fn legacy_rustc() {
-    // `cargo rustc` historically has supported dev/test/bench/check
+    // `corgi rustc` historically has supported dev/test/bench/check
     // other profiles are covered in check::rustc_check
     let p = project()
         .file(

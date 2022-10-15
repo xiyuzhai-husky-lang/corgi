@@ -1,4 +1,4 @@
-//! Implementation of `cargo tree`.
+//! Implementation of `corgi tree`.
 
 use self::format::Pattern;
 use crate::core::compiler::{CompileKind, RustcTargetData};
@@ -126,7 +126,7 @@ static ASCII_SYMBOLS: Symbols = Symbols {
     right: "-",
 };
 
-/// Entry point for the `cargo tree` command.
+/// Entry point for the `corgi tree` command.
 pub fn build_and_print(ws: &Workspace<'_>, opts: &TreeOptions) -> CorgiResult<()> {
     let requested_targets = match &opts.target {
         Target::All | Target::Host => Vec::new(),

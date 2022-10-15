@@ -1,4 +1,4 @@
-//! Tests for the `cargo login` command.
+//! Tests for the `corgi login` command.
 
 use cargo_test_support::install::cargo_home;
 use cargo_test_support::registry::RegistryBuilder;
@@ -85,7 +85,7 @@ fn registry_credentials() {
         .run();
 
     // Ensure not overwriting 1st alternate registry token with
-    // 2nd alternate registry token (see rust-lang/cargo#7701).
+    // 2nd alternate registry token (see rust-lang/corgi#7701).
     assert!(check_token(ORIGINAL_TOKEN, None));
     assert!(check_token(TOKEN, Some(reg)));
     assert!(check_token(TOKEN2, Some(reg2)));

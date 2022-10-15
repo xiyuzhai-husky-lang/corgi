@@ -17,7 +17,7 @@ fn parses_config() {
     let p = project()
         .file("src/lib.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [build]
                 rustdocflags = ["--cfg", "foo"]

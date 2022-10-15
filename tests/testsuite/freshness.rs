@@ -282,7 +282,7 @@ fn changing_bin_paths_common_target_features_caches_targets() {
     let p = project()
         .no_manifest()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [build]
                 target-dir = "./target"
@@ -633,7 +633,7 @@ fn rerun_if_changed_in_dep() {
             "a/build.rs",
             r#"
                 fn main() {
-                    println!("cargo:rerun-if-changed=build.rs");
+                    println!("corgi:rerun-if-changed=build.rs");
                 }
             "#,
         )
@@ -699,7 +699,7 @@ fn same_build_dir_cached_packages() {
         .file("d/Cargo.toml", &basic_manifest("d", "0.0.1"))
         .file("d/src/lib.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [build]
                 target-dir = "./target"
@@ -1716,7 +1716,7 @@ fn script_fails_stay_dirty() {
             r#"
                 mod helper;
                 fn main() {
-                    println!("cargo:rerun-if-changed=build.rs");
+                    println!("corgi:rerun-if-changed=build.rs");
                     helper::doit();
                 }
             "#,
@@ -1754,7 +1754,7 @@ fn simulated_docker_deps_stay_cached() {
             "build.rs",
             r#"
             fn main() {
-                println!("cargo:rerun-if-env-changed=SOMEVAR");
+                println!("corgi:rerun-if-env-changed=SOMEVAR");
             }
             "#,
         )
@@ -1765,7 +1765,7 @@ fn simulated_docker_deps_stay_cached() {
             "build.rs",
             r#"
             fn main() {
-                println!("cargo:rerun-if-changed=build.rs");
+                println!("corgi:rerun-if-changed=build.rs");
             }
             "#,
         )
@@ -2003,7 +2003,7 @@ fn rename_with_path_deps() {
 
     p.cargo("build").run();
 
-    // Now rename the root directory and rerun `cargo run`. Not only should we
+    // Now rename the root directory and rerun `corgi run`. Not only should we
     // not build anything but we also shouldn't crash.
     let mut new = p.root();
     new.pop();
@@ -2050,7 +2050,7 @@ fn move_target_directory_with_path_deps() {
                 use std::path::Path;
 
                 fn main() {
-                    println!("cargo:rerun-if-changed=build.rs");
+                    println!("corgi:rerun-if-changed=build.rs");
                     let out_dir = env::var("OUT_DIR").unwrap();
                     let dest_path = Path::new(&out_dir).join("hello.rs");
                     fs::write(&dest_path, r#"
@@ -2091,9 +2091,9 @@ fn rerun_if_changes() {
             "build.rs",
             r#"
                 fn main() {
-                    println!("cargo:rerun-if-env-changed=FOO");
+                    println!("corgi:rerun-if-env-changed=FOO");
                     if std::env::var("FOO").is_ok() {
-                        println!("cargo:rerun-if-env-changed=BAR");
+                        println!("corgi:rerun-if-env-changed=BAR");
                     }
                 }
             "#,
@@ -2270,10 +2270,10 @@ LLVM version: 9.0
     makeit("stable1", stable1);
     makeit("stable2", stable2);
 
-    // Run `cargo check` with different rustc versions to observe its behavior.
+    // Run `corgi check` with different rustc versions to observe its behavior.
     let p = project().file("src/lib.rs", "").build();
 
-    // Runs `cargo check` and returns the rmeta filename created.
+    // Runs `corgi check` and returns the rmeta filename created.
     // Checks that the freshness matches the given value.
     let check = |version, fresh| -> String {
         let output = p
@@ -2334,7 +2334,7 @@ fn linking_interrupted() {
     // Interrupt during the linking phase shouldn't leave test executable as "fresh".
 
     // This is used to detect when linking starts, then to pause the linker so
-    // that the test can kill cargo.
+    // that the test can kill corgi.
     let link_listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let link_addr = link_listener.local_addr().unwrap();
 
@@ -2459,7 +2459,7 @@ fn lld_is_fresh() {
     // Check for bug when using lld linker that it remains fresh with dylib.
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [target.x86_64-pc-windows-msvc]
                 linker = "rust-lld"

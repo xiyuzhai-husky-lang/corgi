@@ -35,7 +35,7 @@ pub struct WorkspaceResolve<'cfg> {
     pub pkg_set: PackageSet<'cfg>,
     /// The resolve for the entire workspace.
     ///
-    /// This may be `None` for things like `cargo install` and `-Zavoid-dev-deps`.
+    /// This may be `None` for things like `corgi install` and `-Zavoid-dev-deps`.
     /// This does not include `paths` overrides.
     pub workspace_resolve: Option<Resolve>,
     /// The narrowed resolve, with the specific features enabled, and only the
@@ -48,14 +48,14 @@ pub struct WorkspaceResolve<'cfg> {
 const UNUSED_PATCH_WARNING: &str = "\
 Check that the patched package version and available features are compatible
 with the dependency requirements. If the patch has a different version from
-what is locked in the Cargo.lock file, run `cargo update` to use the new
+what is locked in the Cargo.lock file, run `corgi update` to use the new
 version. This may also occur with an optional dependency that is not enabled.";
 
 /// Resolves all dependencies for the workspace using the previous
 /// lock file as a guide if present.
 ///
 /// This function will also write the result of resolution as a new lock file
-/// (unless it is an ephemeral workspace such as `cargo install` or `cargo
+/// (unless it is an ephemeral workspace such as `corgi install` or `corgi
 /// package`).
 ///
 /// This is a simple interface used by commands like `clean`, `fetch`, and
@@ -71,9 +71,9 @@ pub fn resolve_ws<'a>(ws: &Workspace<'a>) -> CorgiResult<(PackageSet<'a>, Resolv
 /// taking into account `paths` overrides and activated features.
 ///
 /// This function will also write the result of resolution as a new lock file
-/// (unless `Workspace::require_optional_deps` is false, such as `cargo
-/// install` or `-Z avoid-dev-deps`), or it is an ephemeral workspace (`cargo
-/// install` or `cargo package`).
+/// (unless `Workspace::require_optional_deps` is false, such as `corgi
+/// install` or `-Z avoid-dev-deps`), or it is an ephemeral workspace (`corgi
+/// install` or `corgi package`).
 ///
 /// `specs` may be empty, which indicates it should resolve all workspace
 /// members. In this case, `opts.all_features` must be `true`.
@@ -492,8 +492,8 @@ pub fn add_overrides<'a>(
 
     let paths = paths.val.iter().map(|(s, def)| {
         // The path listed next to the string is the config file in which the
-        // key was located, so we want to pop off the `.cargo/config` component
-        // to get the directory containing the `.cargo` folder.
+        // key was located, so we want to pop off the `.corgi/config` component
+        // to get the directory containing the `.corgi` folder.
         (def.root(config).join(s), def)
     });
 
@@ -558,7 +558,7 @@ fn register_previous_locks(
 
     // Ok so we've been passed in a `keep` function which basically says "if I
     // return `true` then this package wasn't listed for an update on the command
-    // line". That is, if we run `cargo update -p foo` then `keep(bar)` will return
+    // line". That is, if we run `corgi update -p foo` then `keep(bar)` will return
     // `true`, whereas `keep(foo)` will return `false` (roughly speaking).
     //
     // This isn't actually quite what we want, however. Instead we want to
@@ -568,7 +568,7 @@ fn register_previous_locks(
     // * There's a crate `log`.
     // * There's a crate `serde` which depends on `log`.
     //
-    // Let's say we then run `cargo update -p serde`. This may *also* want to
+    // Let's say we then run `corgi update -p serde`. This may *also* want to
     // update the `log` dependency as our newer version of `serde` may have a
     // new minimum version required for `log`. Now this isn't always guaranteed
     // to work. What'll happen here is we *won't* lock the `log` dependency nor
@@ -599,7 +599,7 @@ fn register_previous_locks(
     }
 
     // Ok, but the above loop isn't the entire story! Updates to the dependency
-    // graph can come from two locations, the `cargo update` command or
+    // graph can come from two locations, the `corgi update` command or
     // manifests themselves. For example a manifest on the filesystem may
     // have been updated to have an updated version requirement on `serde`. In
     // this case both `keep(serde)` and `keep(log)` return `true` (the `keep`

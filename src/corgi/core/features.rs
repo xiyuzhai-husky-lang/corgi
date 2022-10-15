@@ -9,7 +9,7 @@
 //! Cargo, and the good news is that it shouldn't be too hard! First determine
 //! how the feature should be gated:
 //!
-//! * New syntax in Cargo.toml should use `cargo-features`.
+//! * New syntax in Cargo.toml should use `corgi-features`.
 //! * New CLI options should use `-Z unstable-options`.
 //! * New functionality that may not have an interface, or the interface has
 //!   not yet been designed, or for more complex features that affect multiple
@@ -33,7 +33,7 @@
 //!
 //! The steps for adding new Cargo.toml syntax are:
 //!
-//! 1. Add the cargo-features unstable gate. Search below for "look here" to
+//! 1. Add the corgi-features unstable gate. Search below for "look here" to
 //!    find the `features!` macro and add your feature to the list.
 //!
 //! 2. Update the Cargo.toml parsing code to handle your new feature.
@@ -41,7 +41,7 @@
 //! 3. Wherever you added the new parsing code, call
 //!    `features.require(Feature::my_feature_name())?` if the new syntax is
 //!    used. This will return an error if the user hasn't listed the feature
-//!    in `cargo-features` or this is not the nightly channel.
+//!    in `corgi-features` or this is not the nightly channel.
 //!
 //! ## `-Z unstable-options`
 //!
@@ -77,7 +77,7 @@
 //! The steps for stabilizing are roughly:
 //!
 //! 1. Update the feature to be stable, based on the kind of feature:
-//!   1. `cargo-features`: Change the feature to `stable` in the `features!`
+//!   1. `corgi-features`: Change the feature to `stable` in the `features!`
 //!      macro below, and include the version and a URL for the documentation.
 //!   2. `-Z unstable-options`: Find the call to `fail_if_stable_opt` and
 //!      remove it. Be sure to update the man pages if necessary.
@@ -86,7 +86,7 @@
 //!      `CliUnstable. Remove the `(unstable)` note in the clap help text if
 //!      necessary.
 //! 2. Remove `masquerade_as_nightly_cargo` from any tests, and remove
-//!    `cargo-features` from `Cargo.toml` test files if any. You can
+//!    `corgi-features` from `Cargo.toml` test files if any. You can
 //!     quickly find what needs to be removed by searching for the name
 //!     of the feature, e.g. `print_im_a_teapot`
 //! 3. Update the docs in unstable.md to move the section to the bottom
@@ -362,7 +362,7 @@ macro_rules! stab {
 // following the directions above.
 //
 // Note that all feature names here are valid Rust identifiers, but the `_`
-// character is translated to `-` when specified in the `cargo-features`
+// character is translated to `-` when specified in the `corgi-features`
 // manifest entry in `Cargo.toml`.
 features! {
     // A dummy feature that doesn't actually gate anything, but it's used in
@@ -463,12 +463,12 @@ impl Features {
         let is_local = self.is_local;
         let (slot, feature) = match self.status(feature_name) {
             Some(p) => p,
-            None => bail!("unknown cargo feature `{}`", feature_name),
+            None => bail!("unknown corgi feature `{}`", feature_name),
         };
 
         if *slot {
             bail!(
-                "the cargo feature `{}` has already been activated",
+                "the corgi feature `{}` has already been activated",
                 feature_name
             );
         }
@@ -492,7 +492,7 @@ impl Features {
                 // Warnings are usually suppressed, but just being cautious here.
                 if is_local {
                     let warning = format!(
-                        "the cargo feature `{}` has been stabilized in the {} \
+                        "the corgi feature `{}` has been stabilized in the {} \
                          release and is no longer necessary to be listed in the \
                          manifest\n  {}",
                         feature_name,
@@ -503,7 +503,7 @@ impl Features {
                 }
             }
             Status::Unstable if !nightly_features_allowed => bail!(
-                "the cargo feature `{}` requires a nightly version of \
+                "the corgi feature `{}` requires a nightly version of \
                  Cargo, but this is the `{}` channel\n\
                  {}\n{}",
                 feature_name,
@@ -524,7 +524,7 @@ impl Features {
             }
             Status::Removed => {
                 let mut msg = format!(
-                    "the cargo feature `{}` has been removed in the {} release\n\n",
+                    "the corgi feature `{}` has been removed in the {} release\n\n",
                     feature_name, feature.version
                 );
                 if self.is_local {
@@ -574,7 +574,7 @@ impl Features {
             if self.is_local {
                 drop(writeln!(
                     msg,
-                    "Consider adding `cargo-features = [\"{}\"]` \
+                    "Consider adding `corgi-features = [\"{}\"]` \
                      to the top of Cargo.toml (above the [package] table) \
                      to tell Cargo you are opting in to use this unstable feature.",
                     feature_name
@@ -661,12 +661,12 @@ unstable_cli_options!(
     jobserver_per_rustc: bool = (HIDDEN),
     minimal_versions: bool = ("Resolve minimal dependency versions instead of maximum"),
     mtime_on_use: bool = ("Configure Cargo to update the mtime of used files"),
-    multitarget: bool = ("Allow passing multiple `--target` flags to the cargo subcommand selected"),
+    multitarget: bool = ("Allow passing multiple `--target` flags to the corgi subcommand selected"),
     no_index_update: bool = ("Do not update the registry index even if the cache is outdated"),
     panic_abort_tests: bool = ("Enable support to run tests with -Cpanic=abort"),
-    host_config: bool = ("Enable the [host] section in the .cargo/config.toml file"),
+    host_config: bool = ("Enable the [host] section in the .corgi/config.toml file"),
     sparse_registry: bool = ("Support plain-HTTP-based crate registries"),
-    target_applies_to_host: bool = ("Enable the `target-applies-to-host` key in the .cargo/config.toml file"),
+    target_applies_to_host: bool = ("Enable the `target-applies-to-host` key in the .corgi/config.toml file"),
     rustdoc_map: bool = ("Allow passing external documentation mappings to rustdoc"),
     separate_nightlies: bool = (HIDDEN),
     terminal_width: Option<Option<usize>>  = ("Provide a terminal width to rustc for error truncation"),
@@ -899,7 +899,7 @@ impl CliUnstable {
                 self.check_cfg = v.map_or(Ok(None), |v| parse_check_cfg(v.split(',')))?
             }
             "dual-proc-macros" => self.dual_proc_macros = parse_empty(k, v)?,
-            // can also be set in .cargo/config or with and ENV
+            // can also be set in .corgi/config or with and ENV
             "mtime-on-use" => self.mtime_on_use = parse_empty(k, v)?,
             "named-profiles" => stabilized_warn(k, "1.57", STABILIZED_NAMED_PROFILES),
             "binary-dep-depinfo" => self.binary_dep_depinfo = parse_empty(k, v)?,
@@ -1017,19 +1017,19 @@ impl CliUnstable {
         }
         let see = format!(
             "See https://github.com/rust-lang/cargo/issues/{} for more \
-            information about the `cargo {}` command.",
+            information about the `corgi {}` command.",
             issue, command
         );
         if config.nightly_features_allowed {
             bail!(
-                "the `cargo {}` command is unstable, pass `-Z unstable-options` to enable it\n\
+                "the `corgi {}` command is unstable, pass `-Z unstable-options` to enable it\n\
                  {}",
                 command,
                 see
             );
         } else {
             bail!(
-                "the `cargo {}` command is unstable, and only available on the \
+                "the `corgi {}` command is unstable, and only available on the \
                  nightly channel of Cargo, but this is the `{}` channel\n\
                  {}\n\
                  {}",

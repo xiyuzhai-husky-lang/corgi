@@ -1,4 +1,4 @@
-//! Core of cargo-add command
+//! Core of corgi-add command
 
 mod crate_spec;
 
@@ -41,7 +41,7 @@ use crate_spec::CrateSpec;
 /// Information on what dependencies should be added
 #[derive(Clone, Debug)]
 pub struct AddOptions<'a> {
-    /// Configuration information for cargo operations
+    /// Configuration information for corgi operations
     pub config: &'a Config,
     /// Package to add dependencies to
     pub spec: &'a Package,

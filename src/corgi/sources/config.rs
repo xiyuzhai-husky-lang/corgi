@@ -2,7 +2,7 @@
 //!
 //! This module will parse the various `source.*` TOML configuration keys into a
 //! structure usable by Cargo itself. Currently this is primarily used to map
-//! sources to one another via the `replace-with` key in `.cargo/config`.
+//! sources to one another via the `replace-with` key in `.corgi/config`.
 
 use crate::core::{GitReference, PackageId, Source, SourceId};
 use crate::sources::{ReplacedSource, CRATES_IO_REGISTRY};
@@ -61,7 +61,7 @@ struct SourceConfig {
     /// Whether or not this source is replaced with another.
     ///
     /// This field is a tuple of `(name, location)` where `location` is where
-    /// this configuration key was defined (such as the `.cargo/config` path
+    /// this configuration key was defined (such as the `.corgi/config` path
     /// or the environment variable name).
     replace_with: Option<(String, String)>,
 }

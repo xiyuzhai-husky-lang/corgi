@@ -38,7 +38,7 @@ use pathdiff::diff_paths;
 pub struct Workspace<'cfg> {
     config: &'cfg Config,
 
-    // This path is a path to where the current cargo subcommand was invoked
+    // This path is a path to where the current corgi subcommand was invoked
     // from. That is the `--manifest-path` argument to Cargo, and
     // points to the "main crate" that we're going to worry about.
     current_manifest: PathBuf,
@@ -76,12 +76,12 @@ pub struct Workspace<'cfg> {
     default_members: Vec<PathBuf>,
 
     // `true` if this is a temporary workspace created for the purposes of the
-    // `cargo install` or `cargo package` commands.
+    // `corgi install` or `corgi package` commands.
     is_ephemeral: bool,
 
     // `true` if this workspace should enforce optional dependencies even when
     // not needed; false if this workspace should only enforce dependencies
-    // needed by the current configuration (such as in cargo install). In some
+    // needed by the current configuration (such as in corgi install). In some
     // cases `false` also results in the non-enforcement of dev-dependencies.
     require_optional_deps: bool,
 
@@ -90,7 +90,7 @@ pub struct Workspace<'cfg> {
     loaded_packages: RefCell<HashMap<PathBuf, Package>>,
 
     // If `true`, then the resolver will ignore any existing `Cargo.lock`
-    // file. This is set for `cargo install` without `--locked`.
+    // file. This is set for `corgi install` without `--locked`.
     ignore_lock: bool,
 
     /// The resolver behavior specified with the `resolver` field.
@@ -254,8 +254,8 @@ impl<'cfg> Workspace<'cfg> {
     /// in-memory workspace. That is, all configuration is ignored, it's just
     /// intended for that one package.
     ///
-    /// This is currently only used in niche situations like `cargo install` or
-    /// `cargo package`.
+    /// This is currently only used in niche situations like `corgi install` or
+    /// `corgi package`.
     pub fn ephemeral(
         package: Package,
         config: &'cfg Config,
@@ -442,7 +442,7 @@ impl<'cfg> Workspace<'cfg> {
         for message in warnings {
             self.config
                 .shell()
-                .warn(format!("[patch] in cargo config: {}", message))?
+                .warn(format!("[patch] in corgi config: {}", message))?
         }
 
         Ok(patch)
@@ -769,7 +769,7 @@ impl<'cfg> Workspace<'cfg> {
         Ok(())
     }
 
-    /// Returns the unstable nightly-only features enabled via `cargo-features` in the manifest.
+    /// Returns the unstable nightly-only features enabled via `corgi-features` in the manifest.
     pub fn unstable_features(&self) -> &Features {
         match self.root_maybe() {
             MaybePackage::Package(p) => p.manifest().unstable_features(),
@@ -1023,9 +1023,9 @@ impl<'cfg> Workspace<'cfg> {
     /// with their in-memory formats.
     pub fn preload(&self, registry: &mut PackageRegistry<'cfg>) {
         // These can get weird as this generally represents a workspace during
-        // `cargo install`. Things like git repositories will actually have a
+        // `corgi install`. Things like git repositories will actually have a
         // `PathSource` with multiple entries in it, so the logic below is
-        // mostly just an optimization for normal `cargo build` in workspaces
+        // mostly just an optimization for normal `corgi build` in workspaces
         // during development.
         if self.is_ephemeral {
             return;
@@ -1389,7 +1389,7 @@ impl<'cfg> Workspace<'cfg> {
             .collect();
 
         if members.is_empty() {
-            // `cargo build -p foo`, where `foo` is not a member.
+            // `corgi build -p foo`, where `foo` is not a member.
             // Do not allow any command-line flags (defaults only).
             if !(cli_features.features.is_empty()
                 && !cli_features.all_features

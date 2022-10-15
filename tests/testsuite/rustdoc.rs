@@ -1,4 +1,4 @@
-//! Tests for the `cargo rustdoc` command.
+//! Tests for the `corgi rustdoc` command.
 
 use cargo_test_support::{basic_manifest, cross_compile, project};
 

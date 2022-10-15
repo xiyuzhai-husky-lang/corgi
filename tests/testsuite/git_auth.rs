@@ -123,7 +123,7 @@ fn http_auth_offered() {
         )
         .file("src/main.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             "[net]
              retry = 0
             ",
@@ -196,7 +196,7 @@ fn https_something_happens() {
         )
         .file("src/main.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             "[net]
              retry = 0
             ",
@@ -322,7 +322,7 @@ Caused by:
         .run();
 
     p.change_file(
-        ".cargo/config",
+        ".corgi/config",
         "
             [net]
             git-fetch-with-cli = true

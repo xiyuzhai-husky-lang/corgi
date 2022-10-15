@@ -268,7 +268,7 @@ impl Registry {
 
         let token = match self.token.as_ref() {
             Some(s) => s,
-            None => bail!("no upload token found, please run `cargo login`"),
+            None => bail!("no upload token found, please run `corgi login`"),
         };
         self.handle.put(true)?;
         self.handle.url(&url)?;
@@ -380,7 +380,7 @@ impl Registry {
         if authorized == Auth::Authorized {
             let token = match self.token.as_ref() {
                 Some(s) => s,
-                None => bail!("no upload token found, please run `cargo login`"),
+                None => bail!("no upload token found, please run `corgi login`"),
             };
             headers.append(&format!("Authorization: {}", token))?;
         }

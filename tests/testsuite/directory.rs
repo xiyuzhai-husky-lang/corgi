@@ -14,9 +14,9 @@ use cargo_test_support::{basic_manifest, project, t, ProjectBuilder};
 
 fn setup() {
     let root = paths::root();
-    t!(fs::create_dir(&root.join(".cargo")));
+    t!(fs::create_dir(&root.join(".corgi")));
     t!(fs::write(
-        root.join(".cargo/config"),
+        root.join(".corgi/config"),
         r#"
             [source.crates-io]
             replace-with = 'my-awesome-local-registry'
@@ -70,7 +70,7 @@ impl VendorPackage {
     fn build(&mut self) {
         let p = self.p.take().unwrap();
         let json = serde_json::to_string(&self.cksum).unwrap();
-        let p = p.file(".cargo-checksum.json", &json);
+        let p = p.file(".corgi-checksum.json", &json);
         let _ = p.build();
     }
 }
@@ -291,13 +291,13 @@ fn multiple() {
     VendorPackage::new("bar-0.1.0")
         .file("Cargo.toml", &basic_manifest("bar", "0.1.0"))
         .file("src/lib.rs", "pub fn bar() {}")
-        .file(".cargo-checksum", "")
+        .file(".corgi-checksum", "")
         .build();
 
     VendorPackage::new("bar-0.2.0")
         .file("Cargo.toml", &basic_manifest("bar", "0.2.0"))
         .file("src/lib.rs", "pub fn bar() {}")
-        .file(".cargo-checksum", "")
+        .file(".corgi-checksum", "")
         .build();
 
     let p = project()
@@ -582,9 +582,9 @@ fn git_lock_file_doesnt_change() {
     let lock1 = p.read_lockfile();
 
     let root = paths::root();
-    t!(fs::create_dir(&root.join(".cargo")));
+    t!(fs::create_dir(&root.join(".corgi")));
     t!(fs::write(
-        root.join(".cargo/config"),
+        root.join(".corgi/config"),
         format!(
             r#"
                 [source.my-git-repo]
@@ -637,9 +637,9 @@ fn git_override_requires_lockfile() {
         .build();
 
     let root = paths::root();
-    t!(fs::create_dir(&root.join(".cargo")));
+    t!(fs::create_dir(&root.join(".corgi")));
     t!(fs::write(
-        root.join(".cargo/config"),
+        root.join(".corgi/config"),
         r#"
             [source.my-git-repo]
             git = 'https://example.com/'
@@ -691,7 +691,7 @@ fn workspace_different_locations() {
         .file("foo/src/lib.rs", "")
         .file("foo/vendor/baz/Cargo.toml", &basic_manifest("baz", "0.1.0"))
         .file("foo/vendor/baz/src/lib.rs", "")
-        .file("foo/vendor/baz/.cargo-checksum.json", "{\"files\":{}}")
+        .file("foo/vendor/baz/.corgi-checksum.json", "{\"files\":{}}")
         .file(
             "bar/Cargo.toml",
             r#"
@@ -705,7 +705,7 @@ fn workspace_different_locations() {
         )
         .file("bar/src/lib.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [build]
                 target-dir = './target'

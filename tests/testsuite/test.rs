@@ -1,4 +1,4 @@
-//! Tests for the `cargo test` command.
+//! Tests for the `corgi test` command.
 
 use cargo_test_support::paths::CargoPathExt;
 use cargo_test_support::registry::Package;
@@ -717,7 +717,7 @@ fn dont_run_examples() {
         .file(
             "examples/dont-run-me-i-will-fail.rs",
             r#"
-                fn main() { panic!("Examples should not be run by 'cargo test'"); }
+                fn main() { panic!("Examples should not be run by 'corgi test'"); }
             "#,
         )
         .build();
@@ -760,7 +760,7 @@ fn pass_through_command_line() {
         .run();
 }
 
-// Regression test for running cargo-test twice with
+// Regression test for running corgi-test twice with
 // tests in an rlib
 #[cargo_test]
 fn cargo_test_twice() {
@@ -4015,7 +4015,7 @@ test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out[..]
 
 ",
         )
-        .env("CARGO_LOG", "cargo=trace")
+        .env("CARGO_LOG", "corgi=trace")
         .run();
 
     p.cargo("test --lib --doc")
@@ -4210,7 +4210,7 @@ fn cargo_test_doctest_xcompile_runner() {
     let runner_path = paths::root().join("runner");
     fs::copy(&runner.bin("runner"), &runner_path).unwrap();
 
-    let config = paths::root().join(".cargo/config");
+    let config = paths::root().join(".corgi/config");
 
     fs::create_dir_all(config.parent().unwrap()).unwrap();
     // Escape Windows backslashes for TOML config.

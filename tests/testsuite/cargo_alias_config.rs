@@ -11,19 +11,19 @@ fn alias_incorrect_config_type() {
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [alias]
-                b-cargo-test = 5
+                b-corgi-test = 5
             "#,
         )
         .build();
 
-    p.cargo("b-cargo-test -v")
+    p.cargo("b-corgi-test -v")
         .with_status(101)
         .with_stderr(
             "\
-[ERROR] invalid configuration for key `alias.b-cargo-test`
+[ERROR] invalid configuration for key `alias.b-corgi-test`
 expected a list, but found a integer for [..]",
         )
         .run();
@@ -35,15 +35,15 @@ fn alias_malformed_config_string() {
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [alias]
-                b-cargo-test = `
+                b-corgi-test = `
             "#,
         )
         .build();
 
-    p.cargo("b-cargo-test -v")
+    p.cargo("b-corgi-test -v")
         .with_status(101)
         .with_stderr(
             "\
@@ -58,7 +58,7 @@ Caused by:
 Caused by:
   TOML parse error at line [..]
     |
-  3 |                 b-cargo-test = `
+  3 |                 b-corgi-test = `
     |                                ^
   Unexpected ```
   Expected quoted string
@@ -73,15 +73,15 @@ fn alias_malformed_config_list() {
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [alias]
-                b-cargo-test = [1, 2]
+                b-corgi-test = [1, 2]
             "#,
         )
         .build();
 
-    p.cargo("b-cargo-test -v")
+    p.cargo("b-corgi-test -v")
         .with_status(101)
         .with_stderr(
             "\
@@ -94,7 +94,7 @@ Caused by:
   [..] `alias`
 
 Caused by:
-  [..] `b-cargo-test`
+  [..] `b-corgi-test`
 
 Caused by:
   expected string but found integer in list
@@ -109,15 +109,15 @@ fn alias_config() {
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [alias]
-                b-cargo-test = "build"
+                b-corgi-test = "build"
             "#,
         )
         .build();
 
-    p.cargo("b-cargo-test -v")
+    p.cargo("b-corgi-test -v")
         .with_stderr_contains(
             "\
 [COMPILING] foo v0.5.0 [..]
@@ -132,16 +132,16 @@ fn dependent_alias() {
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [alias]
-                b-cargo-test = "build"
-                a-cargo-test = ["b-cargo-test", "-v"]
+                b-corgi-test = "build"
+                a-corgi-test = ["b-corgi-test", "-v"]
             "#,
         )
         .build();
 
-    p.cargo("a-cargo-test")
+    p.cargo("a-corgi-test")
         .with_stderr_contains(
             "\
 [COMPILING] foo v0.5.0 [..]
@@ -157,7 +157,7 @@ fn alias_shadowing_external_subcommand() {
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [alias]
                 echo = "build"
@@ -172,9 +172,9 @@ fn alias_shadowing_external_subcommand() {
     p.cargo("echo")
         .env("PATH", &path)
         .with_stderr("\
-[WARNING] user-defined alias `echo` is shadowing an external subcommand found at: `[ROOT]/cargo-echo/target/debug/cargo-echo[EXE]`
+[WARNING] user-defined alias `echo` is shadowing an external subcommand found at: `[ROOT]/corgi-echo/target/debug/corgi-echo[EXE]`
 This was previously accepted but is being phased out; it will become a hard error in a future release.
-For more information, see issue #10049 <https://github.com/rust-lang/cargo/issues/10049>.
+For more information, see issue #10049 <https://github.com/rust-lang/corgi/issues/10049>.
 [COMPILING] foo v0.5.0 [..]
 [FINISHED] dev [unoptimized + debuginfo] target(s) in [..]
 ",
@@ -189,7 +189,7 @@ fn default_args_alias() {
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [alias]
                 echo = "echo --flag1 --flag2"
@@ -207,9 +207,9 @@ fn default_args_alias() {
         .env("PATH", &path)
         .with_status(101)
         .with_stderr("\
-[WARNING] user-defined alias `echo` is shadowing an external subcommand found at: `[ROOT]/cargo-echo/target/debug/cargo-echo[EXE]`
+[WARNING] user-defined alias `echo` is shadowing an external subcommand found at: `[ROOT]/corgi-echo/target/debug/corgi-echo[EXE]`
 This was previously accepted but is being phased out; it will become a hard error in a future release.
-For more information, see issue #10049 <https://github.com/rust-lang/cargo/issues/10049>.
+For more information, see issue #10049 <https://github.com/rust-lang/corgi/issues/10049>.
 error: alias echo has unresolvable recursive definition: echo -> echo
 ",
         )
@@ -219,9 +219,9 @@ error: alias echo has unresolvable recursive definition: echo -> echo
         .env("PATH", &path)
         .with_status(101)
         .with_stderr("\
-[WARNING] user-defined alias `echo` is shadowing an external subcommand found at: `[ROOT]/cargo-echo/target/debug/cargo-echo[EXE]`
+[WARNING] user-defined alias `echo` is shadowing an external subcommand found at: `[ROOT]/corgi-echo/target/debug/corgi-echo[EXE]`
 This was previously accepted but is being phased out; it will become a hard error in a future release.
-For more information, see issue #10049 <https://github.com/rust-lang/cargo/issues/10049>.
+For more information, see issue #10049 <https://github.com/rust-lang/corgi/issues/10049>.
 error: alias test-1 has unresolvable recursive definition: test-1 -> echo -> echo
 ",
         )
@@ -245,7 +245,7 @@ fn corecursive_alias() {
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [alias]
                 test-1 = "test-2 --flag1"
@@ -276,15 +276,15 @@ fn alias_list_test() {
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                [alias]
-               b-cargo-test = ["build", "--release"]
+               b-corgi-test = ["build", "--release"]
             "#,
         )
         .build();
 
-    p.cargo("b-cargo-test -v")
+    p.cargo("b-corgi-test -v")
         .with_stderr_contains("[COMPILING] foo v0.5.0 [..]")
         .with_stderr_contains("[RUNNING] `rustc --crate-name [..]")
         .run();
@@ -296,15 +296,15 @@ fn alias_with_flags_config() {
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                [alias]
-               b-cargo-test = "build --release"
+               b-corgi-test = "build --release"
             "#,
         )
         .build();
 
-    p.cargo("b-cargo-test -v")
+    p.cargo("b-corgi-test -v")
         .with_stderr_contains("[COMPILING] foo v0.5.0 [..]")
         .with_stderr_contains("[RUNNING] `rustc --crate-name foo [..]")
         .run();
@@ -316,7 +316,7 @@ fn alias_cannot_shadow_builtin_command() {
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                [alias]
                build = "fetch"
@@ -341,7 +341,7 @@ fn alias_override_builtin_alias() {
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                [alias]
                b = "run"

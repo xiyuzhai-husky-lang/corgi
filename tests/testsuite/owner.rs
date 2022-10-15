@@ -1,4 +1,4 @@
-//! Tests for the `cargo owner` command.
+//! Tests for the `corgi owner` command.
 
 use std::fs;
 

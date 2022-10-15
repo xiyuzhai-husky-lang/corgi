@@ -69,7 +69,7 @@ fn external_subcommand_inherits_jobserver() {
         return;
     }
 
-    let name = "cargo-jobserver-check";
+    let name = "corgi-jobserver-check";
     let p = project()
         .file(
             "Cargo.toml",

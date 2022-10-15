@@ -1,4 +1,4 @@
-//! Parser for the `--format` string for `cargo tree`.
+//! Parser for the `--format` string for `corgi tree`.
 
 use std::iter;
 use std::str;
@@ -14,7 +14,7 @@ pub enum RawChunk<'a> {
     Error(&'static str),
 }
 
-/// `cargo tree` format parser.
+/// `corgi tree` format parser.
 ///
 /// The format string indicates how each package should be displayed. It
 /// includes simple markers surrounded in curly braces that will be

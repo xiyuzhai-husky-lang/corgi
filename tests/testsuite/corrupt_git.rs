@@ -37,7 +37,7 @@ fn deleting_database_files() {
     project.cargo("build").run();
 
     let mut files = Vec::new();
-    find_files(&paths::home().join(".cargo/git/db"), &mut files);
+    find_files(&paths::home().join(".corgi/git/db"), &mut files);
     assert!(!files.is_empty());
 
     let log = "corgi::sources::git=trace";
@@ -95,7 +95,7 @@ fn deleting_checkout_files() {
     project.cargo("build").run();
 
     let dir = paths::home()
-        .join(".cargo/git/checkouts")
+        .join(".corgi/git/checkouts")
         // get the first entry in the checkouts dir for the package's location
         .read_dir()
         .unwrap()

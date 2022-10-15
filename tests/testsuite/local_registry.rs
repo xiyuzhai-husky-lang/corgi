@@ -7,9 +7,9 @@ use std::fs;
 
 fn setup() {
     let root = paths::root();
-    t!(fs::create_dir(&root.join(".cargo")));
+    t!(fs::create_dir(&root.join(".corgi")));
     t!(fs::write(
-        root.join(".cargo/config"),
+        root.join(".corgi/config"),
         r#"
             [source.crates-io]
             registry = 'https://wut'
@@ -121,7 +121,7 @@ fn depend_on_yanked() {
         .file("src/lib.rs", "")
         .build();
 
-    // Run cargo to create lock file.
+    // Run corgi to create lock file.
     p.cargo("check").run();
 
     registry_path().join("index").join("3").rm_rf();
@@ -381,7 +381,7 @@ fn invalid_dir_bad() {
         )
         .file("src/lib.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [source.crates-io]
                 registry = 'https://wut'
@@ -419,10 +419,10 @@ Caused by:
 fn different_directory_replacing_the_registry_is_bad() {
     setup();
 
-    // Move our test's .cargo/config to a temporary location and publish a
+    // Move our test's .corgi/config to a temporary location and publish a
     // registry package we're going to use first.
-    let config = paths::root().join(".cargo");
-    let config_tmp = paths::root().join(".cargo-old");
+    let config = paths::root().join(".corgi");
+    let config_tmp = paths::root().join(".corgi-old");
     t!(fs::rename(&config, &config_tmp));
 
     let p = project()
@@ -477,9 +477,9 @@ unable to verify that `bar v0.0.1` is the same as when the lockfile was generate
 #[cargo_test]
 fn crates_io_registry_url_is_optional() {
     let root = paths::root();
-    t!(fs::create_dir(&root.join(".cargo")));
+    t!(fs::create_dir(&root.join(".corgi")));
     t!(fs::write(
-        root.join(".cargo/config"),
+        root.join(".corgi/config"),
         r#"
             [source.crates-io]
             replace-with = 'my-awesome-local-registry'

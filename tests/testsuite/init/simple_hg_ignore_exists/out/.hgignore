@@ -1,6 +1,6 @@
 ^/somefile
 
-# Added by cargo
+# Added by corgi
 
 ^target/
 ^Cargo.lock$

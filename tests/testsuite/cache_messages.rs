@@ -29,14 +29,14 @@ fn simple() {
     let cargo_output1 = p
         .cargo("check -q --color=never")
         .exec_with_output()
-        .expect("cargo to run");
+        .expect("corgi to run");
     assert_eq!(rustc_output, as_str(&cargo_output1.stderr));
     assert!(cargo_output1.stdout.is_empty());
     // Check that the cached version is exactly the same.
     let cargo_output2 = p
         .cargo("check -q")
         .exec_with_output()
-        .expect("cargo to run");
+        .expect("corgi to run");
     assert_eq!(rustc_output, as_str(&cargo_output2.stderr));
     assert!(cargo_output2.stdout.is_empty());
 }
@@ -59,13 +59,13 @@ fn simple_short() {
     let cargo_output1 = p
         .cargo("check -q --color=never --message-format=short")
         .exec_with_output()
-        .expect("cargo to run");
+        .expect("corgi to run");
     assert_eq!(rustc_output, as_str(&cargo_output1.stderr));
     // assert!(cargo_output1.stdout.is_empty());
     let cargo_output2 = p
         .cargo("check -q --message-format=short")
         .exec_with_output()
-        .expect("cargo to run");
+        .expect("corgi to run");
     println!("{}", String::from_utf8_lossy(&cargo_output2.stdout));
     assert_eq!(rustc_output, as_str(&cargo_output2.stderr));
     assert!(cargo_output2.stdout.is_empty());
@@ -102,21 +102,21 @@ fn color() {
     let cargo_output1 = p
         .cargo("check -q --color=always")
         .exec_with_output()
-        .expect("cargo to run");
+        .expect("corgi to run");
     compare(&rustc_color, as_str(&cargo_output1.stderr));
 
     // Replay cached, with color.
     let cargo_output2 = p
         .cargo("check -q --color=always")
         .exec_with_output()
-        .expect("cargo to run");
+        .expect("corgi to run");
     compare(&rustc_color, as_str(&cargo_output2.stderr));
 
     // Replay cached, no color.
     let cargo_output_nocolor = p
         .cargo("check -q --color=never")
         .exec_with_output()
-        .expect("cargo to run");
+        .expect("corgi to run");
     compare(&rustc_nocolor, as_str(&cargo_output_nocolor.stderr));
 }
 
@@ -130,7 +130,7 @@ fn cached_as_json() {
     let cargo_output = p
         .cargo("check --message-format=json")
         .exec_with_output()
-        .expect("cargo to run");
+        .expect("corgi to run");
     assert!(cargo_output.status.success());
     let orig_cargo_out = as_str(&cargo_output.stdout);
     assert!(orig_cargo_out.contains("compiler-message"));
@@ -140,14 +140,14 @@ fn cached_as_json() {
     let cargo_output1 = p
         .cargo("check --message-format=json")
         .exec_with_output()
-        .expect("cargo to run");
+        .expect("corgi to run");
     assert_eq!(as_str(&cargo_output1.stdout), orig_cargo_out);
 
     // Check JSON output, fresh.
     let cargo_output2 = p
         .cargo("check --message-format=json")
         .exec_with_output()
-        .expect("cargo to run");
+        .expect("corgi to run");
     // The only difference should be this field.
     let fix_fresh = as_str(&cargo_output2.stdout).replace("\"fresh\":true", "\"fresh\":false");
     assert_eq!(fix_fresh, orig_cargo_out);

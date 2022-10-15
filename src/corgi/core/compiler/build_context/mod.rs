@@ -25,7 +25,7 @@ pub struct BuildContext<'a, 'cfg> {
     /// The workspace the build is for.
     pub ws: &'a Workspace<'cfg>,
 
-    /// The cargo configuration.
+    /// The corgi configuration.
     pub config: &'cfg Config,
     pub profiles: Profiles,
     pub build_config: &'a BuildConfig,

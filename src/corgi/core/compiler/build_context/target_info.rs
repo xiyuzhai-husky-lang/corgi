@@ -585,7 +585,7 @@ impl Flags {
 ///
 /// then if none of those were found
 ///
-///  - `target.*.rustflags` from the config (.cargo/config)
+///  - `target.*.rustflags` from the config (.corgi/config)
 ///  - `target.cfg(..).rustflags` from the config
 ///  - `host.*.rustflags` from the config if compiling a host artifact or without `--target`
 ///
@@ -901,7 +901,7 @@ pub struct RustDocFingerprint {
 
 impl RustDocFingerprint {
     /// This function checks whether the latest version of `Rustc` used to compile this
-    /// `Workspace`'s docs was the same as the one is currently being used in this `cargo doc`
+    /// `Workspace`'s docs was the same as the one is currently being used in this `corgi doc`
     /// call.
     ///
     /// In case it's not, it takes care of removing the `doc/` folder as well as overwriting
@@ -928,7 +928,7 @@ impl RustDocFingerprint {
             // If the fingerprint does not exist, do not clear out the doc
             // directories. Otherwise this ran into problems where projects
             // like rustbuild were creating the doc directory before running
-            // `cargo doc` in a way that deleting it would break it.
+            // `corgi doc` in a way that deleting it would break it.
             Err(_) => return write_fingerprint(),
         };
         match serde_json::from_str::<RustDocFingerprint>(&rustdoc_data) {

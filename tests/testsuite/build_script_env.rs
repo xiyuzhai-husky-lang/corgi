@@ -12,7 +12,7 @@ fn rerun_if_env_changes() {
             "build.rs",
             r#"
                 fn main() {
-                    println!("cargo:rerun-if-env-changed=FOO");
+                    println!("corgi:rerun-if-env-changed=FOO");
                 }
             "#,
         )
@@ -66,8 +66,8 @@ fn rerun_if_env_or_file_changes() {
             "build.rs",
             r#"
                 fn main() {
-                    println!("cargo:rerun-if-env-changed=FOO");
-                    println!("cargo:rerun-if-changed=foo");
+                    println!("corgi:rerun-if-env-changed=FOO");
+                    println!("corgi:rerun-if-changed=foo");
                 }
             "#,
         )
@@ -132,7 +132,7 @@ fn rustc_bootstrap() {
     p.cargo("build")
         .masquerade_as_nightly_cargo(&["RUSTC_BOOTSTRAP"])
         // NOTE: uses RUSTC_BOOTSTRAP so it will be propagated to rustc
-        // (this matters when tests are being run with a beta or stable cargo)
+        // (this matters when tests are being run with a beta or stable corgi)
         .env("RUSTC_BOOTSTRAP", "1")
         .with_stderr_contains("warning: Cannot set `RUSTC_BOOTSTRAP=1` [..]")
         .run();
@@ -161,7 +161,7 @@ fn rustc_bootstrap() {
     p.cargo("build")
         .masquerade_as_nightly_cargo(&["RUSTC_BOOTSTRAP"])
         // NOTE: uses RUSTC_BOOTSTRAP so it will be propagated to rustc
-        // (this matters when tests are being run with a beta or stable cargo)
+        // (this matters when tests are being run with a beta or stable corgi)
         .env("RUSTC_BOOTSTRAP", "1")
         .with_stderr_contains("warning: Cannot set `RUSTC_BOOTSTRAP=1` [..]")
         .run();

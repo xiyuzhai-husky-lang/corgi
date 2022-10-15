@@ -1,4 +1,4 @@
-//! Tests for running multiple `cargo` processes at the same time.
+//! Tests for running multiple `corgi` processes at the same time.
 
 use std::fs;
 use std::net::TcpListener;

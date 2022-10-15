@@ -93,7 +93,7 @@ pub struct VirtualManifest {
 ///
 /// Note that many of these fields can contain invalid values such as the
 /// homepage, repository, documentation, or license. These fields are not
-/// validated by cargo itself, but rather it is up to the registry when uploaded
+/// validated by corgi itself, but rather it is up to the registry when uploaded
 /// to validate these fields. Cargo will itself accept any valid TOML
 /// specification for these values.
 #[derive(PartialEq, Clone, Debug)]
@@ -204,7 +204,7 @@ pub struct Target {
 struct TargetInner {
     kind: TargetKind,
     name: String,
-    // Note that `bin_name` is used for the cargo-feature `different_binary_name`
+    // Note that `bin_name` is used for the corgi-feature `different_binary_name`
     bin_name: Option<String>,
     // Note that the `src_path` here is excluded from the `Hash` implementation
     // as it's absolute currently and is otherwise a little too brittle for
@@ -276,7 +276,7 @@ struct SerializedTarget<'a> {
     edition: &'a str,
     #[serde(rename = "required-features", skip_serializing_if = "Option::is_none")]
     required_features: Option<Vec<&'a str>>,
-    /// Whether docs should be built for the target via `cargo doc`
+    /// Whether docs should be built for the target via `corgi doc`
     /// See <https://doc.rust-lang.org/cargo/commands/cargo-doc.html#target-selection>
     doc: bool,
     doctest: bool,
@@ -463,7 +463,7 @@ impl Manifest {
     pub fn targets(&self) -> &[Target] {
         &self.targets
     }
-    // It is used by cargo-c, please do not remove it
+    // It is used by corgi-c, please do not remove it
     pub fn targets_mut(&mut self) -> &mut [Target] {
         &mut self.targets
     }

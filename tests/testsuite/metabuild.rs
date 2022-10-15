@@ -34,7 +34,7 @@ Caused by:
 
   The package requires the Cargo feature called `metabuild`, \
   but that feature is not stabilized in this version of Cargo (1.[..]).
-  Consider adding `cargo-features = [\"metabuild\"]` to the top of Cargo.toml \
+  Consider adding `corgi-features = [\"metabuild\"]` to the top of Cargo.toml \
   (above the [package] table) to tell Cargo you are opting in to use this unstable feature.
   See https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#metabuild \
   for more information about the status of this feature.
@@ -48,7 +48,7 @@ fn basic_project() -> Project {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["metabuild"]
+                corgi-features = ["metabuild"]
                 [package]
                 name = "foo"
                 version = "0.0.1"
@@ -96,7 +96,7 @@ fn metabuild_error_both() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["metabuild"]
+                corgi-features = ["metabuild"]
                 [package]
                 name = "foo"
                 version = "0.0.1"
@@ -135,7 +135,7 @@ fn metabuild_missing_dep() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["metabuild"]
+                corgi-features = ["metabuild"]
                 [package]
                 name = "foo"
                 version = "0.0.1"
@@ -164,7 +164,7 @@ fn metabuild_optional_dep() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["metabuild"]
+                corgi-features = ["metabuild"]
                 [package]
                 name = "foo"
                 version = "0.0.1"
@@ -200,7 +200,7 @@ fn metabuild_lib_name() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["metabuild"]
+                corgi-features = ["metabuild"]
                 [package]
                 name = "foo"
                 version = "0.0.1"
@@ -248,7 +248,7 @@ fn metabuild_fresh() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["metabuild"]
+                corgi-features = ["metabuild"]
                 [package]
                 name = "foo"
                 version = "0.0.1"
@@ -290,7 +290,7 @@ fn metabuild_links() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["metabuild"]
+                corgi-features = ["metabuild"]
                 [package]
                 name = "foo"
                 version = "0.0.1"
@@ -327,7 +327,7 @@ fn metabuild_override() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["metabuild"]
+                corgi-features = ["metabuild"]
                 [package]
                 name = "foo"
                 version = "0.0.1"
@@ -345,7 +345,7 @@ fn metabuild_override() {
             r#"pub fn metabuild() { panic!("should not run"); }"#,
         )
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [target.{}.cat]
@@ -374,7 +374,7 @@ fn metabuild_workspace() {
         .file(
             "member1/Cargo.toml",
             r#"
-                cargo-features = ["metabuild"]
+                corgi-features = ["metabuild"]
                 [package]
                 name = "member1"
                 version = "0.0.1"
@@ -389,7 +389,7 @@ fn metabuild_workspace() {
         .file(
             "member2/Cargo.toml",
             r#"
-                cargo-features = ["metabuild"]
+                corgi-features = ["metabuild"]
                 [package]
                 name = "member2"
                 version = "0.0.1"
@@ -570,7 +570,7 @@ fn metabuild_two_versions() {
         .file(
             "member1/Cargo.toml",
             r#"
-                cargo-features = ["metabuild"]
+                corgi-features = ["metabuild"]
                 [package]
                 name = "member1"
                 version = "0.0.1"
@@ -584,7 +584,7 @@ fn metabuild_two_versions() {
         .file(
             "member2/Cargo.toml",
             r#"
-                cargo-features = ["metabuild"]
+                corgi-features = ["metabuild"]
                 [package]
                 name = "member2"
                 version = "0.0.1"
@@ -646,7 +646,7 @@ fn metabuild_external_dependency() {
         .file(
             "Cargo.toml",
             r#"
-                cargo-features = ["metabuild"]
+                corgi-features = ["metabuild"]
                 [package]
                 name = "dep"
                 version = "1.0.0"

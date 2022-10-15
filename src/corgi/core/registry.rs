@@ -468,7 +468,7 @@ impl<'cfg> PackageRegistry<'cfg> {
         //
         // If we have a precise version, then we'll update lazily during the
         // querying phase. Note that precise in this case is only
-        // `Some("locked")` as other `Some` values indicate a `cargo update
+        // `Some("locked")` as other `Some` values indicate a `corgi update
         // --precise` request
         if source_id.precise() != Some("locked") {
             self.sources.get_mut(source_id).unwrap().invalidate_cache();

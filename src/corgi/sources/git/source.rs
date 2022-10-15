@@ -244,7 +244,7 @@ mod test {
     #[test]
     pub fn test_url_to_path_ident_with_path() {
         let ident = ident(&src("https://github.com/carlhuda/cargo"));
-        assert!(ident.starts_with("cargo-"));
+        assert!(ident.starts_with("corgi-"));
     }
 
     #[test]

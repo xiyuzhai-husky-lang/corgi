@@ -177,7 +177,7 @@ retry without the offline flag.
         .run();
 
     // While we're here, also check the config works.
-    p.change_file(".cargo/config", "net.offline = true");
+    p.change_file(".corgi/config", "net.offline = true");
     p.cargo("build").with_status(101).with_stderr(msg).run();
 }
 

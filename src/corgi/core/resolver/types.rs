@@ -133,7 +133,7 @@ impl ResolveBehavior {
 pub struct ResolveOpts {
     /// Whether or not dev-dependencies should be included.
     ///
-    /// This may be set to `false` by things like `cargo install` or `-Z avoid-dev-deps`.
+    /// This may be set to `false` by things like `corgi install` or `-Z avoid-dev-deps`.
     /// It also gets set to `false` when activating dependencies in the resolver.
     pub dev_deps: bool,
     /// Set of features requested on the command-line.

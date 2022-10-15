@@ -65,16 +65,16 @@ diagnosing problems.
 
 ```sh
 # Outputs all logs with levels debug and higher
-CARGO_LOG=debug cargo generate-lockfile
+CARGO_LOG=debug corgi generate-lockfile
 
 # Don't forget that you can filter by module as well
-CARGO_LOG=corgi::core::resolver=trace cargo generate-lockfile
+CARGO_LOG=corgi::core::resolver=trace corgi generate-lockfile
 
 # This will print lots of info about the download process. `trace` prints even more.
-CARGO_HTTP_DEBUG=true CARGO_LOG=corgi::ops::registry=debug cargo fetch
+CARGO_HTTP_DEBUG=true CARGO_LOG=corgi::ops::registry=debug corgi fetch
 
 # This is an important command for diagnosing fingerprint issues.
-CARGO_LOG=corgi::core::compiler::fingerprint=trace cargo build
+CARGO_LOG=corgi::core::compiler::fingerprint=trace corgi build
 ```
 
 [`env_logger`]: https://docs.rs/env_logger

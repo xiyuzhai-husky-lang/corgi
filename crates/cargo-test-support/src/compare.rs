@@ -13,7 +13,7 @@
 //! - `[ROOT]` is the path to the test directory's root.
 //! - `[CWD]` is the working directory of the process that was run.
 //! - There is a wide range of substitutions (such as `[COMPILING]` or
-//!   `[WARNING]`) to match cargo's "status" output and allows you to ignore
+//!   `[WARNING]`) to match corgi's "status" output and allows you to ignore
 //!   the alignment. See the source of `substitute_macros` for a complete list
 //!   of substitutions.
 //!

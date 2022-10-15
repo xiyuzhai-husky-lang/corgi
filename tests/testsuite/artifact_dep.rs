@@ -1432,7 +1432,7 @@ fn dependencies_of_dependencies_work_in_artifacts() {
         .masquerade_as_nightly_cargo(&["bindeps"])
         .run();
 
-    // cargo tree sees artifacts as the dependency kind they are in and doesn't do anything special with it.
+    // corgi tree sees artifacts as the dependency kind they are in and doesn't do anything special with it.
     p.cargo("tree -Z bindeps")
         .masquerade_as_nightly_cargo(&["bindeps"])
         .with_stdout(

@@ -1,4 +1,4 @@
-//! Tests for the `cargo build` command.
+//! Tests for the `corgi build` command.
 
 use cargo_test_support::compare;
 use cargo_test_support::paths::{root, CargoPathExt};
@@ -116,7 +116,7 @@ fn incremental_config() {
     let p = project()
         .file("src/main.rs", "fn main() {}")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [build]
                 incremental = false
@@ -378,7 +378,7 @@ fn cargo_compile_with_forbidden_bin_target_name() {
 [ERROR] failed to parse manifest at `[..]`
 
 Caused by:
-  the binary target name `build` is forbidden, it conflicts with with cargo's build directory names
+  the binary target name `build` is forbidden, it conflicts with with corgi's build directory names
 ",
         )
         .run();
@@ -584,7 +584,7 @@ fn cargo_compile_with_lowercase_corgi_toml() {
         .with_status(101)
         .with_stderr(
             "[ERROR] could not find `Cargo.toml` in `[..]` or any parent directory, \
-        but found cargo.toml please try to rename it to Cargo.toml",
+        but found corgi.toml please try to rename it to Cargo.toml",
         )
         .run();
 }
@@ -2891,7 +2891,7 @@ fn credentials_is_unreadable() {
         .file("src/lib.rs", "")
         .build();
 
-    let credentials = home().join(".cargo/credentials");
+    let credentials = home().join(".corgi/credentials");
     t!(fs::create_dir_all(credentials.parent().unwrap()));
     t!(fs::write(
         &credentials,
@@ -2932,7 +2932,7 @@ fn bad_cargo_config() {
     let foo = project()
         .file("Cargo.toml", &basic_manifest("foo", "0.0.0"))
         .file("src/lib.rs", "")
-        .file(".cargo/config", "this is not valid toml")
+        .file(".corgi/config", "this is not valid toml")
         .build();
     foo.cargo("build -v")
         .with_status(101)
@@ -3565,7 +3565,7 @@ fn custom_target_dir_env() {
     assert!(p.root().join("foo2/target/debug").join(&exe_name).is_file());
 
     p.change_file(
-        ".cargo/config",
+        ".corgi/config",
         r#"
             [build]
             target-dir = "foo/target"
@@ -3592,7 +3592,7 @@ fn custom_target_dir_line_parameter() {
     assert!(p.root().join("target/debug").join(&exe_name).is_file());
 
     p.change_file(
-        ".cargo/config",
+        ".corgi/config",
         r#"
             [build]
             target-dir = "foo/target"
@@ -4684,7 +4684,7 @@ fn rustc_wrapper_relative() {
         .run();
     p.build_dir().rm_rf();
     p.change_file(
-        ".cargo/config.toml",
+        ".corgi/config.toml",
         &format!(
             r#"
                 build.rustc-wrapper = "./{}"
@@ -5214,7 +5214,7 @@ fn uplift_pdb_of_bin_on_windows() {
     assert!(!p.target_debug_dir().join("d.pdb").exists());
 }
 
-// Ensure that `cargo build` chooses the correct profile for building
+// Ensure that `corgi build` chooses the correct profile for building
 // targets based on filters (assuming `--profile` is not specified).
 #[cargo_test]
 fn build_filter_infer_profile() {
@@ -5405,7 +5405,7 @@ fn default_cargo_config_jobs() {
     let p = project()
         .file("src/lib.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [build]
                 jobs = 1
@@ -5420,7 +5420,7 @@ fn good_cargo_config_jobs() {
     let p = project()
         .file("src/lib.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [build]
                 jobs = 4
@@ -5447,7 +5447,7 @@ fn invalid_cargo_config_jobs() {
     let p = project()
         .file("src/lib.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
                 [build]
                 jobs = 0
@@ -6047,14 +6047,14 @@ fn close_output_during_drain() {
         .file("src/lib.rs", "")
         .build();
 
-    // Spawn cargo, wait for the first rustc to start, and then close stderr.
+    // Spawn corgi, wait for the first rustc to start, and then close stderr.
     let mut cmd = process(&cargo_exe())
         .arg("check")
         .cwd(p.root())
         .env("RUSTC", rustc_wrapper)
         .build_command();
     cmd.stdout(Stdio::piped()).stderr(Stdio::piped());
-    let mut child = cmd.spawn().expect("cargo should spawn");
+    let mut child = cmd.spawn().expect("corgi should spawn");
     // Wait for the rustc wrapper to start.
     let rustc_conn = listener.accept().unwrap().0;
     // Close stderr to force an error.

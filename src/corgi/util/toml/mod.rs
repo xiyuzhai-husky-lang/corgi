@@ -89,14 +89,14 @@ pub fn read_manifest_from_str(
 
     // Provide a helpful error message for a common user error.
     if let Some(package) = toml.get("package").or_else(|| toml.get("project")) {
-        if let Some(feats) = package.get("cargo-features") {
+        if let Some(feats) = package.get("corgi-features") {
             let mut feats = feats.clone();
             if let Some(value) = feats.as_value_mut() {
                 // Only keep formatting inside of the `[]` and not formatting around it
                 value.decor_mut().clear();
             }
             bail!(
-                "cargo-features = {} was found in the wrong location: it \
+                "corgi-features = {} was found in the wrong location: it \
                  should be set at the top of Cargo.toml before any tables",
                 feats.to_string()
             );
@@ -367,7 +367,7 @@ pub struct DetailedTomlDependency<P: Clone = String> {
     /// crates published by other users.
     registry_index: Option<String>,
     // `path` is relative to the file it appears in. If that's a `Cargo.toml`, it'll be relative to
-    // that TOML file, and if it's a `.cargo/config` file, it'll be relative to that file.
+    // that TOML file, and if it's a `.corgi/config` file, it'll be relative to that file.
     path: Option<P>,
     git: Option<String>,
     branch: Option<String>,
@@ -542,7 +542,7 @@ pub struct TomlProfile {
     pub dir_name: Option<InternedString>,
     pub inherits: Option<InternedString>,
     pub strip: Option<StringOrBool>,
-    // Note that `rustflags` is used for the cargo-feature `profile_rustflags`
+    // Note that `rustflags` is used for the corgi-feature `profile_rustflags`
     pub rustflags: Option<Vec<InternedString>>,
     // These two fields must be last because they are sub-tables, and TOML
     // requires all non-tables to be listed first.
@@ -710,7 +710,7 @@ impl TomlProfile {
         // These are some arbitrary reservations. We have no plans to use
         // these, but it seems safer to reserve a few just in case we want to
         // add more built-in profiles in the future. We can also uses special
-        // syntax like cargo:foo if needed. But it is unlikely these will ever
+        // syntax like corgi:foo if needed. But it is unlikely these will ever
         // be used.
         if matches!(
             lower_name.as_str(),
@@ -733,7 +733,7 @@ impl TomlProfile {
                 | "target"
                 | "tmp"
                 | "uninstall"
-        ) || lower_name.starts_with("cargo")
+        ) || lower_name.starts_with("corgi")
         {
             bail!(
                 "profile name `{}` is reserved\n\
@@ -1373,7 +1373,7 @@ impl TomlManifest {
                     .map(|e| e.default_resolve_behavior())
             })?;
         if ws.resolve_behavior() != current_resolver {
-            // This ensures the published crate if built as a root (e.g. `cargo install`) will
+            // This ensures the published crate if built as a root (e.g. `corgi install`) will
             // use the same resolver behavior it was tested with in the workspace.
             // To avoid forcing a higher MSRV we don't explicitly set this if it would implicitly
             // result in the same thing.
@@ -1386,7 +1386,7 @@ impl TomlManifest {
             let license_path = Path::new(&license_file);
             let abs_license_path = paths::normalize_path(&package_root.join(license_path));
             if abs_license_path.strip_prefix(package_root).is_err() {
-                // This path points outside of the package root. `cargo package`
+                // This path points outside of the package root. `corgi package`
                 // will copy it into the root, so adjust the path to this location.
                 package.license_file = Some(MaybeWorkspace::Defined(
                     license_path
@@ -1408,7 +1408,7 @@ impl TomlManifest {
                     let readme_path = Path::new(&readme);
                     let abs_readme_path = paths::normalize_path(&package_root.join(readme_path));
                     if abs_readme_path.strip_prefix(package_root).is_err() {
-                        // This path points outside of the package root. `cargo package`
+                        // This path points outside of the package root. `corgi package`
                         // will copy it into the root, so adjust the path to this location.
                         package.readme = Some(MaybeWorkspace::Defined(StringOrBool::String(
                             readme_path
@@ -2852,7 +2852,7 @@ struct TomlTarget {
     crate_type2: Option<Vec<String>>,
 
     path: Option<PathValue>,
-    // Note that `filename` is used for the cargo-feature `different_binary_name`
+    // Note that `filename` is used for the corgi-feature `different_binary_name`
     filename: Option<String>,
     test: Option<bool>,
     doctest: Option<bool>,

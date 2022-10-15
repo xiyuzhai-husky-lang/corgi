@@ -65,7 +65,7 @@ const MAX_REPORTS: usize = 5;
 /// The structure saved to disk containing the reports.
 #[derive(Serialize, Deserialize)]
 pub struct OnDiskReports {
-    /// A schema version number, to handle older cargo's from trying to read
+    /// A schema version number, to handle older corgi's from trying to read
     /// something that they don't understand.
     version: u32,
     /// The report ID to use for the next report to save.
@@ -85,7 +85,7 @@ struct OnDiskReport {
     /// Report, suitable for printing to the console.
     /// Maps package names to the corresponding report
     /// We use a `BTreeMap` so that the iteration order
-    /// is stable across multiple runs of `cargo`
+    /// is stable across multiple runs of `corgi`
     per_package: BTreeMap<String, String>,
 }
 
@@ -417,7 +417,7 @@ You may want to consider updating them to a newer version to see if the issue ha
                 "
   - {package_spec}
   - Repository: {url}
-  - Detailed warning command: `cargo report future-incompatibilities --id {id} --package {package_spec}`",
+  - Detailed warning command: `corgi report future-incompatibilities --id {id} --package {package_spec}`",
                 package_spec = format!("{}@{}", package_id.name(), package_id.version()),
                 url = manifest
                     .metadata()
@@ -459,14 +459,14 @@ https://doc.rust-lang.org/cargo/reference/overriding-dependencies.html#the-patch
     if bcx.build_config.future_incompat_report {
         drop(bcx.config.shell().note(&suggestion_message));
         drop(bcx.config.shell().note(&format!(
-            "this report can be shown with `cargo report \
+            "this report can be shown with `corgi report \
              future-incompatibilities --id {}`",
             report_id
         )));
     } else if should_display_message {
         drop(bcx.config.shell().note(&format!(
             "to see what the problems were, use the option \
-             `--future-incompat-report`, or run `cargo report \
+             `--future-incompat-report`, or run `corgi report \
              future-incompatibilities --id {}`",
             report_id
         )));

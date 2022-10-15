@@ -294,7 +294,7 @@ impl<'a> GitCheckout<'a> {
         match self.repo.revparse_single("HEAD") {
             Ok(ref head) if head.id() == self.revision => {
                 // See comments in reset() for why we check this
-                self.location.join(".cargo-ok").exists()
+                self.location.join(".corgi-ok").exists()
             }
             _ => false,
         }
@@ -305,11 +305,11 @@ impl<'a> GitCheckout<'a> {
         // of a signal) Cargo needs to be sure to try to check out this repo
         // again on the next go-round.
         //
-        // To enable this we have a dummy file in our checkout, .cargo-ok, which
+        // To enable this we have a dummy file in our checkout, .corgi-ok, which
         // if present means that the repo has been successfully reset and is
         // ready to go. Hence if we start to do a reset, we make sure this file
         // *doesn't* exist, and then once we're done we create the file.
-        let ok_file = self.location.join(".cargo-ok");
+        let ok_file = self.location.join(".corgi-ok");
         let _ = paths::remove_file(&ok_file);
         info!("reset {} to {}", self.repo.path().display(), self.revision);
 
@@ -921,7 +921,7 @@ fn fetch_with_cli(
         .arg("--update-head-ok") // see discussion in #2078
         .arg(url)
         .args(refspecs)
-        // If cargo is run by git (for example, the `exec` command in `git
+        // If corgi is run by git (for example, the `exec` command in `git
         // rebase`), the GIT_DIR is set by git and will point to the wrong
         // location (this takes precedence over the cwd). Make sure this is
         // unset so git will look at cwd for the repo.
@@ -1138,7 +1138,7 @@ fn github_fast_path(
     debug!("attempting GitHub fast path for {}", url);
     handle.get(true)?;
     handle.url(&url)?;
-    handle.useragent("cargo")?;
+    handle.useragent("corgi")?;
     handle.http_headers({
         let mut headers = List::new();
         headers.append("Accept: application/vnd.github.3.sha")?;

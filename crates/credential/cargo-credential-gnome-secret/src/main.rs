@@ -77,7 +77,7 @@ extern "C" {
 struct GnomeSecret;
 
 fn label(registry_name: &str) -> CString {
-    CString::new(format!("cargo-registry:{}", registry_name)).unwrap()
+    CString::new(format!("corgi-registry:{}", registry_name)).unwrap()
 }
 
 fn schema() -> SecretSchema {
@@ -94,7 +94,7 @@ fn schema() -> SecretSchema {
         attr_type: SecretSchemaAttributeType::String,
     };
     SecretSchema {
-        name: b"org.rust-lang.cargo.registry\0".as_ptr() as *const gchar,
+        name: b"org.rust-lang.corgi.registry\0".as_ptr() as *const gchar,
         flags: SecretSchemaFlags::None,
         attributes,
     }

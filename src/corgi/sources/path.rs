@@ -117,7 +117,7 @@ impl<'cfg> PathSource<'cfg> {
 
         let mut exclude_builder = GitignoreBuilder::new(root);
         if no_include_option && git_repo.is_none() {
-            // no include option and not git repo discovered (see rust-lang/cargo#7183).
+            // no include option and not git repo discovered (see rust-lang/corgi#7183).
             exclude_builder.add_line(None, ".*")?;
         }
         for rule in pkg.manifest().exclude() {
@@ -166,7 +166,7 @@ impl<'cfg> PathSource<'cfg> {
             ignore_should_package(relative_path, is_dir)
         };
 
-        // Attempt Git-prepopulate only if no `include` (see rust-lang/cargo#4135).
+        // Attempt Git-prepopulate only if no `include` (see rust-lang/corgi#4135).
         if no_include_option {
             if let Some(repo) = git_repo {
                 return self.list_files_git(pkg, &repo, &filter);
@@ -434,7 +434,7 @@ impl<'cfg> PathSource<'cfg> {
                 Err(err) => match err.path() {
                     // If an error occurs with a path, filter it again.
                     // If it is excluded, Just ignore it in this case.
-                    // See issue rust-lang/cargo#10917
+                    // See issue rust-lang/corgi#10917
                     Some(path) if !filter(path, path.is_dir()) => {}
                     // Otherwise, simply recover from it.
                     // Don't worry about error skipping here, the callers would

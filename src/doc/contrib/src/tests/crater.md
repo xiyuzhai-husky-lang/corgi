@@ -31,10 +31,10 @@ Roughly the steps are:
    For example:
 
    ```bash
-   git submodule set-url src/tools/cargo https://github.com/ehuss/cargo.git
-   git submodule set-branch --branch my-awesome-feature src/tools/cargo
-   git submodule update --remote src/tools/cargo
-   git add .gitmodules src/tools/cargo
+   git submodule set-url src/tools/corgi https://github.com/ehuss/cargo.git
+   git submodule set-branch --branch my-awesome-feature src/tools/corgi
+   git submodule update --remote src/tools/corgi
+   git add .gitmodules src/tools/corgi
    git commit
    ```
 

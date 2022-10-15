@@ -14,7 +14,7 @@ fn overwrite_version_with_path() {
 
     snapbox::cmd::Command::cargo_ui()
         .arg("add")
-        .arg_line("cargo-list-test-fixture-dependency --path ../dependency")
+        .arg_line("corgi-list-test-fixture-dependency --path ../dependency")
         .current_dir(&cwd)
         .assert()
         .success()

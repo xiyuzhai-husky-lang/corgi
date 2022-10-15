@@ -12,7 +12,7 @@ use cargo_test_support::registry::Package;
 use url::Url;
 
 fn find_index() -> PathBuf {
-    let dir = paths::home().join(".cargo/registry/index");
+    let dir = paths::home().join(".corgi/registry/index");
     dir.read_dir().unwrap().next().unwrap().unwrap().path()
 }
 

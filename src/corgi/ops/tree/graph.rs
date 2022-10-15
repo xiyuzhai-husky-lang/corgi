@@ -1,4 +1,4 @@
-//! Code for building the graph used by `cargo tree`.
+//! Code for building the graph used by `corgi tree`.
 
 use super::TreeOptions;
 use crate::core::compiler::{CompileKind, RustcTargetData};

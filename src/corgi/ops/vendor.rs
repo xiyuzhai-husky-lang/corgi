@@ -38,7 +38,7 @@ pub fn vendor(ws: &Workspace<'_>, opts: &VendorOptions<'_>) -> CorgiResult<()> {
         } else {
             crate::drop_eprint!(
                 config,
-                "To use vendored sources, add this to your .cargo/config.toml for this project:\n\n"
+                "To use vendored sources, add this to your .corgi/config.toml for this project:\n\n"
             );
             crate::drop_print!(
                 config,
@@ -101,7 +101,7 @@ fn sync(
         }
     }
 
-    // First up attempt to work around rust-lang/cargo#5956. Apparently build
+    // First up attempt to work around rust-lang/corgi#5956. Apparently build
     // artifacts sprout up in Cargo's global cache for whatever reason, although
     // it's unsure what tool is causing these issues at this time. For now we
     // apply a heavy-hammer approach which is to delete Cargo's unpacked version
@@ -210,7 +210,7 @@ fn sync(
         sources.insert(id.source_id());
         let dst = canonical_destination.join(&dst_name);
         to_remove.remove(&dst);
-        let cksum = dst.join(".cargo-checksum.json");
+        let cksum = dst.join(".corgi-checksum.json");
         if dir_has_version_suffix && cksum.exists() {
             // Always re-copy directory without version suffix in case the version changed
             continue;
@@ -330,7 +330,7 @@ fn cp_sources(
             Some(".gitattributes") | Some(".gitignore") | Some(".git") => continue,
 
             // Temporary Cargo files
-            Some(".cargo-ok") => continue,
+            Some(".corgi-ok") => continue,
 
             // Skip patch-style orig/rej files. Published crates on crates.io
             // have `Cargo.toml.orig` which we don't want to use here and

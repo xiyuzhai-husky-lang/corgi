@@ -207,12 +207,12 @@ fn run_example_and_bin() {
     let p = full_project();
     p.cargo("run -v --bin 'bi*1'")
         .with_status(101)
-        .with_stderr("[ERROR] `cargo run` does not support glob patterns on target selection")
+        .with_stderr("[ERROR] `corgi run` does not support glob patterns on target selection")
         .run();
 
     p.cargo("run -v --example 'ex*1'")
         .with_status(101)
-        .with_stderr("[ERROR] `cargo run` does not support glob patterns on target selection")
+        .with_stderr("[ERROR] `corgi run` does not support glob patterns on target selection")
         .run();
 }
 
@@ -373,7 +373,7 @@ fn install_example() {
 [INSTALLING] foo v0.0.1 ([CWD])
 [COMPILING] foo v0.0.1 ([CWD])
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [..]/home/.cargo/bin/example1[EXE]
+[INSTALLING] [..]/home/.corgi/bin/example1[EXE]
 [INSTALLED] package `foo v0.0.1 ([CWD])` (executable `example1[EXE]`)
 [WARNING] be sure to add [..]
 ",
@@ -390,7 +390,7 @@ fn install_bin() {
 [INSTALLING] foo v0.0.1 ([CWD])
 [COMPILING] foo v0.0.1 ([CWD])
 [FINISHED] release [optimized] target(s) in [..]
-[INSTALLING] [..]/home/.cargo/bin/bin1[EXE]
+[INSTALLING] [..]/home/.corgi/bin/bin1[EXE]
 [INSTALLED] package `foo v0.0.1 ([CWD])` (executable `bin1[EXE]`)
 [WARNING] be sure to add [..]
 ",

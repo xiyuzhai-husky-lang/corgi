@@ -57,7 +57,7 @@
 //! -------------------------------------------|-------------|----------
 //! rustc                                      | ✓           | ✓
 //! Profile                                    | ✓           | ✓
-//! `cargo rustc` extra args                   | ✓           | ✓
+//! `corgi rustc` extra args                   | ✓           | ✓
 //! CompileMode                                | ✓           | ✓
 //! Target Name                                | ✓           | ✓
 //! TargetKind (bin/lib/etc.)                  | ✓           | ✓
@@ -104,7 +104,7 @@
 //!   quick loading and comparison.
 //! - A `.json` file that contains details about the Fingerprint. This is only
 //!   used to log details about *why* a fingerprint is considered dirty.
-//!   `CARGO_LOG=corgi::core::compiler::fingerprint=trace cargo build` can be
+//!   `CARGO_LOG=corgi::core::compiler::fingerprint=trace corgi build` can be
 //!   used to display this log information.
 //! - A "dep-info" file which is a translation of rustc's `*.d` dep-info files
 //!   to a Cargo-specific format that tweaks file names and is optimized for
@@ -521,7 +521,7 @@ pub struct Fingerprint {
     /// package-relative source path, edition, etc.
     target: u64,
     /// Hash of the `Profile`, `CompileMode`, and any extra flags passed via
-    /// `cargo rustc` or `cargo rustdoc`.
+    /// `corgi rustc` or `corgi rustdoc`.
     profile: u64,
     /// Hash of the path to the base source file. This is relative to the
     /// workspace root for path members, or absolute for other sources.
@@ -735,7 +735,7 @@ impl LocalFingerprint {
                                 .to_str()
                                 .ok_or_else(|| {
                                     format_err!(
-                                        "cargo exe path {} must be valid UTF-8",
+                                        "corgi exe path {} must be valid UTF-8",
                                         cargo_exe.display()
                                     )
                                 })?
@@ -1369,7 +1369,7 @@ fn calculate_run_custom_build(cx: &mut Context<'_, '_>, unit: &Unit) -> CorgiRes
             const IO_ERR_MESSAGE: &str = "\
 An I/O error happened. Please make sure you can access the file.
 
-By default, if your project contains a build script, cargo scans all files in
+By default, if your project contains a build script, corgi scans all files in
 it to determine whether a rebuild is needed. If you don't expect to access the 
 file, specify `rerun-if-changed` in your build script.
 See https://doc.rust-lang.org/cargo/reference/build-scripts.html#rerun-if-changed for more information.";
@@ -1419,7 +1419,7 @@ See https://doc.rust-lang.org/cargo/reference/build-scripts.html#rerun-if-change
 /// This function has, what's on the surface, a seriously wonky interface.
 /// You'll call this function and it'll return a closure and a boolean. The
 /// boolean is pretty simple in that it indicates whether the `unit` has been
-/// overridden via `.cargo/config`. The closure is much more complicated.
+/// overridden via `.corgi/config`. The closure is much more complicated.
 ///
 /// This closure is intended to capture any local state necessary to compute
 /// the `LocalFingerprint` values for this unit. It is `Send` and `'static` to
@@ -1691,7 +1691,7 @@ pub fn parse_dep_info(
     let info = match EncodedDepInfo::parse(&data) {
         Some(info) => info,
         None => {
-            log::warn!("failed to parse cargo's dep-info at {:?}", dep_info);
+            log::warn!("failed to parse corgi's dep-info at {:?}", dep_info);
             return Ok(None);
         }
     };
@@ -1760,7 +1760,7 @@ where
         //
         // All in all, an equality check here would be a conservative assumption that,
         // if equal, files were changed just after a previous build finished.
-        // Unfortunately this became problematic when (in #6484) cargo switch to more accurately
+        // Unfortunately this became problematic when (in #6484) corgi switch to more accurately
         // measuring the start time of builds.
         if path_mtime <= reference_mtime {
             continue;

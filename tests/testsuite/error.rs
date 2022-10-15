@@ -10,9 +10,9 @@ fn internal_error() {
         .with_stderr(
             "\
 [ERROR] internal error test
-[NOTE] this is an unexpected cargo internal error
+[NOTE] this is an unexpected corgi internal error
 [NOTE] we would appreciate a bug report: https://github.com/rust-lang/cargo/issues/
-[NOTE] cargo [..]
+[NOTE] corgi [..]
 ",
         )
         .run();

@@ -319,7 +319,7 @@ fn rustc_fingerprint(
     // the `rustc` binary, so we try to account for this here.
     // If we see rustup's env vars, we mix them into the fingerprint,
     // but we also mix in the mtime of the actual compiler (and not
-    // the rustup shim at `~/.cargo/bin/rustup`), because `RUSTUP_TOOLCHAIN`
+    // the rustup shim at `~/.corgi/bin/rustup`), because `RUSTUP_TOOLCHAIN`
     // could be just `stable-x86_64-unknown-linux-gnu`, i.e, it could
     // not mention the version of Rust at all, which changes after
     // `rustup update`.

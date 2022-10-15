@@ -1,4 +1,4 @@
-//! Tests for the `cargo pkgid` command.
+//! Tests for the `corgi pkgid` command.
 
 use cargo_test_support::project;
 use cargo_test_support::registry::Package;

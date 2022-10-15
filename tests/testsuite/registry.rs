@@ -72,7 +72,7 @@ fn simple(cargo: fn(&Project, &str) -> Execs) {
 
     cargo(&p, "clean").run();
 
-    assert!(paths::home().join(".cargo/registry/CACHEDIR.TAG").is_file());
+    assert!(paths::home().join(".corgi/registry/CACHEDIR.TAG").is_file());
 
     // Don't download a second time
     cargo(&p, "build")
@@ -132,7 +132,7 @@ fn deps(cargo: fn(&Project, &str) -> Execs) {
         )
         .run();
 
-    assert!(paths::home().join(".cargo/registry/CACHEDIR.TAG").is_file());
+    assert!(paths::home().join(".corgi/registry/CACHEDIR.TAG").is_file());
 }
 
 #[cargo_test]
@@ -904,7 +904,7 @@ fn update_with_lockfile_if_packages_missing(cargo: fn(&Project, &str) -> Execs) 
     cargo(&p, "build").run();
     p.root().move_into_the_past();
 
-    paths::home().join(".cargo/registry").rm_rf();
+    paths::home().join(".corgi/registry").rm_rf();
     cargo(&p, "build")
         .with_stderr(
             "\
@@ -951,7 +951,7 @@ fn update_lockfile(cargo: fn(&Project, &str) -> Execs) {
 
     Package::new("bar", "0.0.2").publish();
     Package::new("bar", "0.0.3").publish();
-    paths::home().join(".cargo/registry").rm_rf();
+    paths::home().join(".corgi/registry").rm_rf();
     println!("0.0.2 update");
     cargo(&p, "update -p bar --precise 0.0.2")
         .with_stderr(
@@ -1074,10 +1074,10 @@ fn login_with_no_cargo_dir() {
     // Create a config in the root directory because `login` requires the
     // index to be updated, and we don't want to hit crates.io.
     registry::init();
-    fs::rename(paths::home().join(".cargo"), paths::root().join(".cargo")).unwrap();
+    fs::rename(paths::home().join(".corgi"), paths::root().join(".corgi")).unwrap();
     paths::home().rm_rf();
     cargo_process("login foo -v").run();
-    let credentials = fs::read_to_string(paths::home().join(".cargo/credentials")).unwrap();
+    let credentials = fs::read_to_string(paths::home().join(".corgi/credentials")).unwrap();
     assert_eq!(credentials, "[registry]\ntoken = \"foo\"\n");
 }
 
@@ -1085,7 +1085,7 @@ fn login_with_no_cargo_dir() {
 fn login_with_differently_sized_token() {
     // Verify that the configuration file gets properly truncated.
     registry::init();
-    let credentials = paths::home().join(".cargo/credentials");
+    let credentials = paths::home().join(".corgi/credentials");
     fs::remove_file(&credentials).unwrap();
     cargo_process("login lmaolmaolmao -v").run();
     cargo_process("login lmao -v").run();
@@ -1097,7 +1097,7 @@ fn login_with_differently_sized_token() {
 #[cargo_test]
 fn login_with_token_on_stdin() {
     registry::init();
-    let credentials = paths::home().join(".cargo/credentials");
+    let credentials = paths::home().join(".corgi/credentials");
     fs::remove_file(&credentials).unwrap();
     cargo_process("login lmao -v").run();
     cargo_process("login")
@@ -1198,12 +1198,12 @@ fn updating_a_dep(cargo: fn(&Project, &str) -> Execs) {
 ",
         )
         .run();
-    assert!(paths::home().join(".cargo/registry/CACHEDIR.TAG").is_file());
+    assert!(paths::home().join(".corgi/registry/CACHEDIR.TAG").is_file());
 
     // Now delete the CACHEDIR.TAG file: this is the situation we'll be in after
     // upgrading from a version of Cargo that doesn't mark this directory, to one that
     // does. It should be recreated.
-    fs::remove_file(paths::home().join(".cargo/registry/CACHEDIR.TAG"))
+    fs::remove_file(paths::home().join(".corgi/registry/CACHEDIR.TAG"))
         .expect("remove CACHEDIR.TAG");
 
     p.change_file(
@@ -1236,7 +1236,7 @@ fn updating_a_dep(cargo: fn(&Project, &str) -> Execs) {
         .run();
 
     assert!(
-        paths::home().join(".cargo/registry/CACHEDIR.TAG").is_file(),
+        paths::home().join(".corgi/registry/CACHEDIR.TAG").is_file(),
         "CACHEDIR.TAG recreated in existing registry"
     );
 }
@@ -1348,7 +1348,7 @@ fn update_publish_then_update(cargo: fn(&Project, &str) -> Execs) {
     // Next, publish a new package and back up the copy of the registry we just
     // created.
     Package::new("a", "0.1.1").publish();
-    let registry = paths::home().join(".cargo/registry");
+    let registry = paths::home().join(".corgi/registry");
     let backup = paths::root().join("registry-backup");
     t!(fs::rename(&registry, &backup));
 
@@ -2309,7 +2309,7 @@ fn git_init_templatedir_missing(cargo: fn(&Project, &str) -> Execs) {
 
     cargo(&p, "build").run();
 
-    remove_dir_all(paths::home().join(".cargo/registry")).unwrap();
+    remove_dir_all(paths::home().join(".corgi/registry")).unwrap();
     fs::write(
         paths::home().join(".gitconfig"),
         r#"
@@ -2462,7 +2462,7 @@ fn readonly_registry_still_works(cargo: fn(&Project, &str) -> Execs) {
     cargo(&p, "fetch --locked").run();
     chmod_readonly(&paths::home(), true);
     cargo(&p, "build").run();
-    // make sure we un-readonly the files afterwards so "cargo clean" can remove them (#6934)
+    // make sure we un-readonly the files afterwards so "corgi clean" can remove them (#6934)
     chmod_readonly(&paths::home(), false);
 
     fn chmod_readonly(path: &Path, readonly: bool) {
@@ -2501,7 +2501,7 @@ fn registry_index_rejected(cargo: fn(&Project, &str) -> Execs) {
 
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
             [registry]
             index = "https://example.com/"
@@ -2566,7 +2566,7 @@ fn package_lock_inside_package_is_overwritten() {
 
     Package::new("bar", "0.0.1")
         .file("src/lib.rs", "")
-        .file(".cargo-ok", "")
+        .file(".corgi-ok", "")
         .publish();
 
     p.cargo("build").run();
@@ -2578,7 +2578,7 @@ fn package_lock_inside_package_is_overwritten() {
         .join("src")
         .join(format!("-{}", hash))
         .join("bar-0.0.1")
-        .join(".cargo-ok");
+        .join(".corgi-ok");
 
     assert_eq!(ok.metadata().unwrap().len(), 2);
 }
@@ -2604,7 +2604,7 @@ fn package_lock_as_a_symlink_inside_package_is_overwritten() {
 
     Package::new("bar", "0.0.1")
         .file("src/lib.rs", "pub fn f() {}")
-        .symlink(".cargo-ok", "src/lib.rs")
+        .symlink(".corgi-ok", "src/lib.rs")
         .publish();
 
     p.cargo("build").run();
@@ -2616,7 +2616,7 @@ fn package_lock_as_a_symlink_inside_package_is_overwritten() {
         .join("src")
         .join(format!("-{}", hash))
         .join("bar-0.0.1");
-    let ok = pkg_root.join(".cargo-ok");
+    let ok = pkg_root.join(".corgi-ok");
     let librs = pkg_root.join("src/lib.rs");
 
     // Is correctly overwritten and doesn't affect the file linked to

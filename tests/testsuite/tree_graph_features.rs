@@ -1,4 +1,4 @@
-//! Tests for the `cargo tree` command with -e features option.
+//! Tests for the `corgi tree` command with -e features option.
 
 use cargo_test_support::project;
 use cargo_test_support::registry::{Dependency, Package};

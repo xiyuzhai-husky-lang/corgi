@@ -64,7 +64,7 @@ fn simple_cross_config() {
 
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [build]
@@ -169,7 +169,7 @@ fn per_crate_target_test(
             "Cargo.toml",
             &format!(
                 r#"
-                    cargo-features = ["per-package-target"]
+                    corgi-features = ["per-package-target"]
 
                     [package]
                     name = "foo"
@@ -271,7 +271,7 @@ fn workspace_with_multiple_targets() {
         .file(
             "native/Cargo.toml",
             r#"
-                cargo-features = ["per-package-target"]
+                corgi-features = ["per-package-target"]
 
                 [package]
                 name = "native"
@@ -307,7 +307,7 @@ fn workspace_with_multiple_targets() {
             "cross/Cargo.toml",
             &format!(
                 r#"
-                    cargo-features = ["per-package-target"]
+                    corgi-features = ["per-package-target"]
 
                     [package]
                     name = "cross"
@@ -367,7 +367,7 @@ fn linker() {
     let target = cross_compile::alternate();
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [target.{}]
@@ -1184,7 +1184,7 @@ fn platform_specific_variables_reflected_in_build_scripts() {
                 build = "build.rs"
             "#,
         )
-        .file("d1/build.rs", r#"fn main() { println!("cargo:val=1") }"#)
+        .file("d1/build.rs", r#"fn main() { println!("corgi:val=1") }"#)
         .file("d1/src/lib.rs", "")
         .file(
             "d2/Cargo.toml",
@@ -1197,7 +1197,7 @@ fn platform_specific_variables_reflected_in_build_scripts() {
                 build = "build.rs"
             "#,
         )
-        .file("d2/build.rs", r#"fn main() { println!("cargo:val=1") }"#)
+        .file("d2/build.rs", r#"fn main() { println!("corgi:val=1") }"#)
         .file("d2/src/lib.rs", "")
         .build();
 
@@ -1305,7 +1305,7 @@ fn doctest_xcompile_linker() {
     let target = cross_compile::alternate();
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             &format!(
                 r#"
                     [target.{}]

@@ -1,4 +1,4 @@
-//! Tests for the `cargo search` command.
+//! Tests for the `corgi search` command.
 
 use cargo_test_support::cargo_process;
 use cargo_test_support::paths;
@@ -97,7 +97,7 @@ fn not_update() {
     let cfg = Config::new(
         Shell::from_write(Box::new(Vec::new())),
         paths::root(),
-        paths::home().join(".cargo"),
+        paths::home().join(".corgi"),
     );
     let lock = cfg.acquire_package_cache_lock().unwrap();
     let mut regsrc = RegistrySource::remote(sid, &HashSet::new(), &cfg).unwrap();

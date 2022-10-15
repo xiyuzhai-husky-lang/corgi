@@ -8,7 +8,7 @@ profile stack to print results for.
 
 ```sh
 # Output first three levels of profiling info
-CARGO_PROFILE=3 cargo generate-lockfile
+CARGO_PROFILE=3 corgi generate-lockfile
 ```
 
 ## Benchmarking

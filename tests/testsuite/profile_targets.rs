@@ -148,7 +148,7 @@ fn profile_selection_build_all_targets() {
     // - build_script_build is built without panic because it thinks
     //   `build.rs` is a plugin.
     // - Benchmark dependencies are compiled in `dev` mode, which may be
-    //   surprising. See issue rust-lang/cargo#4929.
+    //   surprising. See issue rust-lang/corgi#4929.
     //
     // - Dependency profiles:
     //   Pkg  Target  Profile     Reason
@@ -514,7 +514,7 @@ fn profile_selection_check_all_targets() {
     // Starting with Rust 1.27, rustc emits `rmeta` files for bins, so
     // everything should be completely fresh. Previously, bins were being
     // rechecked.
-    // See PR rust-lang/rust#49289 and issue rust-lang/cargo#3624.
+    // See PR rust-lang/rust#49289 and issue rust-lang/corgi#3624.
     p.cargo("check --all-targets -vv")
         .with_stderr_unordered(
             "\
@@ -531,7 +531,7 @@ fn profile_selection_check_all_targets() {
 fn profile_selection_check_all_targets_release() {
     let p = all_target_project();
     // `check --release`
-    // See issue rust-lang/cargo#5218.
+    // See issue rust-lang/corgi#5218.
     // This is a pretty straightforward variant of
     // `profile_selection_check_all_targets` that uses `release` instead of
     // `dev` for all targets.

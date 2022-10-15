@@ -1,4 +1,4 @@
-//! Tests for custom cargo commands and other global command features.
+//! Tests for custom corgi commands and other global command features.
 
 use std::env;
 use std::fs;
@@ -50,7 +50,7 @@ fn list_builtin_aliases_with_descriptions() {
 fn list_custom_aliases_with_descriptions() {
     let p = project_in_home("proj")
         .file(
-            &paths::home().join(".cargo").join("config"),
+            &paths::home().join(".corgi").join("config"),
             r#"
             [alias]
             myaliasstr = "foo --bar"
@@ -68,8 +68,8 @@ fn list_custom_aliases_with_descriptions() {
 #[cargo_test]
 fn list_dedupe() {
     let p = project()
-        .executable(Path::new("path-test-1").join("cargo-dupe"), "")
-        .executable(Path::new("path-test-2").join("cargo-dupe"), "")
+        .executable(Path::new("path-test-1").join("corgi-dupe"), "")
+        .executable(Path::new("path-test-2").join("corgi-dupe"), "")
         .build();
 
     let mut path = path();
@@ -86,7 +86,7 @@ fn list_dedupe() {
 #[cargo_test]
 fn list_command_looks_at_path() {
     let proj = project()
-        .executable(Path::new("path-test").join("cargo-1"), "")
+        .executable(Path::new("path-test").join("corgi-1"), "")
         .build();
 
     let mut path = path();
@@ -107,7 +107,7 @@ fn list_command_looks_at_path() {
 #[cargo_test]
 fn list_command_handles_known_external_commands() {
     let p = project()
-        .executable(Path::new("path-test").join("cargo-fmt"), "")
+        .executable(Path::new("path-test").join("corgi-fmt"), "")
         .build();
 
     let fmt_desc = "    fmt                  Formats all bin and lib files of the current crate using rustfmt.";
@@ -132,7 +132,7 @@ fn list_command_handles_known_external_commands() {
 #[cargo_test]
 fn list_command_resolves_symlinks() {
     let proj = project()
-        .symlink(cargo_exe(), Path::new("path-test").join("cargo-2"))
+        .symlink(cargo_exe(), Path::new("path-test").join("corgi-2"))
         .build();
 
     let mut path = path();
@@ -193,7 +193,7 @@ error: no such subcommand: `biuld`
 
     // But, if we actually have `biuld`, it must work!
     // https://github.com/rust-lang/cargo/issues/5201
-    Package::new("cargo-biuld", "1.0.0")
+    Package::new("corgi-biuld", "1.0.0")
         .file(
             "src/main.rs",
             r#"
@@ -204,7 +204,7 @@ error: no such subcommand: `biuld`
         )
         .publish();
 
-    cargo_process("install cargo-biuld").run();
+    cargo_process("install corgi-biuld").run();
     cargo_process("biuld")
         .with_stdout("Similar, but not identical to, build\n")
         .run();
@@ -268,7 +268,7 @@ fn find_closest_dont_correct_nonsense() {
             "\
 [ERROR] no such subcommand: `there-is-no-way-that-there-is-a-command-close-to-this`
 
-<tab>View all installed commands with `cargo --list`",
+<tab>View all installed commands with `corgi --list`",
         )
         .run();
 }
@@ -281,7 +281,7 @@ fn displays_subcommand_on_error() {
             "\
 [ERROR] no such subcommand: `invalid-command`
 
-<tab>View all installed commands with `cargo --list`",
+<tab>View all installed commands with `corgi --list`",
         )
         .run();
 }
@@ -294,7 +294,7 @@ fn override_cargo_home() {
     fs::write(
         &my_home.join("config"),
         r#"
-            [cargo-new]
+            [corgi-new]
             vcs = "none"
         "#,
     )
@@ -323,15 +323,15 @@ fn cargo_subcommand_env() {
     );
 
     let p = project()
-        .at("cargo-envtest")
-        .file("Cargo.toml", &basic_bin_manifest("cargo-envtest"))
+        .at("corgi-envtest")
+        .file("Cargo.toml", &basic_bin_manifest("corgi-envtest"))
         .file("src/main.rs", &src)
         .build();
 
     let target_dir = p.target_debug_dir();
 
     p.cargo("build").run();
-    assert!(p.bin("cargo-envtest").is_file());
+    assert!(p.bin("corgi-envtest").is_file());
 
     let cargo = cargo_exe().canonicalize().unwrap();
     let mut path = path();
@@ -346,30 +346,30 @@ fn cargo_subcommand_env() {
 
 #[cargo_test]
 fn cargo_cmd_bins_vs_explicit_path() {
-    // Set up `cargo-foo` binary in two places: inside `$HOME/.cargo/bin` and outside of it
+    // Set up `corgi-foo` binary in two places: inside `$HOME/.corgi/bin` and outside of it
     //
     // Return paths to both places
     fn set_up_cargo_foo() -> (PathBuf, PathBuf) {
         let p = project()
-            .at("cargo-foo")
-            .file("Cargo.toml", &basic_manifest("cargo-foo", "1.0.0"))
+            .at("corgi-foo")
+            .file("Cargo.toml", &basic_manifest("corgi-foo", "1.0.0"))
             .file(
-                "src/bin/cargo-foo.rs",
+                "src/bin/corgi-foo.rs",
                 r#"fn main() { println!("INSIDE"); }"#,
             )
             .file(
-                "src/bin/cargo-foo2.rs",
+                "src/bin/corgi-foo2.rs",
                 r#"fn main() { println!("OUTSIDE"); }"#,
             )
             .build();
         p.cargo("build").run();
-        let cargo_bin_dir = paths::home().join(".cargo/bin");
+        let cargo_bin_dir = paths::home().join(".corgi/bin");
         cargo_bin_dir.mkdir_p();
         let root_bin_dir = paths::root().join("bin");
         root_bin_dir.mkdir_p();
-        let exe_name = format!("cargo-foo{}", env::consts::EXE_SUFFIX);
-        fs::rename(p.bin("cargo-foo"), cargo_bin_dir.join(&exe_name)).unwrap();
-        fs::rename(p.bin("cargo-foo2"), root_bin_dir.join(&exe_name)).unwrap();
+        let exe_name = format!("corgi-foo{}", env::consts::EXE_SUFFIX);
+        fs::rename(p.bin("corgi-foo"), cargo_bin_dir.join(&exe_name)).unwrap();
+        fs::rename(p.bin("corgi-foo2"), root_bin_dir.join(&exe_name)).unwrap();
 
         (root_bin_dir, cargo_bin_dir)
     }
@@ -424,7 +424,7 @@ fn cargo_cmd_bins_vs_explicit_path() {
 #[cargo_test]
 fn cargo_subcommand_args() {
     let p = echo_subcommand();
-    let cargo_foo_bin = p.bin("cargo-echo");
+    let cargo_foo_bin = p.bin("corgi-echo");
     assert!(cargo_foo_bin.is_file());
 
     let mut path = path();
@@ -476,7 +476,7 @@ fn subcommand_leading_plus_output_contains() {
 error: no such subcommand: `+nightly`
 
 <tab>Cargo does not handle `+toolchain` directives.
-<tab>Did you mean to invoke `cargo` through `rustup` instead?",
+<tab>Did you mean to invoke `corgi` through `rustup` instead?",
         )
         .run();
 }
@@ -491,7 +491,7 @@ error: no such subcommand: `bluid`
 
 <tab>Did you mean `build`?
 
-<tab>View all installed commands with `cargo --list`",
+<tab>View all installed commands with `corgi --list`",
         )
         .run();
 }

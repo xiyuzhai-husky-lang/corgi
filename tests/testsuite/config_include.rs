@@ -8,7 +8,7 @@ fn gated() {
     // Requires -Z flag.
     write_config("include='other'");
     write_config_at(
-        ".cargo/other",
+        ".corgi/other",
         "
         othervalue = 1
         ",
@@ -23,7 +23,7 @@ fn gated() {
 fn simple() {
     // Simple test.
     write_config_at(
-        ".cargo/config",
+        ".corgi/config",
         "
         include = 'other'
         key1 = 1
@@ -31,7 +31,7 @@ fn simple() {
         ",
     );
     write_config_at(
-        ".cargo/other",
+        ".corgi/other",
         "
         key2 = 3
         key3 = 4
@@ -46,7 +46,7 @@ fn simple() {
 #[cargo_test]
 fn works_with_cli() {
     write_config_at(
-        ".cargo/config.toml",
+        ".corgi/config.toml",
         "
         include = 'other.toml'
         [build]
@@ -54,7 +54,7 @@ fn works_with_cli() {
         ",
     );
     write_config_at(
-        ".cargo/other.toml",
+        ".corgi/other.toml",
         "
         [build]
         rustflags = ['-W', 'unsafe-code']
@@ -86,21 +86,21 @@ fn works_with_cli() {
 fn left_to_right() {
     // How it merges multiple includes.
     write_config_at(
-        ".cargo/config",
+        ".corgi/config",
         "
         include = ['one', 'two']
         primary = 1
         ",
     );
     write_config_at(
-        ".cargo/one",
+        ".corgi/one",
         "
         one = 1
         primary = 2
         ",
     );
     write_config_at(
-        ".cargo/two",
+        ".corgi/two",
         "
         two = 2
         primary = 3
@@ -126,10 +126,10 @@ fn missing_file() {
 could not load Cargo configuration
 
 Caused by:
-  failed to load config include `missing` from `[..]/.cargo/config`
+  failed to load config include `missing` from `[..]/.corgi/config`
 
 Caused by:
-  failed to read configuration file `[..]/.cargo/missing`
+  failed to read configuration file `[..]/.corgi/missing`
 
 Caused by:
   {}",
@@ -141,9 +141,9 @@ Caused by:
 #[cargo_test]
 fn cycle() {
     // Detects a cycle.
-    write_config_at(".cargo/config", "include='one'");
-    write_config_at(".cargo/one", "include='two'");
-    write_config_at(".cargo/two", "include='config'");
+    write_config_at(".corgi/config", "include='one'");
+    write_config_at(".corgi/one", "include='two'");
+    write_config_at(".corgi/two", "include='config'");
     let config = ConfigBuilder::new()
         .unstable_flag("config-include")
         .build_err();
@@ -153,16 +153,16 @@ fn cycle() {
 could not load Cargo configuration
 
 Caused by:
-  failed to load config include `one` from `[..]/.cargo/config`
+  failed to load config include `one` from `[..]/.corgi/config`
 
 Caused by:
-  failed to load config include `two` from `[..]/.cargo/one`
+  failed to load config include `two` from `[..]/.corgi/one`
 
 Caused by:
-  failed to load config include `config` from `[..]/.cargo/two`
+  failed to load config include `config` from `[..]/.corgi/two`
 
 Caused by:
-  config `include` cycle detected with path `[..]/.cargo/config`",
+  config `include` cycle detected with path `[..]/.corgi/config`",
     );
 }
 
@@ -171,16 +171,16 @@ fn cli_include() {
     // Using --config with include.
     // CLI takes priority over files.
     write_config_at(
-        ".cargo/config",
+        ".corgi/config",
         "
         foo = 1
         bar = 2
         ",
     );
-    write_config_at(".cargo/config-foo", "foo = 2");
+    write_config_at(".corgi/config-foo", "foo = 2");
     let config = ConfigBuilder::new()
         .unstable_flag("config-include")
-        .config_arg("include='.cargo/config-foo'")
+        .config_arg("include='.corgi/config-foo'")
         .build();
     assert_eq!(config.get::<i32>("foo").unwrap(), 2);
     assert_eq!(config.get::<i32>("bar").unwrap(), 2);
@@ -199,7 +199,7 @@ fn bad_format() {
 could not load Cargo configuration
 
 Caused by:
-  `include` expected a string or list, but found integer in `[..]/.cargo/config`",
+  `include` expected a string or list, but found integer in `[..]/.corgi/config`",
     );
 }
 
@@ -234,23 +234,23 @@ fn cli_merge_failed() {
     // Error message when CLI include merge fails.
     write_config("foo = ['a']");
     write_config_at(
-        ".cargo/other",
+        ".corgi/other",
         "
         foo = 'b'
         ",
     );
     let config = ConfigBuilder::new()
         .unstable_flag("config-include")
-        .config_arg("include='.cargo/other'")
+        .config_arg("include='.corgi/other'")
         .build_err();
     // Maybe this error message should mention it was from an include file?
     assert_error(
         config.unwrap_err(),
         "\
-failed to merge --config key `foo` into `[..]/.cargo/config`
+failed to merge --config key `foo` into `[..]/.corgi/config`
 
 Caused by:
-  failed to merge config value from `[..]/.cargo/other` into `[..]/.cargo/config`: \
+  failed to merge config value from `[..]/.corgi/other` into `[..]/.corgi/config`: \
   expected array, but found string",
     );
 }

@@ -2423,7 +2423,7 @@ fn add_a_git_dep() {
 
     p.cargo("build").run();
 
-    assert!(paths::home().join(".cargo/git/CACHEDIR.TAG").is_file());
+    assert!(paths::home().join(".corgi/git/CACHEDIR.TAG").is_file());
 
     p.change_file(
         "a/Cargo.toml",
@@ -2736,7 +2736,7 @@ fn use_the_cli() {
         )
         .file("src/lib.rs", "")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             "
                 [net]
                 git-fetch-with-cli = true
@@ -2755,7 +2755,7 @@ fn use_the_cli() {
 ";
 
     project.cargo("build -v").with_stderr(stderr).run();
-    assert!(paths::home().join(".cargo/git/CACHEDIR.TAG").is_file());
+    assert!(paths::home().join(".corgi/git/CACHEDIR.TAG").is_file());
 }
 
 #[cargo_test]
@@ -2836,7 +2836,7 @@ fn git_with_cli_force() {
         )
         .file("src/main.rs", "fn main() { dep1::f(); }")
         .file(
-            ".cargo/config",
+            ".corgi/config",
             "
             [net]
             git-fetch-with-cli = true
@@ -2894,7 +2894,7 @@ fn git_fetch_cli_env_clean() {
             )
             .file("src/lib.rs", "pub extern crate dep1;")
             .file(
-                ".cargo/config",
+                ".corgi/config",
                 "
                 [net]
                 git-fetch-with-cli = true
@@ -2913,7 +2913,7 @@ fn git_fetch_cli_env_clean() {
 
 #[cargo_test]
 fn dirty_submodule() {
-    // `cargo package` warns for dirty file in submodule.
+    // `corgi package` warns for dirty file in submodule.
     let (git_project, repo) = git::new_repo("foo", |project| {
         project
             .file("Cargo.toml", &basic_manifest("foo", "0.5.0"))
@@ -3163,7 +3163,7 @@ fn historical_lockfile_works_with_vendor() {
         .build();
 
     let output = project.cargo("vendor").exec_with_output().unwrap();
-    project.change_file(".cargo/config", str::from_utf8(&output.stdout).unwrap());
+    project.change_file(".corgi/config", str::from_utf8(&output.stdout).unwrap());
     project.change_file(
         "Cargo.lock",
         &format!(
@@ -3251,7 +3251,7 @@ fn two_dep_forms() {
 
 #[cargo_test]
 fn metadata_master_consistency() {
-    // SourceId consistency in the `cargo metadata` output when `master` is
+    // SourceId consistency in the `corgi metadata` output when `master` is
     // explicit or implicit, using new or old Cargo.lock.
     let (git_project, git_repo) = git::new_repo("bar", |project| {
         project
@@ -3461,7 +3461,7 @@ fn metadata_master_consistency() {
 
 #[cargo_test]
 fn git_with_force_push() {
-    // Checks that cargo can handle force-pushes to git repos.
+    // Checks that corgi can handle force-pushes to git repos.
     // This works by having a git dependency that is updated with an amend
     // commit, and tries with various forms (default branch, branch, rev,
     // tag).
@@ -3601,12 +3601,12 @@ fn _corrupted_checkout(with_cli: bool) {
 
     let mut paths = t!(glob::glob(
         paths::home()
-            .join(".cargo/git/checkouts/dep1-*/*")
+            .join(".corgi/git/checkouts/dep1-*/*")
             .to_str()
             .unwrap()
     ));
     let path = paths.next().unwrap().unwrap();
-    let ok = path.join(".cargo-ok");
+    let ok = path.join(".corgi-ok");
 
     // Deleting this file simulates an interrupted checkout.
     t!(fs::remove_file(&ok));

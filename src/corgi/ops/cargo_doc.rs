@@ -6,7 +6,7 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 
-/// Strongly typed options for the `cargo doc` command.
+/// Strongly typed options for the `corgi doc` command.
 #[derive(Debug)]
 pub struct DocOptions {
     /// Whether to attempt to open the browser after compiling the docs
@@ -15,7 +15,7 @@ pub struct DocOptions {
     pub compile_opts: ops::CompileOptions,
 }
 
-/// Main method for `cargo doc`.
+/// Main method for `corgi doc`.
 pub fn doc(ws: &Workspace<'_>, options: &DocOptions) -> CorgiResult<()> {
     let compilation = ops::compile(ws, &options.compile_opts)?;
 

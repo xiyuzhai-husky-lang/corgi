@@ -18,8 +18,8 @@ fn manifest_path_package() {
             "--manifest-path",
             "Cargo.toml",
             "--package",
-            "cargo-list-test-fixture",
-            "cargo-list-test-fixture-dependency",
+            "corgi-list-test-fixture",
+            "corgi-list-test-fixture-dependency",
         ])
         .current_dir(cwd)
         .assert()

@@ -1,4 +1,4 @@
-//! Tests for the `cargo rustc` command.
+//! Tests for the `corgi rustc` command.
 
 use cargo_test_support::{basic_bin_manifest, basic_lib_manifest, basic_manifest, project};
 
@@ -768,7 +768,7 @@ fn rustc_with_print_cfg_config_toml() {
     let p = project()
         .file("Cargo.toml", &basic_bin_manifest("foo"))
         .file(
-            ".cargo/config.toml",
+            ".corgi/config.toml",
             r#"
 [target.x86_64-pc-windows-msvc]
 rustflags = ["-C", "target-feature=+crt-static"]

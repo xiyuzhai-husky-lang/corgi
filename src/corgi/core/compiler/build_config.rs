@@ -31,7 +31,7 @@ pub struct BuildConfig {
     pub unit_graph: bool,
     /// An optional override of the rustc process for primary units
     pub primary_unit_rustc: Option<ProcessBuilder>,
-    /// A thread used by `cargo fix` to receive messages on a socket regarding
+    /// A thread used by `corgi fix` to receive messages on a socket regarding
     /// the success/failure of applying fixes.
     pub rustfix_diagnostic_server: RefCell<Option<RustfixDiagnosticServer>>,
     /// The directory to copy final artifacts to. Note that even if `out_dir` is
@@ -129,7 +129,7 @@ impl BuildConfig {
 pub enum MessageFormat {
     Human,
     Json {
-        /// Whether rustc diagnostics are rendered by cargo or included into the
+        /// Whether rustc diagnostics are rendered by corgi or included into the
         /// output stream.
         render_diagnostics: bool,
         /// Whether the `rendered` field of rustc diagnostics are using the

@@ -54,7 +54,7 @@ pub(crate) static FIELDS: [&str; 2] = [VALUE_FIELD, DEFINITION_FIELD];
 /// Location where a config value is defined.
 #[derive(Clone, Debug, Eq)]
 pub enum Definition {
-    /// Defined in a `.cargo/config`, includes the path to the file.
+    /// Defined in a `.corgi/config`, includes the path to the file.
     Path(PathBuf),
     /// Defined in an environment variable, includes the environment key.
     Environment(String),
@@ -65,7 +65,7 @@ pub enum Definition {
 impl Definition {
     /// Root directory where this is defined.
     ///
-    /// If from a file, it is the directory above `.cargo/config`.
+    /// If from a file, it is the directory above `.corgi/config`.
     /// CLI and env are the current working directory.
     pub fn root<'a>(&'a self, config: &'a Config) -> &'a Path {
         match self {

@@ -1,4 +1,4 @@
-// See src/cargo/lib.rs for notes on these lint settings.
+// See src/corgi/lib.rs for notes on these lint settings.
 #![warn(rust_2018_idioms)]
 #![allow(clippy::all)]
 #![cfg_attr(feature = "deny-warnings", deny(warnings))]

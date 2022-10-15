@@ -129,7 +129,7 @@ fn add_registry_packages(alt: bool) {
         "my-build-package2",
         "toml",
         "versioned-package",
-        "cargo-list-test-fixture-dependency",
+        "corgi-list-test-fixture-dependency",
         "unrelateed-crate",
     ] {
         cargo_test_support::registry::Package::new(name, "0.1.1+my-package")

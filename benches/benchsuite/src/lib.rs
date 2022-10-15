@@ -13,7 +13,7 @@ macro_rules! fixtures {
 
 // This is an arbitrary commit that existed when I started. This helps
 // ensure consistent results. It can be updated if needed, but that can
-// make it harder to compare results with older versions of cargo.
+// make it harder to compare results with older versions of corgi.
 const CRATES_IO_COMMIT: &str = "85f7bfd61ea4fee08ec68c468762e886b2aebec6";
 
 pub struct Fixtures {

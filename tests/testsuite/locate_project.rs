@@ -1,4 +1,4 @@
-//! Tests for the `cargo locate-project` command.
+//! Tests for the `corgi locate-project` command.
 
 use cargo_test_support::project;
 

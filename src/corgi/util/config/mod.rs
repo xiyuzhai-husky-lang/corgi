@@ -121,8 +121,8 @@ macro_rules! get_value_typed {
     };
 }
 
-/// Configuration information for cargo. This is not specific to a build, it is information
-/// relating to cargo itself.
+/// Configuration information for corgi. This is not specific to a build, it is information
+/// relating to corgi itself.
 #[derive(Debug)]
 pub struct Config {
     /// The location of the user's Cargo home directory. OS-dependent.
@@ -133,11 +133,11 @@ pub struct Config {
     values: LazyCell<HashMap<String, ConfigValue>>,
     /// CLI config values, passed in via `configure`.
     cli_config: Option<Vec<String>>,
-    /// The current working directory of cargo
+    /// The current working directory of corgi
     cwd: PathBuf,
     /// Directory where config file searching should stop (inclusive).
     search_stop_path: Option<PathBuf>,
-    /// The location of the cargo executable (path to current process)
+    /// The location of the corgi executable (path to current process)
     cargo_exe: LazyCell<PathBuf>,
     /// The location of the rustdoc executable
     rustdoc: LazyCell<PathBuf>,
@@ -194,7 +194,7 @@ pub struct Config {
     /// This should be true if:
     /// - this is an artifact of the rustc distribution process for "nightly"
     /// - this is being used in the rustc distribution process internally
-    /// - this is a cargo executable that was built from source
+    /// - this is a corgi executable that was built from source
     /// - this is an `#[test]` that called `enable_nightly_features`
     /// - this is an integration test that uses `ProcessBuilder`
     ///       that called `masquerade_as_nightly_cargo`
@@ -388,12 +388,12 @@ impl Config {
         )
     }
 
-    /// Gets the path to the `cargo` executable.
+    /// Gets the path to the `corgi` executable.
     pub fn cargo_exe(&self) -> CorgiResult<&Path> {
         self.cargo_exe
             .try_borrow_with(|| {
                 fn from_current_exe() -> CorgiResult<PathBuf> {
-                    // Try fetching the path to `cargo` using `env::current_exe()`.
+                    // Try fetching the path to `corgi` using `env::current_exe()`.
                     // The method varies per operating system and might fail; in particular,
                     // it depends on `/proc` being mounted on Linux, and some environments
                     // (like containers or chroots) may not have that available.
@@ -406,8 +406,8 @@ impl Config {
                     // If `argv[0]` has one component, it must have come from a `PATH` lookup,
                     // so probe `PATH` in that case.
                     // Otherwise, it has multiple components and is either:
-                    // - a relative path (e.g., `./cargo`, `target/debug/cargo`), or
-                    // - an absolute path (e.g., `/usr/local/bin/cargo`).
+                    // - a relative path (e.g., `./corgi`, `target/debug/corgi`), or
+                    // - an absolute path (e.g., `/usr/local/bin/corgi`).
                     // In either case, `Path::canonicalize` will return the full absolute path
                     // to the target if it exists.
                     let argv0 = env::args_os()
@@ -419,7 +419,7 @@ impl Config {
 
                 let exe = from_current_exe()
                     .or_else(|_| from_argv())
-                    .with_context(|| "couldn't get the path to cargo executable")?;
+                    .with_context(|| "couldn't get the path to corgi executable")?;
                 Ok(exe)
             })
             .map(AsRef::as_ref)
@@ -444,7 +444,7 @@ impl Config {
     /// Gets a mutable copy of the on-disk config values.
     ///
     /// This requires the config values to already have been loaded. This
-    /// currently only exists for `cargo vendor` to remove the `source`
+    /// currently only exists for `corgi vendor` to remove the `source`
     /// entries. This doesn't respect environment variables. You should avoid
     /// using this if possible.
     pub fn values_mut(&mut self) -> CorgiResult<&mut HashMap<String, ConfigValue>> {
@@ -531,7 +531,7 @@ impl Config {
         log::trace!("get cv {:?}", key);
         let vals = self.values()?;
         if key.is_root() {
-            // Returning the entire root table (for example `cargo config get`
+            // Returning the entire root table (for example `corgi config get`
             // with no key). The definition here shouldn't matter.
             return Ok(Some(CV::Table(
                 vals.clone(),
@@ -911,7 +911,7 @@ impl Config {
         let verbose = verbose != 0;
 
         // Ignore errors in the configuration files. We don't want basic
-        // commands like `cargo version` to error out due to config file
+        // commands like `corgi version` to error out due to config file
         // problems.
         let term = self.get::<TermConfig>("term").unwrap_or_default();
 
@@ -1364,7 +1364,7 @@ impl Config {
         let mut stash: HashSet<PathBuf> = HashSet::new();
 
         for current in paths::ancestors(pwd, self.search_stop_path.as_deref()) {
-            if let Some(path) = self.get_file_path(&current.join(".cargo"), "config", true)? {
+            if let Some(path) = self.get_file_path(&current.join(".corgi"), "config", true)? {
                 walk(&path)?;
                 stash.insert(path);
             }
@@ -1432,7 +1432,7 @@ impl Config {
         };
 
         let mut value = self.load_file(&credentials, true)?;
-        // Backwards compatibility for old `.cargo/credentials` layout.
+        // Backwards compatibility for old `.corgi/credentials` layout.
         {
             let (value_map, def) = match value {
                 CV::Table(ref mut value, ref def) => (value, def),
@@ -1548,7 +1548,7 @@ impl Config {
     /// This is used to validate the `term` table has valid syntax.
     ///
     /// This is necessary because loading the term settings happens very
-    /// early, and in some situations (like `cargo version`) we don't want to
+    /// early, and in some situations (like `corgi version`) we don't want to
     /// fail if there are problems with the config file.
     pub fn validate_term_config(&self) -> CorgiResult<()> {
         drop(self.get::<TermConfig>("term")?);

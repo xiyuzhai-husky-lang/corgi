@@ -26,7 +26,7 @@ pub(super) fn auth_token(
 ) -> CorgiResult<String> {
     let token = match (cli_token, credential) {
         (None, RegistryConfig::None) => {
-            bail!("no upload token found, please run `cargo login` or pass `--token`");
+            bail!("no upload token found, please run `corgi login` or pass `--token`");
         }
         (Some(cli_token), _) => cli_token.to_string(),
         (None, RegistryConfig::Token(config_token)) => config_token.to_string(),
@@ -85,7 +85,7 @@ fn run_command(
     action: Action,
 ) -> CorgiResult<Option<String>> {
     let cred_proc;
-    let (exe, args) = if process.0.to_str().unwrap_or("").starts_with("cargo:") {
+    let (exe, args) = if process.0.to_str().unwrap_or("").starts_with("corgi:") {
         cred_proc = sysroot_credential(config, process)?;
         &cred_proc
     } else {
@@ -218,14 +218,14 @@ fn sysroot_credential(
     config: &Config,
     process: &(PathBuf, Vec<String>),
 ) -> CorgiResult<(PathBuf, Vec<String>)> {
-    let cred_name = process.0.to_str().unwrap().strip_prefix("cargo:").unwrap();
+    let cred_name = process.0.to_str().unwrap().strip_prefix("corgi:").unwrap();
     let cargo = config.cargo_exe()?;
     let root = cargo
         .parent()
         .and_then(|p| p.parent())
-        .ok_or_else(|| format_err!("expected cargo path {}", cargo.display()))?;
+        .ok_or_else(|| format_err!("expected corgi path {}", cargo.display()))?;
     let exe = root.join("libexec").join(format!(
-        "cargo-credential-{}{}",
+        "corgi-credential-{}{}",
         cred_name,
         std::env::consts::EXE_SUFFIX
     ));

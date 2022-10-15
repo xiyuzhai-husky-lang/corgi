@@ -1,4 +1,4 @@
-//! Tests for the `cargo publish` command.
+//! Tests for the `corgi publish` command.
 
 use cargo_test_support::git::{self, repo};
 use cargo_test_support::paths;
@@ -153,7 +153,7 @@ fn old_token_location() {
         .file("src/main.rs", "fn main() {}")
         .build();
 
-    let credentials = paths::home().join(".cargo/credentials");
+    let credentials = paths::home().join(".corgi/credentials");
     fs::remove_file(&credentials).unwrap();
 
     // Verify can't publish without a token.
@@ -161,7 +161,7 @@ fn old_token_location() {
         .with_status(101)
         .with_stderr_contains(
             "[ERROR] no upload token found, \
-            please run `cargo login` or pass `--token`",
+            please run `corgi login` or pass `--token`",
         )
         .run();
 
@@ -1017,7 +1017,7 @@ fn publish_checks_for_token_before_verify() {
         .file("src/main.rs", "fn main() {}")
         .build();
 
-    let credentials = paths::home().join(".cargo/credentials");
+    let credentials = paths::home().join(".corgi/credentials");
     fs::remove_file(&credentials).unwrap();
 
     // Assert upload token error before the package is verified
@@ -1025,7 +1025,7 @@ fn publish_checks_for_token_before_verify() {
         .with_status(101)
         .with_stderr_contains(
             "[ERROR] no upload token found, \
-            please run `cargo login` or pass `--token`",
+            please run `corgi login` or pass `--token`",
         )
         .with_stderr_does_not_contain("[VERIFYING] foo v0.0.1 ([CWD])")
         .run();
@@ -1041,7 +1041,7 @@ fn publish_checks_for_token_before_verify() {
 fn publish_with_bad_source() {
     let p = project()
         .file(
-            ".cargo/config",
+            ".corgi/config",
             r#"
             [source.crates-io]
             replace-with = 'local-registry'
@@ -1058,13 +1058,13 @@ fn publish_with_bad_source() {
         .with_stderr(
             "\
 [ERROR] registry `[..]/foo/registry` does not support API commands.
-Check for a source-replacement in .cargo/config.
+Check for a source-replacement in .corgi/config.
 ",
         )
         .run();
 
     p.change_file(
-        ".cargo/config",
+        ".corgi/config",
         r#"
         [source.crates-io]
         replace-with = "vendored-sources"
@@ -1079,7 +1079,7 @@ Check for a source-replacement in .cargo/config.
         .with_stderr(
             "\
 [ERROR] dir [..]/foo/vendor does not support API commands.
-Check for a source-replacement in .cargo/config.
+Check for a source-replacement in .corgi/config.
 ",
         )
         .run();
@@ -1297,7 +1297,7 @@ repository = "foo"
 fn credentials_ambiguous_filename() {
     registry::init();
 
-    let credentials_toml = paths::home().join(".cargo/credentials.toml");
+    let credentials_toml = paths::home().join(".corgi/credentials.toml");
     fs::write(credentials_toml, r#"token = "api-token""#).unwrap();
 
     let p = project()
@@ -1331,7 +1331,7 @@ fn index_requires_token() {
     // --index will not load registry.token to avoid possibly leaking
     // crates.io token to another server.
     let registry = registry::init();
-    let credentials = paths::home().join(".cargo/credentials");
+    let credentials = paths::home().join(".corgi/credentials");
     fs::remove_file(&credentials).unwrap();
 
     let p = project()
@@ -1613,7 +1613,7 @@ fn api_curl_error() {
         .build();
 
     // This doesn't check for the exact text of the error in the remote
-    // possibility that cargo is linked with a weird version of libcurl, or
+    // possibility that corgi is linked with a weird version of libcurl, or
     // curl changes the text of the message. Currently the message 52
     // (CURLE_GOT_NOTHING) is:
     //    Server returned nothing (no headers, no data) (Empty reply from server)

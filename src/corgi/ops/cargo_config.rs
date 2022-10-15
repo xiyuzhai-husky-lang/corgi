@@ -1,4 +1,4 @@
-//! Implementation of `cargo config` subcommand.
+//! Implementation of `corgi config` subcommand.
 
 use crate::util::config::{Config, ConfigKey, ConfigValue as CV, Definition};
 use crate::util::errors::CorgiResult;
@@ -42,7 +42,7 @@ impl fmt::Display for ConfigFormat {
     }
 }
 
-/// Options for `cargo config get`.
+/// Options for `corgi config get`.
 pub struct GetOptions<'a> {
     pub key: Option<&'a str>,
     pub format: ConfigFormat,

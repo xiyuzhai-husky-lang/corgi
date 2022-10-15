@@ -1,6 +1,6 @@
 //! High-level overview of how `fix` works:
 //!
-//! The main goal is to run `cargo check` to get rustc to emit JSON
+//! The main goal is to run `corgi check` to get rustc to emit JSON
 //! diagnostics with suggested fixes that can be applied to the files on the
 //! filesystem, and validate that those changes didn't break anything.
 //!
@@ -14,16 +14,16 @@
 //! messages to the user on the console (so that multiple processes don't try
 //! to print at the same time).
 //!
-//! Cargo begins a normal `cargo check` operation with itself set as a proxy
+//! Cargo begins a normal `corgi check` operation with itself set as a proxy
 //! for rustc by setting `primary_unit_rustc` in the build config. When
-//! cargo launches rustc to check a crate, it is actually launching itself.
-//! The `FIX_ENV` environment variable is set so that cargo knows it is in
+//! corgi launches rustc to check a crate, it is actually launching itself.
+//! The `FIX_ENV` environment variable is set so that corgi knows it is in
 //! fix-proxy-mode.
 //!
-//! Each proxied cargo-as-rustc detects it is in fix-proxy-mode (via `FIX_ENV`
+//! Each proxied corgi-as-rustc detects it is in fix-proxy-mode (via `FIX_ENV`
 //! environment variable in `main`) and does the following:
 //!
-//! - Acquire a lock from the `LockServer` from the master cargo process.
+//! - Acquire a lock from the `LockServer` from the master corgi process.
 //! - Launches the real rustc (`rustfix_and_fix`), looking at the JSON output
 //!   for suggested fixes.
 //! - Uses the `rustfix` crate to apply the suggestions to the files on the
@@ -121,11 +121,11 @@ pub fn fix(ws: &Workspace<'_>, opts: &mut FixOptions) -> CorgiResult<()> {
 
     let rustc = ws.config().load_global_rustc(Some(ws))?;
     wrapper.arg(&rustc.path);
-    // This is calling rustc in cargo fix-proxy-mode, so it also need to retry.
+    // This is calling rustc in corgi fix-proxy-mode, so it also need to retry.
     // The argfile handling are located at `FixArgs::from_args`.
     wrapper.retry_with_argfile(true);
 
-    // primary crates are compiled using a cargo subprocess to do extra work of applying fixes and
+    // primary crates are compiled using a corgi subprocess to do extra work of applying fixes and
     // repeating build until there are no more changes to be applied
     opts.compile_opts.build_config.primary_unit_rustc = Some(wrapper);
 
@@ -139,7 +139,7 @@ fn check_version_control(config: &Config, opts: &FixOptions) -> CorgiResult<()> 
     }
     if !existing_vcs_repo(config.cwd(), config.cwd()) {
         bail!(
-            "no VCS found for this package and `cargo fix` can potentially \
+            "no VCS found for this package and `corgi fix` can potentially \
              perform destructive changes; if you'd like to suppress this \
              error pass `--allow-no-vcs`"
         )
@@ -195,7 +195,7 @@ fn check_version_control(config: &Config, opts: &FixOptions) -> CorgiResult<()> 
 
     bail!(
         "the working directory of this package has uncommitted changes, and \
-         `cargo fix` can potentially perform destructive changes; if you'd \
+         `corgi fix` can potentially perform destructive changes; if you'd \
          like to suppress this error pass `--allow-dirty`, `--allow-staged`, \
          or commit the changes to these files:\n\
          \n\
@@ -341,9 +341,9 @@ pub fn fix_get_proxy_lock_addr() -> Option<String> {
     env::var(FIX_ENV).ok()
 }
 
-/// Entry point for `cargo` running as a proxy for `rustc`.
+/// Entry point for `corgi` running as a proxy for `rustc`.
 ///
-/// This is called every time `cargo` is run to check if it is in proxy mode.
+/// This is called every time `corgi` is run to check if it is in proxy mode.
 ///
 /// If there are warnings or errors, this does not return,
 /// and the process exits with the corresponding `rustc` exit code.
@@ -351,7 +351,7 @@ pub fn fix_get_proxy_lock_addr() -> Option<String> {
 /// See [`fix_get_proxy_lock_addr`]
 pub fn fix_exec_rustc(config: &Config, lock_addr: &str) -> CorgiResult<()> {
     let args = FixArgs::get()?;
-    trace!("cargo-fix as rustc got file {:?}", args.file);
+    trace!("corgi-fix as rustc got file {:?}", args.file);
 
     let workspace_rustc = std::env::var("RUSTC_WORKSPACE_WRAPPER")
         .map(PathBuf::from)
@@ -624,7 +624,7 @@ fn rustfix_and_fix(
             continue;
         };
 
-        // Do not write into registry cache. See rust-lang/cargo#9857.
+        // Do not write into registry cache. See rust-lang/corgi#9857.
         if Path::new(&file_name).starts_with(home_path) {
             continue;
         }
@@ -749,7 +749,7 @@ fn log_failed_fix(krate: Option<String>, stderr: &[u8], status: ExitStatus) -> C
     Ok(())
 }
 
-/// Various command-line options and settings used when `cargo` is running as
+/// Various command-line options and settings used when `corgi` is running as
 /// a proxy for `rustc` during the fix operation.
 struct FixArgs {
     /// This is the `.rs` file that is being fixed.
@@ -805,7 +805,7 @@ impl FixArgs {
                     return Ok(());
                 }
                 if s.starts_with("--error-format=") || s.starts_with("--json=") {
-                    // Cargo may add error-format in some cases, but `cargo
+                    // Cargo may add error-format in some cases, but `corgi
                     // fix` wants to add its own.
                     format_args.push(s.to_string());
                     return Ok(());
@@ -816,8 +816,8 @@ impl FixArgs {
         };
 
         if let Some(argfile_path) = rustc.to_str().unwrap_or_default().strip_prefix("@") {
-            // Because cargo in fix-proxy-mode might hit the command line size limit,
-            // cargo fix need handle `@path` argfile for this special case.
+            // Because corgi in fix-proxy-mode might hit the command line size limit,
+            // corgi fix need handle `@path` argfile for this special case.
             if argv.next().is_some() {
                 bail!("argfile `@path` cannot be combined with other arguments");
             }
@@ -867,7 +867,7 @@ impl FixArgs {
             // migrate.
             cmd.arg("--cap-lints=allow");
         } else {
-            // This allows `cargo fix` to work even if the crate has #[deny(warnings)].
+            // This allows `corgi fix` to work even if the crate has #[deny(warnings)].
             cmd.arg("--cap-lints=warn");
         }
         if let Some(edition) = self.enabled_edition {
@@ -898,10 +898,10 @@ impl FixArgs {
                 .and(Ok(true));
             }
         };
-        // Unfortunately determining which cargo targets are being built
+        // Unfortunately determining which corgi targets are being built
         // isn't easy, and each target can be a different edition. The
-        // cargo-as-rustc fix wrapper doesn't know anything about the
-        // workspace, so it can't check for the `cargo-features` unstable
+        // corgi-as-rustc fix wrapper doesn't know anything about the
+        // workspace, so it can't check for the `corgi-features` unstable
         // opt-in. As a compromise, this just restricts to the nightly
         // toolchain.
         //
@@ -965,7 +965,7 @@ mod tests {
         temp.write_all(content.as_bytes()).unwrap();
 
         let argfile = format!("@{}", temp.path().display());
-        let args = ["cargo", &argfile];
+        let args = ["corgi", &argfile];
         let fix_args = FixArgs::from_args(args.map(|x| x.into())).unwrap();
         assert_eq!(fix_args.rustc, PathBuf::from("/path/to/rustc"));
         assert_eq!(fix_args.file, main_rs.path());
@@ -981,7 +981,7 @@ mod tests {
         temp.write_all(content.as_bytes()).unwrap();
 
         let argfile = format!("@{}", temp.path().display());
-        let args = ["cargo", &argfile, "boo!"];
+        let args = ["corgi", &argfile, "boo!"];
         match FixArgs::from_args(args.map(|x| x.into())) {
             Err(e) => assert_eq!(
                 e.to_string(),

@@ -14,7 +14,7 @@ fn workspace_name() {
 
     snapbox::cmd::Command::cargo_ui()
         .arg("add")
-        .arg_line("cargo-list-test-fixture-dependency")
+        .arg_line("corgi-list-test-fixture-dependency")
         .current_dir(&cwd)
         .assert()
         .success()
