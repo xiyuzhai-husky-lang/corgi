@@ -295,13 +295,13 @@ impl Config {
     ///
     /// This does only minimal initialization. In particular, it does not load
     /// any config files from disk. Those will be loaded lazily as-needed.
-    pub fn default() -> CorgiResult<Config> {
+    pub fn minimal_init() -> CorgiResult<Config> {
         let shell = Shell::new();
         let cwd = env::current_dir()
             .with_context(|| "couldn't get the current directory of the process")?;
         let homedir = homedir(&cwd).ok_or_else(|| {
             anyhow!(
-                "Cargo couldn't find your home directory. \
+                "Corgi couldn't find your home directory. \
                  This probably means that $HOME was not set."
             )
         })?;
@@ -1977,7 +1977,7 @@ impl ConfigValue {
 }
 
 pub fn homedir(cwd: &Path) -> Option<PathBuf> {
-    ::home::cargo_home_with_cwd(cwd).ok()
+    corgi_home::corgi_home_with_cwd(cwd).ok()
 }
 
 pub fn save_credentials(

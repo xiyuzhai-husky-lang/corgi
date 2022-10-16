@@ -90,7 +90,7 @@ mod test {
 
     fn summ(name: &str, version: &str) -> Summary {
         let pkg_id = pkgid(name, version);
-        let config = Config::default().unwrap();
+        let config = Config::minimal_init().unwrap();
         let features = BTreeMap::new();
         Summary::new(&config, pkg_id, Vec::new(), &features, None::<&String>).unwrap()
     }

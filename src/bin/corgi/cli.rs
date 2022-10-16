@@ -32,6 +32,7 @@ pub fn main(config: &mut LazyConfig) -> CliResult {
     // the [alias] table).
     let config = config.get_mut();
 
+    // https://doc.rust-lang.org/cargo/reference/config.html#configuration-format
     let (expanded_args, global_args) = expand_aliases(config, args, vec![])?;
 
     if expanded_args
@@ -354,10 +355,12 @@ fn config_configure(
 }
 
 fn execute_subcommand(config: &mut Config, cmd: &str, subcommand_args: &ArgMatches) -> CliResult {
+    // 先看内置的子命令是否存在
     if let Some(exec) = commands::builtin_exec(cmd) {
         return exec(config, subcommand_args);
     }
 
+    // 再尝试寻找外部安装的命令
     let mut ext_args: Vec<&OsStr> = vec![OsStr::new(cmd)];
     ext_args.extend(
         subcommand_args
@@ -508,13 +511,14 @@ impl LazyConfig {
     ///
     /// On error, the process is terminated
     pub fn get_mut(&mut self) -> &mut Config {
-        self.config.get_or_insert_with(|| match Config::default() {
-            Ok(cfg) => cfg,
-            Err(e) => {
-                let mut shell = Shell::new();
-                corgi::exit_with_error(e.into(), &mut shell)
-            }
-        })
+        self.config
+            .get_or_insert_with(|| match Config::minimal_init() {
+                Ok(cfg) => cfg,
+                Err(e) => {
+                    let mut shell = Shell::new();
+                    corgi::exit_with_error(e.into(), &mut shell)
+                }
+            })
     }
 }
 

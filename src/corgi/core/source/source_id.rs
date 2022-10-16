@@ -643,7 +643,7 @@ impl Ord for SourceKind {
 #[test]
 #[cfg(all(target_endian = "little", target_pointer_width = "64"))]
 fn test_cratesio_hash() {
-    let config = Config::default().unwrap();
+    let config = Config::minimal_init().unwrap();
     let crates_io = SourceId::crates_io(&config).unwrap();
     assert_eq!(crate::util::hex::short_hash(&crates_io), "1ecc6299db9ec823");
 }

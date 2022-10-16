@@ -471,6 +471,7 @@ fn registry(
         .map(|u| u.to_string());
     let sid = get_source_id(config, opt_index.as_deref().or(index), registry)?;
     if !sid.is_remote_registry() {
+        // 这不是官方的 husky-packages.io
         bail!(
             "{} does not support API commands.\n\
              Check for a source-replacement in .corgi/config.",
@@ -517,7 +518,7 @@ fn registry(
                     "using `registry.token` config value with source \
                         replacement is deprecated\n\
                         This may become a hard error in the future; \
-                        see <https://github.com/rust-lang/corgi/issues/xxx>.\n\
+                        see <https://github.com/ancient-software/corgi/issues/xxx>.\n\
                         Use the --token command-line flag to remove this warning.",
                 )?;
                 reg_cfg.as_token().map(|t| t.to_owned())
@@ -949,6 +950,7 @@ fn get_source_id(config: &Config, index: Option<&str>, reg: Option<&str>) -> Cor
         (Some(r), _) => SourceId::alt_registry(config, r),
         (_, Some(i)) => SourceId::for_registry(&i.into_url()?),
         _ => {
+            // TODO
             let map = SourceConfigMap::new(config)?;
             let src = map.load(SourceId::crates_io(config)?, &HashSet::new())?;
             Ok(src.replaced_source_id())

@@ -817,9 +817,9 @@ impl<'cfg> Source for RegistrySource<'cfg> {
 
     fn block_until_ready(&mut self) -> CorgiResult<()> {
         // Before starting to work on the registry, make sure that
-        // `<cargo_home>/registry` is marked as excluded from indexing and
+        // `<corgi_home>/registry` is marked as excluded from indexing and
         // backups. Older versions of Cargo didn't do this, so we do it here
-        // regardless of whether `<cargo_home>` exists.
+        // regardless of whether `<corgi_home>` exists.
         //
         // This does not use `create_dir_all_excluded_from_backups_atomic` for
         // the same reason: we want to exclude it even if the directory already

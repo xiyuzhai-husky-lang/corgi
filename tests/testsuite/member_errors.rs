@@ -47,7 +47,7 @@ fn toml_deserialize_manifest_error() {
     let root_manifest_path = p.root().join("Cargo.toml");
     let member_manifest_path = p.root().join("bar").join("Cargo.toml");
 
-    let error = Workspace::new(&root_manifest_path, &Config::default().unwrap()).unwrap_err();
+    let error = Workspace::new(&root_manifest_path, &Config::minimal_init().unwrap()).unwrap_err();
     eprintln!("{:?}", error);
 
     let manifest_err: &ManifestError = error.downcast_ref().expect("Not a ManifestError");
@@ -97,7 +97,7 @@ fn member_manifest_path_io_error() {
     let member_manifest_path = p.root().join("bar").join("Cargo.toml");
     let missing_manifest_path = p.root().join("bar").join("nosuch").join("Cargo.toml");
 
-    let error = Workspace::new(&root_manifest_path, &Config::default().unwrap()).unwrap_err();
+    let error = Workspace::new(&root_manifest_path, &Config::minimal_init().unwrap()).unwrap_err();
     eprintln!("{:?}", error);
 
     let manifest_err: &ManifestError = error.downcast_ref().expect("Not a ManifestError");

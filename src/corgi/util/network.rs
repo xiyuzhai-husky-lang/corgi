@@ -93,7 +93,7 @@ fn maybe_spurious(err: &Error) -> bool {
 /// ```
 /// # use crate::corgi::util::{CorgiResult, Config};
 /// # let download_something = || return Ok(());
-/// # let config = Config::default().unwrap();
+/// # let config = Config::minimal_init().unwrap();
 /// use corgi::util::network;
 /// let cargo_result = network::with_retry(&config, || download_something());
 /// ```
@@ -125,7 +125,7 @@ fn with_retry_repeats_the_call_then_works() {
     }
     .into();
     let mut results: Vec<CorgiResult<()>> = vec![Ok(()), Err(error1), Err(error2)];
-    let config = Config::default().unwrap();
+    let config = Config::minimal_init().unwrap();
     *config.shell() = Shell::from_write(Box::new(Vec::new()));
     let result = with_retry(&config, || results.pop().unwrap());
     assert!(result.is_ok())
@@ -148,7 +148,7 @@ fn with_retry_finds_nested_spurious_errors() {
     });
     let error2 = anyhow::Error::from(error2.context("A second chained error"));
     let mut results: Vec<CorgiResult<()>> = vec![Ok(()), Err(error1), Err(error2)];
-    let config = Config::default().unwrap();
+    let config = Config::minimal_init().unwrap();
     *config.shell() = Shell::from_write(Box::new(Vec::new()));
     let result = with_retry(&config, || results.pop().unwrap());
     assert!(result.is_ok())
