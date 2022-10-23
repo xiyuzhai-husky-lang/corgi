@@ -5,7 +5,7 @@
 //! sources to one another via the `replace-with` key in `.corgi/config`.
 
 use crate::core::{GitReference, PackageId, Source, SourceId};
-use crate::sources::{ReplacedSource, CRATES_IO_REGISTRY};
+use crate::sources::{ReplacedSource, HUSKY_PACKAGES_IO_REGISTRY};
 use crate::util::config::{self, ConfigRelativePath, OptValue};
 use crate::util::errors::CorgiResult;
 use crate::util::{Config, IntoUrl};
@@ -85,7 +85,7 @@ impl<'cfg> SourceConfigMap<'cfg> {
             config,
         };
         base.add(
-            CRATES_IO_REGISTRY,
+            HUSKY_PACKAGES_IO_REGISTRY,
             SourceConfig {
                 id: SourceId::crates_io(config)?,
                 replace_with: None,
@@ -93,7 +93,7 @@ impl<'cfg> SourceConfigMap<'cfg> {
         )?;
         if config.cli_unstable().sparse_registry {
             base.add(
-                CRATES_IO_REGISTRY,
+                HUSKY_PACKAGES_IO_REGISTRY,
                 SourceConfig {
                     id: SourceId::crates_io_maybe_sparse_http(config)?,
                     replace_with: None,
@@ -198,7 +198,7 @@ restore the source replacement configuration to continue the build
         if let Some(old_name) = self.id2name.insert(cfg.id, name.to_string()) {
             // The user is allowed to redefine the built-in crates-io
             // definition from `empty()`.
-            if name != CRATES_IO_REGISTRY {
+            if name != HUSKY_PACKAGES_IO_REGISTRY {
                 bail!(
                     "source `{}` defines source {}, but that source is already defined by `{}`\n\
                      note: Sources are not allowed to be defined multiple times.",
@@ -256,7 +256,7 @@ restore the source replacement configuration to continue the build
             check_not_set("tag", def.tag)?;
             check_not_set("rev", def.rev)?;
         }
-        if name == CRATES_IO_REGISTRY && srcs.is_empty() {
+        if name == HUSKY_PACKAGES_IO_REGISTRY && srcs.is_empty() {
             srcs.push(SourceId::crates_io_maybe_sparse_http(self.config)?);
         }
 

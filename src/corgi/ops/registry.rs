@@ -24,7 +24,9 @@ use crate::core::source::Source;
 use crate::core::{Package, SourceId, Workspace};
 use crate::ops;
 use crate::ops::Packages;
-use crate::sources::{RegistrySource, SourceConfigMap, CRATES_IO_DOMAIN, CRATES_IO_REGISTRY};
+use crate::sources::{
+    RegistrySource, SourceConfigMap, HUSKY_PACKAGES_IO_DOMAIN, HUSKY_PACKAGES_IO_REGISTRY,
+};
 use crate::util::config::{self, Config, SslVersionConfig, SslVersionConfigRange};
 use crate::util::errors::CorgiResult;
 use crate::util::important_paths::find_root_manifest_for_wd;
@@ -118,7 +120,7 @@ pub fn publish(ws: &Workspace<'_>, opts: &PublishOpts<'_>) -> CorgiResult<()> {
             // If there is only one allowed registry, push to that one directly,
             // even though there is no registry specified in the command.
             let default_registry = &allowed_registries[0];
-            if default_registry != CRATES_IO_REGISTRY {
+            if default_registry != HUSKY_PACKAGES_IO_REGISTRY {
                 // Don't change the registry for crates.io and don't warn the user.
                 // crates.io will be defaulted even without this.
                 opts.config.shell().note(&format!(
@@ -131,7 +133,7 @@ pub fn publish(ws: &Workspace<'_>, opts: &PublishOpts<'_>) -> CorgiResult<()> {
 
         let reg_name = publish_registry
             .clone()
-            .unwrap_or_else(|| CRATES_IO_REGISTRY.to_string());
+            .unwrap_or_else(|| HUSKY_PACKAGES_IO_REGISTRY.to_string());
         if !allowed_registries.contains(&reg_name) {
             bail!(
                 "`{}` cannot be published.\n\
@@ -788,7 +790,8 @@ pub fn registry_login(
         "Login",
         format!(
             "token for `{}` saved",
-            reg.as_ref().map_or(CRATES_IO_DOMAIN, String::as_str)
+            reg.as_ref()
+                .map_or(HUSKY_PACKAGES_IO_DOMAIN, String::as_str)
         ),
     )?;
     Ok(())
@@ -796,7 +799,7 @@ pub fn registry_login(
 
 pub fn registry_logout(config: &Config, reg: Option<String>) -> CorgiResult<()> {
     let (registry, reg_cfg, _) = registry(config, None, None, reg.as_deref(), false, false)?;
-    let reg_name = reg.as_deref().unwrap_or(CRATES_IO_DOMAIN);
+    let reg_name = reg.as_deref().unwrap_or(HUSKY_PACKAGES_IO_DOMAIN);
     if reg_cfg.is_none() {
         config.shell().status(
             "Logout",
@@ -950,7 +953,7 @@ fn get_source_id(config: &Config, index: Option<&str>, reg: Option<&str>) -> Cor
         (Some(r), _) => SourceId::alt_registry(config, r),
         (_, Some(i)) => SourceId::for_registry(&i.into_url()?),
         _ => {
-            // TODO
+            // TODO continue
             let map = SourceConfigMap::new(config)?;
             let src = map.load(SourceId::crates_io(config)?, &HashSet::new())?;
             Ok(src.replaced_source_id())

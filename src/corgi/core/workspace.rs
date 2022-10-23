@@ -19,7 +19,7 @@ use crate::core::resolver::ResolveBehavior;
 use crate::core::{Dependency, FeatureValue, PackageId, PackageIdSpec};
 use crate::core::{EitherManifest, Package, SourceId, VirtualManifest};
 use crate::ops;
-use crate::sources::{PathSource, CRATES_IO_INDEX, CRATES_IO_REGISTRY};
+use crate::sources::{PathSource, HUSKY_PACKAGES_IO_INDEX, HUSKY_PACKAGES_IO_REGISTRY};
 use crate::util::errors::{CorgiResult, ManifestError};
 use crate::util::interning::InternedString;
 use crate::util::lev_distance;
@@ -408,7 +408,7 @@ impl<'cfg> Workspace<'cfg> {
         let mut patch = HashMap::new();
         for (url, deps) in config_patch.into_iter().flatten() {
             let url = match &url[..] {
-                CRATES_IO_REGISTRY => CRATES_IO_INDEX.parse().unwrap(),
+                HUSKY_PACKAGES_IO_REGISTRY => HUSKY_PACKAGES_IO_INDEX.parse().unwrap(),
                 url => self
                     .config
                     .get_registry_index(url)

@@ -87,7 +87,7 @@ pub fn resolve_std<'cfg>(
             Ok(dep)
         })
         .collect::<CorgiResult<Vec<_>>>()?;
-    let crates_io_url = crate::sources::CRATES_IO_INDEX.parse().unwrap();
+    let crates_io_url = crate::sources::HUSKY_PACKAGES_IO_INDEX.parse().unwrap();
     let patch = HashMap::from([(crates_io_url, patches)]);
     let members = vec![
         String::from("library/std"),

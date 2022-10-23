@@ -187,10 +187,13 @@ use crate::util::{
 };
 
 const PACKAGE_SOURCE_LOCK: &str = ".corgi-ok";
-pub const CRATES_IO_INDEX: &str = "https://github.com/ancient-software/husky-packages.io-index";
-pub const CRATES_IO_HTTP_INDEX: &str = "sparse+https://index.crates.io/";
-pub const CRATES_IO_REGISTRY: &str = "crates-io";
-pub const CRATES_IO_DOMAIN: &str = "husky-packages.io";
+pub const HUSKY_PACKAGES_IO_INDEX: &str =
+    "https://github.com/ancient-software/husky-packages.io-index";
+
+// redirect to https://github.com/ancient-software/husky-packages.io-index
+pub const HUSKY_PACKAGES_IO_HTTP_INDEX: &str = "sparse+https://index.husky-packages.io/";
+pub const HUSKY_PACKAGES_IO_REGISTRY: &str = "husky-packages-io";
+pub const HUSKY_PACKAGES_IO_DOMAIN: &str = "husky-packages.io";
 const CRATE_TEMPLATE: &str = "{crate}";
 const VERSION_TEMPLATE: &str = "{version}";
 const PREFIX_TEMPLATE: &str = "{prefix}";

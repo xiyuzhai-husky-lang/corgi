@@ -3,7 +3,7 @@
 use crate::core::compiler::context::Context;
 use crate::core::compiler::unit::Unit;
 use crate::core::compiler::CompileKind;
-use crate::sources::CRATES_IO_REGISTRY;
+use crate::sources::HUSKY_PACKAGES_IO_REGISTRY;
 use crate::util::errors::{internal, CorgiResult};
 use cargo_util::ProcessBuilder;
 use std::collections::HashMap;
@@ -65,7 +65,7 @@ pub struct RustdocExternMap {
 impl Default for RustdocExternMap {
     fn default() -> Self {
         Self {
-            registries: HashMap::from([(CRATES_IO_REGISTRY.into(), DOCS_RS_URL.into())]),
+            registries: HashMap::from([(HUSKY_PACKAGES_IO_REGISTRY.into(), DOCS_RS_URL.into())]),
             std: None,
         }
     }
@@ -76,8 +76,8 @@ fn default_crates_io_to_docs_rs<'de, D: serde::Deserializer<'de>>(
 ) -> Result<HashMap<String, String>, D::Error> {
     use serde::Deserialize;
     let mut registries = HashMap::deserialize(de)?;
-    if !registries.contains_key(CRATES_IO_REGISTRY) {
-        registries.insert(CRATES_IO_REGISTRY.into(), DOCS_RS_URL.into());
+    if !registries.contains_key(HUSKY_PACKAGES_IO_REGISTRY) {
+        registries.insert(HUSKY_PACKAGES_IO_REGISTRY.into(), DOCS_RS_URL.into());
     }
     Ok(registries)
 }
@@ -129,7 +129,7 @@ pub fn add_root_urls(
                         return false;
                     }
                     if sid.is_default_registry() {
-                        return registry == CRATES_IO_REGISTRY;
+                        return registry == HUSKY_PACKAGES_IO_REGISTRY;
                     }
                     if let Some(index_url) = name2url.get(registry) {
                         return index_url == sid.url();

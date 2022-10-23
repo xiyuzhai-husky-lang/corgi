@@ -233,12 +233,12 @@ impl fmt::Debug for PackageId {
 mod tests {
     use super::PackageId;
     use crate::core::source::SourceId;
-    use crate::sources::CRATES_IO_INDEX;
+    use crate::sources::HUSKY_PACKAGES_IO_INDEX;
     use crate::util::IntoUrl;
 
     #[test]
     fn invalid_version_handled_nicely() {
-        let loc = CRATES_IO_INDEX.into_url().unwrap();
+        let loc = HUSKY_PACKAGES_IO_INDEX.into_url().unwrap();
         let repo = SourceId::for_registry(&loc).unwrap();
 
         assert!(PackageId::new("foo", "1.0", repo).is_err());
@@ -249,7 +249,7 @@ mod tests {
 
     #[test]
     fn debug() {
-        let loc = CRATES_IO_INDEX.into_url().unwrap();
+        let loc = HUSKY_PACKAGES_IO_INDEX.into_url().unwrap();
         let pkg_id = PackageId::new("foo", "1.0.0", SourceId::for_registry(&loc).unwrap()).unwrap();
         assert_eq!(
             r#"PackageId { name: "foo", version: "1.0.0", source: "registry `crates-io`" }"#,
@@ -286,7 +286,7 @@ PackageId {
 
     #[test]
     fn display() {
-        let loc = CRATES_IO_INDEX.into_url().unwrap();
+        let loc = HUSKY_PACKAGES_IO_INDEX.into_url().unwrap();
         let pkg_id = PackageId::new("foo", "1.0.0", SourceId::for_registry(&loc).unwrap()).unwrap();
         assert_eq!("foo v1.0.0", pkg_id.to_string());
     }

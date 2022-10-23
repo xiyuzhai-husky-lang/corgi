@@ -1,6 +1,8 @@
 use crate::core::PackageId;
-use crate::sources::registry::CRATES_IO_HTTP_INDEX;
-use crate::sources::{DirectorySource, CRATES_IO_DOMAIN, CRATES_IO_INDEX, CRATES_IO_REGISTRY};
+use crate::sources::registry::HUSKY_PACKAGES_IO_HTTP_INDEX;
+use crate::sources::{
+    DirectorySource, HUSKY_PACKAGES_IO_DOMAIN, HUSKY_PACKAGES_IO_INDEX, HUSKY_PACKAGES_IO_REGISTRY,
+};
 use crate::sources::{GitSource, PathSource, RegistrySource};
 use crate::util::{CanonicalUrl, Config, CorgiResult, IntoUrl};
 use log::trace;
@@ -202,8 +204,8 @@ impl SourceId {
     pub fn crates_io(config: &Config) -> CorgiResult<SourceId> {
         config.crates_io_source_id(|| {
             config.check_registry_index_not_set()?;
-            let url = CRATES_IO_INDEX.into_url().unwrap();
-            SourceId::new(SourceKind::Registry, url, Some(CRATES_IO_REGISTRY))
+            let url = HUSKY_PACKAGES_IO_INDEX.into_url().unwrap();
+            SourceId::new(SourceKind::Registry, url, Some(HUSKY_PACKAGES_IO_REGISTRY))
         })
     }
 
@@ -212,8 +214,8 @@ impl SourceId {
     pub fn crates_io_maybe_sparse_http(config: &Config) -> CorgiResult<SourceId> {
         if config.cli_unstable().sparse_registry {
             config.check_registry_index_not_set()?;
-            let url = CRATES_IO_HTTP_INDEX.into_url().unwrap();
-            SourceId::new(SourceKind::Registry, url, Some(CRATES_IO_REGISTRY))
+            let url = HUSKY_PACKAGES_IO_HTTP_INDEX.into_url().unwrap();
+            SourceId::new(SourceKind::Registry, url, Some(HUSKY_PACKAGES_IO_REGISTRY))
         } else {
             Self::crates_io(config)
         }
@@ -244,7 +246,7 @@ impl SourceId {
 
     pub fn display_index(self) -> String {
         if self.is_default_registry() {
-            format!("{} index", CRATES_IO_DOMAIN)
+            format!("{} index", HUSKY_PACKAGES_IO_DOMAIN)
         } else {
             format!("`{}` index", self.display_registry_name())
         }
@@ -252,7 +254,7 @@ impl SourceId {
 
     pub fn display_registry_name(self) -> String {
         if self.is_default_registry() {
-            CRATES_IO_REGISTRY.to_string()
+            HUSKY_PACKAGES_IO_REGISTRY.to_string()
         } else if let Some(name) = &self.inner.name {
             name.clone()
         } else if self.precise().is_some() {
@@ -370,7 +372,7 @@ impl SourceId {
             _ => return false,
         }
         let url = self.inner.url.as_str();
-        url == CRATES_IO_INDEX || url == CRATES_IO_HTTP_INDEX
+        url == HUSKY_PACKAGES_IO_INDEX || url == HUSKY_PACKAGES_IO_HTTP_INDEX
     }
 
     /// Hashes `self`.

@@ -1,4 +1,4 @@
-use crate::sources::CRATES_IO_DOMAIN;
+use crate::sources::HUSKY_PACKAGES_IO_DOMAIN;
 
 pub use self::cargo_clean::{clean, CleanOptions};
 pub use self::cargo_compile::{
@@ -70,7 +70,7 @@ fn check_dep_has_version(dep: &crate::core::Dependency, publish: bool) -> crate:
 
     if !dep.specified_req() && dep.is_transitive() {
         let dep_version_source = dep.registry_id().map_or_else(
-            || CRATES_IO_DOMAIN.to_string(),
+            || HUSKY_PACKAGES_IO_DOMAIN.to_string(),
             |registry_id| registry_id.display_registry_name(),
         );
         anyhow::bail!(

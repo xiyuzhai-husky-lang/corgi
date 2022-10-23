@@ -26,7 +26,7 @@ use crate::core::{
 };
 use crate::core::{Edition, EitherManifest, Feature, Features, VirtualManifest, Workspace};
 use crate::core::{GitReference, PackageIdSpec, SourceId, WorkspaceConfig, WorkspaceRootConfig};
-use crate::sources::{CRATES_IO_INDEX, CRATES_IO_REGISTRY};
+use crate::sources::{HUSKY_PACKAGES_IO_INDEX, HUSKY_PACKAGES_IO_REGISTRY};
 use crate::util::errors::{CorgiResult, ManifestError};
 use crate::util::interning::InternedString;
 use crate::util::{
@@ -2281,7 +2281,7 @@ impl TomlManifest {
                 )
             })?;
             if spec.url().is_none() {
-                spec.set_url(CRATES_IO_INDEX.parse().unwrap());
+                spec.set_url(HUSKY_PACKAGES_IO_INDEX.parse().unwrap());
             }
 
             if replacement.is_version_specified() {
@@ -2311,7 +2311,7 @@ impl TomlManifest {
         let mut patch = HashMap::new();
         for (url, deps) in self.patch.iter().flatten() {
             let url = match &url[..] {
-                CRATES_IO_REGISTRY => CRATES_IO_INDEX.parse().unwrap(),
+                HUSKY_PACKAGES_IO_REGISTRY => HUSKY_PACKAGES_IO_INDEX.parse().unwrap(),
                 _ => cx
                     .config
                     .get_registry_index(url)

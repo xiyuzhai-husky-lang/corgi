@@ -2,7 +2,7 @@ use crate::core::compiler::{BuildConfig, MessageFormat, TimingOutput};
 use crate::core::resolver::CliFeatures;
 use crate::core::{Edition, Workspace};
 use crate::ops::{CompileFilter, CompileOptions, NewOptions, Packages, VersionControl};
-use crate::sources::CRATES_IO_REGISTRY;
+use crate::sources::HUSKY_PACKAGES_IO_REGISTRY;
 use crate::util::important_paths::find_root_manifest_for_wd;
 use crate::util::interning::InternedString;
 use crate::util::restricted_names::is_glob_pattern;
@@ -678,7 +678,7 @@ pub trait ArgMatchesExt {
             Some(registry) => {
                 validate_package_name(registry, "registry name", "")?;
 
-                if registry == CRATES_IO_REGISTRY {
+                if registry == HUSKY_PACKAGES_IO_REGISTRY {
                     // If "crates.io" is specified, then we just need to return `None`,
                     // as that will cause corgi to use crates.io. This is required
                     // for the case where a default alternative registry is used

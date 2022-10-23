@@ -1,6 +1,6 @@
 //! Registry authentication support.
 
-use crate::sources::CRATES_IO_REGISTRY;
+use crate::sources::HUSKY_PACKAGES_IO_REGISTRY;
 use crate::util::{config, Config, CorgiResult};
 use anyhow::{bail, format_err, Context as _};
 use cargo_util::ProcessError;
@@ -31,7 +31,7 @@ pub(super) fn auth_token(
         (Some(cli_token), _) => cli_token.to_string(),
         (None, RegistryConfig::Token(config_token)) => config_token.to_string(),
         (None, RegistryConfig::Process(process)) => {
-            let registry_name = registry_name.unwrap_or(CRATES_IO_REGISTRY);
+            let registry_name = registry_name.unwrap_or(HUSKY_PACKAGES_IO_REGISTRY);
             run_command(config, process, registry_name, api_url, Action::Get)?.unwrap()
         }
     };
@@ -47,7 +47,7 @@ pub(super) fn login(
     api_url: &str,
 ) -> CorgiResult<()> {
     if let Some(process) = credential_process {
-        let registry_name = registry_name.unwrap_or(CRATES_IO_REGISTRY);
+        let registry_name = registry_name.unwrap_or(HUSKY_PACKAGES_IO_REGISTRY);
         run_command(
             config,
             process,
@@ -69,7 +69,7 @@ pub(super) fn logout(
     api_url: &str,
 ) -> CorgiResult<()> {
     if let Some(process) = credential_process {
-        let registry_name = registry_name.unwrap_or(CRATES_IO_REGISTRY);
+        let registry_name = registry_name.unwrap_or(HUSKY_PACKAGES_IO_REGISTRY);
         run_command(config, process, registry_name, api_url, Action::Erase)?;
     } else {
         config::save_credentials(config, None, registry_name)?;
