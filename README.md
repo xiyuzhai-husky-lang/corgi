@@ -1,10 +1,12 @@
-# Cargo
+# Corgi
 
-Cargo downloads your Rust project’s dependencies and compiles your project.
+(copied from Cargo readme, haven't finished updating)
 
-**To start using Cargo**, learn more at [The Cargo Book].
+Corgi downloads your Husky project’s dependencies and compiles your project.
 
-**To start developing Cargo itself**, read the [Cargo Contributor Guide].
+**To start using Corgi**, learn more at [The Corgi Book].
+
+**To start developing Corgi itself**, read the [Corgi Contributor Guide].
 
 [The Cargo Book]: https://doc.rust-lang.org/cargo/
 [Cargo Contributor Guide]: https://rust-lang.github.io/cargo/contrib/
